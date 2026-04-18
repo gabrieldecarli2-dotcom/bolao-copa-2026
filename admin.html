@@ -184,16 +184,21 @@
     <h1>🔐 ADMIN</h1>
     <p>Painel de administração do Bolão Copa 2026</p>
 
-    <div id="cfg-section" style="display:none">
-      <div class="form-row">
-        <label>Supabase URL</label>
-        <input class="form-input" id="cfg-url" type="url" placeholder="https://xxx.supabase.co">
+    <div id="cfg-section" style="display:none;margin-bottom:16px">
+      <div style="background:rgba(245,200,66,0.06);border:1px solid rgba(245,200,66,0.2);border-radius:10px;padding:16px">
+        <div style="font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--gold);margin-bottom:12px">🔌 Conexão Supabase</div>
+        <div class="form-row">
+          <label>Project URL</label>
+          <input class="form-input" id="cfg-url" type="url" placeholder="https://xxx.supabase.co">
+        </div>
+        <div class="form-row" style="margin-bottom:0">
+          <label>Anon Key</label>
+          <input class="form-input" id="cfg-key" type="text" placeholder="eyJ...">
+        </div>
       </div>
-      <div class="form-row">
-        <label>Anon Key</label>
-        <input class="form-input" id="cfg-key" type="text" placeholder="eyJ...">
-      </div>
-      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Após salvar, esses campos não aparecem mais no login.</div>
+    </div>
+    <div style="text-align:right;margin-bottom:12px">
+      <button type="button" onclick="toggleCfg()" style="background:none;border:none;color:var(--text3);font-size:12px;cursor:pointer;letter-spacing:1px;font-family:'Barlow Condensed';font-weight:600;text-transform:uppercase" id="cfg-toggle-btn">⚙️ Configurar conexão</button>
     </div>
 
     <div class="form-row">
@@ -498,28 +503,30 @@ let db = null;
 let adminUser = null;
 let allParticipantes = [];
 let allJogos = [];
-const STORAGE_KEY = 'bolao_supabase_config';
+const STORAGE_KEY = 'bolao_supabase_config'; // usado apenas para campos manuais de fallback
 
 window.addEventListener('load', () => {
+  // Credenciais SEMPRE ocultas — só aparecem ao clicar no botão
   const saved = localStorage.getItem(STORAGE_KEY);
   if (saved) {
     try {
       const { url, key } = JSON.parse(saved);
       document.getElementById('cfg-url').value = url;
       document.getElementById('cfg-key').value = key;
-      // Já tem credenciais salvas — esconde os campos no login
-      document.getElementById('cfg-section').style.display = 'none';
-    } catch(e) {
-      document.getElementById('cfg-section').style.display = 'block';
-    }
-  } else {
-    // Primeira vez — mostra os campos
-    document.getElementById('cfg-section').style.display = 'block';
+    } catch(e) {}
   }
   const siteLink = location.href.replace('admin.html','index.html');
   const el = document.getElementById('site-link');
   if (el) el.value = siteLink;
 });
+
+function toggleCfg() {
+  const sec = document.getElementById('cfg-section');
+  const btn = document.getElementById('cfg-toggle-btn');
+  const isHidden = sec.style.display === 'none';
+  sec.style.display = isHidden ? 'block' : 'none';
+  btn.textContent = isHidden ? '🔒 Ocultar configuração' : '⚙️ Configurar conexão';
+}
 
 // ════════════════════════════════════════════
 // AUTH
