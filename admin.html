@@ -268,9 +268,15 @@
 
     <!-- ── DASHBOARD ── -->
     <div class="section active" id="sec-dashboard">
-      <div class="page-header">
-        <h1>📊 Dashboard</h1>
-        <p>Visão geral do Bolão Copa 2026</p>
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h1>📊 Dashboard</h1>
+          <p>Visão geral do Bolão Copa 2026</p>
+        </div>
+        <div style="display:flex;gap:10px;align-items:center">
+          <span id="sync-status" style="font-size:12px;color:var(--text3)"></span>
+          <button class="btn btn-primary" onclick="syncScores()">⚽ Sincronizar Placares</button>
+        </div>
       </div>
       <div class="stats-grid" id="dash-stats">
         <div class="stat-card loading"><div class="spinner"></div></div>
@@ -576,6 +582,8 @@ async function adminLogin() {
   if (error) { showErr('E-mail ou senha incorretos'); return; }
 
   adminUser = data.user;
+  // Salva chave na sessão (some ao fechar o navegador)
+  sessionStorage.setItem('admin_secret', secret);
   document.getElementById('adm-avatar').textContent = email.substring(0,2).toUpperCase();
   document.getElementById('adm-name').textContent = email.split('@')[0];
   document.getElementById('admin-login').style.display = 'none';
@@ -993,6 +1001,80 @@ function toggleEye(fieldId, btn) {
     input.type = 'password';
     btn.textContent = '👁️';
   }
+}
+
+async function syncScores() {
+  const btn = event.currentTarget;
+  const status = document.getElementById('sync-status');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sincronizando...';
+  status.textContent = '';
+
+  try {
+    const secret = prompt('Digite sua chave secreta admin para sincronizar:');
+    if (!secret) { btn.disabled = false; btn.textContent = '⚽ Sincronizar Placares'; return; }
+
+    const res = await fetch('/api/sync-scores', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret })
+    });
+    const data = await res.json();
+
+    if (!res.ok) {
+      showToast('Erro: ' + (data.error || 'Falha na sincronização'), true);
+    } else {
+      showToast(`✅ ${data.message} — ${data.jogosSincronizados} jogo(s) atualizado(s)`);
+      status.textContent = `Última sync: ${new Date().toLocaleTimeString('pt-BR')}`;
+      loadDashboard();
+    }
+  } catch(e) {
+    showToast('Erro de conexão: ' + e.message, true);
+  }
+
+  btn.disabled = false;
+  btn.textContent = '⚽ Sincronizar Placares';
+}
+
+async function syncJogos() {
+  const btn = document.getElementById('btn-sync');
+  const result = document.getElementById('sync-result');
+  btn.disabled = true;
+  btn.textContent = '⏳ Sincronizando...';
+  result.style.display = 'none';
+
+  try {
+    // Pega a chave secreta da sessão atual
+    const secret = sessionStorage.getItem('admin_secret');
+    if (!secret) {
+      result.style.cssText = 'display:block;padding:14px;border-radius:10px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3);margin-bottom:20px;font-size:14px;font-weight:600';
+      result.textContent = '❌ Sessão expirada. Faça login novamente.';
+      btn.disabled = false; btn.textContent = '⚽ Sincronizar Jogos Agora';
+      return;
+    }
+
+    const res = await fetch('/api/sync-jogos', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret })
+    });
+    const data = await res.json();
+
+    if (data.ok) {
+      result.style.cssText = 'display:block;padding:14px;border-radius:10px;background:rgba(56,142,60,0.15);color:#81C784;border:1px solid rgba(56,142,60,0.3);margin-bottom:20px;font-size:14px;font-weight:600';
+      result.textContent = data.message;
+      loadDashboard(); // Recarrega dados
+    } else {
+      result.style.cssText = 'display:block;padding:14px;border-radius:10px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3);margin-bottom:20px;font-size:14px;font-weight:600';
+      result.textContent = '❌ ' + (data.error || 'Erro ao sincronizar');
+    }
+  } catch(e) {
+    result.style.cssText = 'display:block;padding:14px;border-radius:10px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3);margin-bottom:20px;font-size:14px;font-weight:600';
+    result.textContent = '❌ Erro de conexão: ' + e.message;
+  }
+
+  btn.disabled = false;
+  btn.textContent = '⚽ Sincronizar Jogos Agora';
 }
 
 function showToast(msg, isError=false) {
