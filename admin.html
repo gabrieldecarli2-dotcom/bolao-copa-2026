@@ -203,6 +203,11 @@
       <label>Senha</label>
       <input class="form-input" id="adm-pass" type="password" placeholder="••••••••">
     </div>
+    <div class="form-row">
+      <label>🔑 Chave Secreta do Admin</label>
+      <input class="form-input" id="adm-secret" type="password" placeholder="Chave exclusiva do administrador">
+      <div style="font-size:11px;color:var(--text3);margin-top:6px">⚠️ Só o administrador sabe essa chave</div>
+    </div>
     <div id="login-err" style="display:none;color:var(--red);font-size:13px;margin-bottom:12px;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
     <button class="btn btn-primary" style="width:100%;padding:13px;font-size:15px;justify-content:center" onclick="adminLogin()">🔐 Entrar no Admin</button>
   </div>
@@ -502,7 +507,11 @@ async function adminLogin() {
   const pass = document.getElementById('adm-pass').value;
 
   if (!url || !key) { showErr('Preencha a URL e a chave do Supabase'); return; }
-  if (!email || !pass) { showErr('Preencha e-mail e senha'); return; }
+  const secret = document.getElementById('adm-secret').value;
+  // ⚠️ ALTERE "SUA_CHAVE_SECRETA_AQUI" para uma senha só sua, ex: "Copa2026@Admin"
+  const ADMIN_SECRET = 'Copa2026@Admin';
+  if (!email || !pass || !secret) { showErr('Preencha todos os campos'); return; }
+  if (secret !== ADMIN_SECRET) { showErr('❌ Chave secreta incorreta'); return; }
 
   try {
     db = window.supabase.createClient(url, key);
