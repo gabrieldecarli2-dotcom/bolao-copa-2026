@@ -1,28 +1,27 @@
-// api/verify-admin.js
-// Este arquivo roda no SERVIDOR da Vercel — nunca fica exposto ao usuário
-// A variável ADMIN_SECRET só existe nos servidores da Vercel
+// api/get-config.js
+// Retorna as credenciais do Supabase de forma segura
+// As variáveis ficam nos servidores da Vercel, nunca no navegador
 
 export default function handler(req, res) {
-  // Só aceita POST
   if (req.method !== 'POST') {
     return res.status(405).json({ error: 'Method not allowed' });
   }
 
   const { secret } = req.body;
-
-  // Busca a chave secreta das variáveis de ambiente da Vercel
   const ADMIN_SECRET = process.env.ADMIN_SECRET;
+  const SUPABASE_URL = process.env.SUPABASE_URL;
+  const SUPABASE_KEY = process.env.SUPABASE_ANON_KEY;
 
-  if (!ADMIN_SECRET) {
-    return res.status(500).json({ error: 'Variável ADMIN_SECRET não configurada na Vercel' });
-  }
-
+  // Só entrega as credenciais se a chave admin estiver correta
   if (!secret || secret !== ADMIN_SECRET) {
-    // Aguarda 1 segundo antes de responder para dificultar tentativas em força bruta
     return setTimeout(() => {
-      res.status(401).json({ ok: false, error: 'Chave secreta incorreta' });
+      res.status(401).json({ error: 'Não autorizado' });
     }, 1000);
   }
 
-  return res.status(200).json({ ok: true });
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return res.status(500).json({ error: 'Variáveis SUPABASE_URL e SUPABASE_ANON_KEY não configuradas na Vercel' });
+  }
+
+  return res.status(200).json({ url: SUPABASE_URL, key: SUPABASE_KEY });
 }
