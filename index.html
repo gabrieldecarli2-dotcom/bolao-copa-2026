@@ -1164,12 +1164,31 @@ async function gerarPix() {
 }
 
 async function verificarPagamento() {
-  const { data } = await db.from('usuarios').select('pago').eq('id', currentUser.id).single();
-  if (data?.pago) {
-    clearInterval(verificarInterval);
-    currentProfile.pago = true;
-    document.getElementById('pay-content').style.display = 'none';
-    document.getElementById('pay-success').style.display = 'block';
+  const btn = document.getElementById('btn-verificar');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Verificando...'; }
+
+  try {
+    // Consulta o status no servidor (que verifica direto no Mercado Pago)
+    const res = await fetch('/api/verificar-pagamento', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ usuario_id: currentUser.id })
+    });
+    const data = await res.json();
+
+    if (data.pago) {
+      clearInterval(verificarInterval);
+      currentProfile.pago = true;
+      document.getElementById('pay-content').style.display = 'none';
+      document.getElementById('pay-loading').style.display = 'none';
+      document.getElementById('pay-success').style.display = 'block';
+    } else {
+      if (btn) { btn.disabled = false; btn.textContent = '✅ Já Paguei — Verificar'; }
+      showToast('Pagamento ainda não confirmado. Aguarde alguns instantes. ⏳', true);
+    }
+  } catch(e) {
+    if (btn) { btn.disabled = false; btn.textContent = '✅ Já Paguei — Verificar'; }
+    showToast('Erro ao verificar. Tente novamente.', true);
   }
 }
 
