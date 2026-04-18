@@ -430,7 +430,7 @@
         </div>
         <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:16px;margin-bottom:16px">
           <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">Distribuição do Prêmio (%)</div>
-          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr 1fr;gap:12px;margin-bottom:14px">
             <div>
               <label style="font-size:12px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">🥇 1º Lugar %</label>
               <input class="form-input" id="cfg-p1" type="number" min="0" max="100" placeholder="60" oninput="previewPremios()">
@@ -442,6 +442,10 @@
             <div>
               <label style="font-size:12px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">🥉 3º Lugar %</label>
               <input class="form-input" id="cfg-p3" type="number" min="0" max="100" placeholder="15" oninput="previewPremios()">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--orange);font-weight:700;display:block;margin-bottom:6px">⚙️ Taxa Admin %</label>
+              <input class="form-input" id="cfg-admin-fee" type="number" min="0" max="100" placeholder="0" oninput="previewPremios()" style="border-color:rgba(255,167,38,0.3)">
             </div>
           </div>
           <div id="premio-preview" style="background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.2);border-radius:10px;padding:12px;font-size:13px;display:none">
@@ -1077,11 +1081,12 @@ async function saveConfigSettings() {
   const p3 = parseFloat(document.getElementById('cfg-p3').value);
 
   if (!taxa || taxa <= 0) { showToast('Informe a taxa de participação ⚠️', true); return; }
-  if (!p1 || !p2 || !p3) { showToast('Informe as 3 porcentagens ⚠️', true); return; }
+  if (!p1 && !p2 && !p3) { showToast('Informe pelo menos uma porcentagem ⚠️', true); return; }
 
-  const soma = p1 + p2 + p3;
-  if (Math.abs(soma - 100) > 0.01) {
-    showToast(`A soma das % deve ser 100% (atual: ${soma}%) ⚠️`, true); return;
+  const adminFee = parseFloat(document.getElementById('cfg-admin-fee').value) || 0;
+  const soma = p1 + p2 + p3 + adminFee;
+  if (soma > 100.01) {
+    showToast(`A soma das porcentagens não pode ultrapassar 100% (atual: ${soma}%) ⚠️`, true); return;
   }
 
   const configs = [
@@ -1089,6 +1094,7 @@ async function saveConfigSettings() {
     { chave: 'perc_premio_1', valor: String(p1) },
     { chave: 'perc_premio_2', valor: String(p2) },
     { chave: 'perc_premio_3', valor: String(p3) },
+    { chave: 'perc_admin', valor: String(adminFee) },
   ];
 
   for (const cfg of configs) {
@@ -1107,6 +1113,7 @@ async function loadConfigSettings() {
       if (c.chave === 'perc_premio_1') document.getElementById('cfg-p1').value = c.valor;
       if (c.chave === 'perc_premio_2') document.getElementById('cfg-p2').value = c.valor;
       if (c.chave === 'perc_premio_3') document.getElementById('cfg-p3').value = c.valor;
+      if (c.chave === 'perc_admin') { const el = document.getElementById('cfg-admin-fee'); if(el) el.value = c.valor; }
     });
   }
   const siteLink = location.href.replace('admin.html','index.html');
@@ -1126,6 +1133,7 @@ async function previewPremios() {
   if (!preview) return;
   preview.style.display = 'block';
 
+  const adminFee = parseFloat(document.getElementById('cfg-admin-fee')?.value) || 0;
   const { count } = await db.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true);
   const total = (count || 0) * taxa;
   const fmt = v => `R$ ${Math.floor(v).toLocaleString('pt-BR')}`;
@@ -1133,10 +1141,17 @@ async function previewPremios() {
   document.getElementById('prev-p1').textContent = fmt(total * p1 / 100);
   document.getElementById('prev-p2').textContent = fmt(total * p2 / 100);
   document.getElementById('prev-p3').textContent = fmt(total * p3 / 100);
+  document.getElementById('prev-admin').textContent = fmt(total * adminFee / 100);
   document.getElementById('prev-total').textContent = fmt(total);
 
-  const soma = p1 + p2 + p3;
-  document.getElementById('perc-warning').style.display = Math.abs(soma - 100) > 0.01 ? 'block' : 'none';
+  const soma = p1 + p2 + p3 + adminFee;
+  const restante = total * (100 - soma) / 100;
+  const restanteWrap = document.getElementById('prev-restante-wrap');
+  if (restanteWrap) {
+    restanteWrap.style.display = soma < 99.99 ? 'inline' : 'none';
+    document.getElementById('prev-restante').textContent = fmt(restante);
+  }
+  document.getElementById('perc-warning').style.display = soma > 100.01 ? 'block' : 'none';
 }
 
 async function previewPremios() {
