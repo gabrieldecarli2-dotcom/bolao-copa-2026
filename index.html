@@ -382,6 +382,18 @@
       </div>
     </div>
 
+    <!-- Banner de pagamento pendente -->
+    <div id="banner-pagamento" style="display:none;background:linear-gradient(135deg,rgba(232,32,69,0.12),rgba(232,32,69,0.06));border:1px solid rgba(232,32,69,0.35);border-radius:16px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
+      <div style="display:flex;align-items:center;gap:14px">
+        <div style="font-size:32px">💳</div>
+        <div>
+          <div style="font-family:'Barlow Condensed';font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#e82045;margin-bottom:4px">Pagamento Pendente</div>
+          <div style="font-size:13px;color:var(--text2)">Para participar do bolão e dar palpites, conclua o pagamento da taxa de participação.</div>
+        </div>
+      </div>
+      <button onclick="showPage('page-pagamento');gerarPix()" style="padding:12px 24px;background:linear-gradient(135deg,#e82045,#b71c1c);border:none;border-radius:10px;color:white;font-family:'Barlow Condensed';font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0">💳 Pagar Agora</button>
+    </div>
+
     <div class="section">
       <div class="section-header">
         <div class="section-title">⚽ Próximos Jogos</div>
@@ -661,13 +673,7 @@ async function doLogin() {
   if (error) { showError('login-error', 'E-mail ou senha incorretos'); return; }
   currentUser = data.user;
   await loadProfile();
-  // Verifica se pagou
-  if (currentProfile?.pago) {
-    enterApp();
-  } else {
-    showPage('page-pagamento');
-    gerarPix();
-  }
+  enterApp();
 }
 
 async function doRegister() {
@@ -694,24 +700,8 @@ async function doRegister() {
     showError('reg-error', msg); return;
   }
   
-  showToast('Conta criada! Gerando seu PIX... 🎉');
-  // Faz login automático e redireciona para pagamento
-  setTimeout(async () => {
-    const { data: loginData, error: loginErr } = await db.auth.signInWithPassword({ email, password: pass });
-    if (!loginErr && loginData.user) {
-      currentUser = loginData.user;
-      await loadProfile();
-      // Se já pagou, entra direto
-      if (currentProfile?.pago) {
-        enterApp();
-      } else {
-        showPage('page-pagamento');
-        gerarPix();
-      }
-    } else {
-      switchAuthTab('login');
-    }
-  }, 1000);
+  showToast('Cadastro realizado! Faça login para entrar. 🎉');
+  setTimeout(() => switchAuthTab('login'), 1500);
 }
 
 async function doLogout() {
@@ -793,6 +783,10 @@ function goPage(page) {
 // HOME
 // ════════════════════════════════════════════════════
 async function loadHome() {
+  // Mostra banner de pagamento se não pagou
+  const banner = document.getElementById('banner-pagamento');
+  if (banner) banner.style.display = currentProfile?.pago ? 'none' : 'flex';
+
   await Promise.all([loadHomeGames(), loadHomeRanking(), loadPrizes()]);
   // Stats do usuário
   const { data: ranking } = await db.from('usuarios').select('id,pontos').order('pontos',{ascending:false});
@@ -939,6 +933,11 @@ function renderGameCard(jogo) {
 }
 
 async function savePalpite(jogoId) {
+  if (!currentProfile?.pago) {
+    showToast('Complete o pagamento para dar palpites ⚠️', true);
+    setTimeout(() => { showPage('page-pagamento'); gerarPix(); }, 1500);
+    return;
+  }
   const v1 = parseInt(document.getElementById(`p-${jogoId}-1`)?.value);
   const v2 = parseInt(document.getElementById(`p-${jogoId}-2`)?.value);
   if (isNaN(v1)||isNaN(v2)) { showToast('Preencha os dois placares ⚠️', true); return; }
