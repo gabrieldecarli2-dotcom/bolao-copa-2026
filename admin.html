@@ -168,6 +168,12 @@
   @keyframes toastIn { from{opacity:0;transform:translateX(16px)} to{opacity:1;transform:translateX(0)} }
   @keyframes spin { to{transform:rotate(360deg)} }
 
+  /* Eye toggle */
+  .input-eye-wrap { position:relative; }
+  .input-eye-wrap .form-input { padding-right: 44px; }
+  .eye-btn { position:absolute; right:12px; top:50%; transform:translateY(-50%); background:none; border:none; cursor:pointer; font-size:18px; color:var(--text3); transition:color 0.2s; padding:0; line-height:1; }
+  .eye-btn:hover { color:var(--text); }
+
   @media(max-width:768px) {
     .sidebar { width:60px; }
     .sidebar-logo span, .nav-item span:not(.icon), .admin-name, .admin-role, .btn-logout { display:none; }
@@ -207,11 +213,17 @@
     </div>
     <div class="form-row">
       <label>Senha</label>
-      <input class="form-input" id="adm-pass" type="password" placeholder="••••••••">
+      <div class="input-eye-wrap">
+        <input class="form-input" id="adm-pass" type="password" placeholder="••••••••">
+        <button type="button" class="eye-btn" onclick="toggleEye('adm-pass',this)">👁️</button>
+      </div>
     </div>
     <div class="form-row">
       <label>🔑 Chave Secreta do Admin</label>
-      <input class="form-input" id="adm-secret" type="password" placeholder="Chave exclusiva do administrador">
+      <div class="input-eye-wrap">
+        <input class="form-input" id="adm-secret" type="password" placeholder="Chave exclusiva do administrador">
+        <button type="button" class="eye-btn" onclick="toggleEye('adm-secret',this)">👁️</button>
+      </div>
       <div style="font-size:11px;color:var(--text3);margin-top:6px">⚠️ Só o administrador sabe essa chave</div>
     </div>
     <div id="login-err" style="display:none;color:var(--red);font-size:13px;margin-bottom:12px;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
@@ -970,6 +982,17 @@ function statusBadge(status) {
 
 function closeModal(id) {
   document.getElementById(id).classList.remove('open');
+}
+
+function toggleEye(fieldId, btn) {
+  const input = document.getElementById(fieldId);
+  if (input.type === 'password') {
+    input.type = 'text';
+    btn.textContent = '🙈';
+  } else {
+    input.type = 'password';
+    btn.textContent = '👁️';
+  }
 }
 
 function showToast(msg, isError=false) {
