@@ -644,11 +644,7 @@ function selectPayment(method, el) {
   document.getElementById('pix-box').classList.toggle('show', method==='pix');
 }
 
-function copiarPix() {
-  const code = document.getElementById('pix-code-display').textContent;
-  navigator.clipboard?.writeText(code);
-  showToast('Código PIX copiado! ✅');
-}
+
 
 async function doLogin() {
   const email = document.getElementById('login-email').value.trim();
@@ -729,67 +725,12 @@ async function doLogout() {
 // ════════════════════════════════════════════════════
 // PAGAMENTO PIX
 // ════════════════════════════════════════════════════
-let pixCodigoAtual = '';
-let verificarInterval = null;
 
-async function gerarPix() {
-  document.getElementById('pay-loading').style.display = 'block';
-  document.getElementById('pay-content').style.display = 'none';
-  document.getElementById('pay-error').style.display = 'none';
 
-  try {
-    const res = await fetch('/api/criar-pix', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({
-        usuario_id: currentUser.id,
-        email: currentUser.email,
-        nome: currentProfile?.nome || ''
-      })
-    });
-    const data = await res.json();
 
-    if (!data.ok) throw new Error(data.error || 'Erro ao gerar PIX');
 
-    pixCodigoAtual = data.pix_copia_cola || '';
-    document.getElementById('pix-code-display').textContent = pixCodigoAtual;
-    document.getElementById('pay-valor').textContent = `R$ ${data.valor}`;
 
-    // QR Code
-    if (data.pix_qr_base64) {
-      const img = document.getElementById('pix-qr-img');
-      img.src = `data:image/png;base64,${data.pix_qr_base64}`;
-      img.style.display = 'block';
-      document.getElementById('pix-qr-placeholder').style.display = 'none';
-    }
 
-    document.getElementById('pay-loading').style.display = 'none';
-    document.getElementById('pay-content').style.display = 'block';
-
-    // Verifica automaticamente a cada 10s
-    verificarInterval = setInterval(verificarPagamento, 10000);
-
-  } catch(e) {
-    document.getElementById('pay-loading').style.display = 'none';
-    document.getElementById('pay-error').style.display = 'block';
-    document.getElementById('pay-error-msg').textContent = e.message;
-  }
-}
-
-async function verificarPagamento() {
-  const { data } = await db.from('usuarios').select('pago').eq('id', currentUser.id).single();
-  if (data?.pago) {
-    clearInterval(verificarInterval);
-    currentProfile.pago = true;
-    document.getElementById('pay-content').style.display = 'none';
-    document.getElementById('pay-success').style.display = 'block';
-  }
-}
-
-function copiarPix() {
-  if (pixCodigoAtual) navigator.clipboard?.writeText(pixCodigoAtual);
-  showToast('Código PIX copiado! ✅');
-}
 
 // ════════════════════════════════════════════════════
 // PERFIL & DADOS
@@ -1175,8 +1116,6 @@ function showError(id, msg) {
   const el = document.getElementById(id);
   if (el) { el.textContent = msg; el.style.display = 'block'; }
 }
-// ════════════════════════════════════════════════════
-// PAGAMENTO PIX
 // ════════════════════════════════════════════════════
 let pixCodigoAtual = '';
 let verificarInterval = null;
