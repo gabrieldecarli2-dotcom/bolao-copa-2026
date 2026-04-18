@@ -372,7 +372,7 @@
         <div class="regra-card"><div class="regra-icon">🎯</div><div><h3><span class="pts-badge">3</span> Placar Exato</h3><p>Acertou o número exato de gols dos dois times. Ex: chutou 2×1 e o jogo terminou 2×1. <strong style="color:var(--gold)">Vale 3 pontos!</strong></p></div></div>
         <div class="regra-card"><div class="regra-icon">✅</div><div><h3><span class="pts-badge">1</span> Resultado Certo</h3><p>Acertou quem venceu ou que seria empate, mas errou o placar exato. Ex: chutou 1×0 e terminou 2×0. <strong style="color:var(--text2)">Vale 1 ponto.</strong></p></div></div>
         <div class="regra-card"><div class="regra-icon">❌</div><div><h3><span class="pts-badge">0</span> Errou</h3><p>Não acertou nem o vencedor. Ex: chutou vitória do Brasil e o jogo terminou em empate ou derrota. <strong style="color:var(--red)">Zero pontos.</strong></p></div></div>
-        <div class="regra-card"><div class="regra-icon">⏰</div><div><h3>Prazo do Palpite</h3><p>Os palpites devem ser enviados até <strong style="color:var(--gold)">30 minutos antes</strong> do início do jogo. Após isso, o jogo trava.</p></div></div>
+        <div class="regra-card"><div class="regra-icon">⏰</div><div><h3>Prazo do Palpite</h3><p>Os palpites devem ser enviados até <strong style="color:var(--gold)">5 minutos antes</strong> do início do jogo. Após isso, o jogo trava.</p></div></div>
       </div>
     </div>
   </div>
@@ -811,7 +811,7 @@ function renderGameCard(jogo) {
   const agora = new Date();
   const inicioJogo = new Date(jogo.data_hora);
   const minutosRestantes = (inicioJogo - agora) / 60000;
-  const prazoEncerrado = minutosRestantes <= 30;
+  const prazoEncerrado = minutosRestantes <= 5;
   const isOpen = jogo.status==='aberto' && !prazoEncerrado;
   const isFechado = jogo.status==='aberto' && prazoEncerrado; // aberto mas travado
   
@@ -861,7 +861,7 @@ function renderGameCard(jogo) {
       </div>
       ${isOpen && palpite ? '<div class="palpite-saved-badge">✅ Palpite salvo — clique em Alterar para mudar</div>' : ''}
       ${isOpen && !palpite ? '<div class="palpite-pending-badge">⚠️ Palpite pendente</div>' : ''}
-      ${isFechado ? `<div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(255,167,38,0.1);border:1px solid rgba(255,167,38,0.25);font-size:12px;font-weight:600;color:#FFA726">⏰ Palpites encerrados — faltam ${Math.max(0,Math.ceil(minutosRestantes))} minutos para o jogo</div>` : ''}
+      ${isFechado ? `<div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(255,167,38,0.1);border:1px solid rgba(255,167,38,0.25);font-size:12px;font-weight:600;color:#FFA726">⏰ Palpites encerrados — faltam ${Math.max(0,Math.ceil(minutosRestantes))} min para o jogo</div>` : ''}
       ${palpiteResult}
     </div>
   </div>`;
