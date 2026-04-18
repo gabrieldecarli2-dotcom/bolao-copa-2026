@@ -1,0 +1,912 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Bolão Copa do Mundo 2026</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
+<!-- Supabase SDK -->
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+<style>
+  :root {
+    --gold: #F5C842; --gold2: #E8A020;
+    --green: #1B5E20; --green2: #2E7D32; --green3: #388E3C;
+    --dark: #0A0F0A; --dark2: #111811; --dark3: #1A231A; --dark4: #1E2A1E;
+    --card: #172017; --card2: #1D281D;
+    --text: #E8F5E9; --text2: #A5D6A7; --text3: #81C784;
+    --red: #EF5350; --blue: #42A5F5;
+  }
+  * { margin:0; padding:0; box-sizing:border-box; }
+  body { background:var(--dark); color:var(--text); font-family:'Barlow',sans-serif; min-height:100vh; overflow-x:hidden; }
+  body::before {
+    content:''; position:fixed; inset:0; z-index:0;
+    background:
+      radial-gradient(ellipse 80% 40% at 50% 0%, rgba(27,94,32,0.35) 0%, transparent 70%),
+      repeating-linear-gradient(0deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px),
+      repeating-linear-gradient(90deg, transparent, transparent 39px, rgba(255,255,255,0.015) 40px);
+    pointer-events:none;
+  }
+
+  /* ── NAV ── */
+  nav { position:sticky; top:0; z-index:100; background:rgba(10,15,10,0.92); backdrop-filter:blur(20px); border-bottom:1px solid rgba(245,200,66,0.2); padding:0 24px; display:flex; align-items:center; justify-content:space-between; height:64px; }
+  .nav-logo { font-family:'Bebas Neue'; font-size:26px; letter-spacing:3px; color:var(--gold); display:flex; align-items:center; gap:10px; }
+  .nav-logo span { color:var(--text); }
+  .nav-links { display:flex; gap:6px; }
+  .nav-btn { background:none; border:none; color:var(--text2); font-family:'Barlow Condensed'; font-size:14px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; padding:8px 14px; border-radius:6px; cursor:pointer; transition:all 0.2s; }
+  .nav-btn:hover, .nav-btn.active { color:var(--gold); background:rgba(245,200,66,0.1); }
+  .nav-right { display:flex; align-items:center; gap:10px; }
+  .user-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--green2),var(--gold)); display:flex; align-items:center; justify-content:center; font-weight:700; font-size:14px; cursor:pointer; border:2px solid rgba(245,200,66,0.4); }
+  .logout-btn { background:rgba(239,83,80,0.15); border:1px solid rgba(239,83,80,0.3); color:var(--red); font-family:'Barlow Condensed'; font-size:13px; font-weight:600; letter-spacing:1px; text-transform:uppercase; padding:7px 14px; border-radius:6px; cursor:pointer; transition:all 0.2s; }
+  .logout-btn:hover { background:rgba(239,83,80,0.25); }
+
+  /* ── PAGES ── */
+  .page { display:none; position:relative; z-index:1; }
+  .page.active { display:block; }
+
+  /* ── AUTH ── */
+  #page-auth { min-height:100vh; display:flex; align-items:center; justify-content:center; padding:40px 20px; }
+  .auth-box { width:100%; max-width:460px; background:rgba(23,32,23,0.95); border:1px solid rgba(245,200,66,0.2); border-radius:20px; padding:48px 40px; box-shadow:0 24px 80px rgba(0,0,0,0.5); animation:fadeUp 0.6s ease; }
+  .auth-logo { text-align:center; margin-bottom:32px; }
+  .auth-logo h1 { font-family:'Bebas Neue'; font-size:48px; letter-spacing:5px; color:var(--gold); line-height:1; }
+  .auth-logo p { color:var(--text2); font-size:13px; letter-spacing:2px; margin-top:6px; }
+  .auth-ball { font-size:52px; display:block; margin-bottom:12px; }
+  .auth-tabs { display:flex; margin-bottom:28px; border-radius:10px; overflow:hidden; border:1px solid rgba(245,200,66,0.2); }
+  .auth-tab { flex:1; padding:12px; background:none; border:none; cursor:pointer; font-family:'Barlow Condensed'; font-size:15px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); transition:all 0.2s; }
+  .auth-tab.active { background:var(--gold); color:var(--dark); }
+  .form-group { margin-bottom:16px; }
+  .form-group label { display:block; font-size:12px; font-weight:600; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:7px; }
+  .form-group input { width:100%; padding:13px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:var(--text); font-family:'Barlow'; font-size:15px; transition:border-color 0.2s; outline:none; }
+  .form-group input:focus { border-color:rgba(245,200,66,0.5); background:rgba(255,255,255,0.07); }
+  .btn-primary { width:100%; padding:15px; background:linear-gradient(135deg,var(--gold),var(--gold2)); border:none; border-radius:12px; color:var(--dark); font-family:'Barlow Condensed'; font-size:16px; font-weight:900; letter-spacing:2px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; margin-top:8px; }
+  .btn-primary:hover { transform:translateY(-2px); box-shadow:0 8px 25px rgba(245,200,66,0.35); }
+  .btn-primary:disabled { opacity:0.6; transform:none; cursor:not-allowed; }
+
+  /* PIX / Pagamento */
+  .payment-section { margin-top:20px; }
+  .payment-section h3 { font-family:'Barlow Condensed'; font-size:14px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:12px; }
+  .payment-methods { display:flex; gap:10px; }
+  .pay-method { flex:1; padding:12px 8px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:10px; cursor:pointer; text-align:center; transition:all 0.2s; font-size:12px; color:var(--text2); font-weight:600; }
+  .pay-method:hover,.pay-method.selected { border-color:var(--gold); background:rgba(245,200,66,0.1); color:var(--gold); }
+  .pay-method .icon { font-size:20px; display:block; margin-bottom:4px; }
+  .pix-box { display:none; margin-top:16px; padding:20px; background:rgba(255,255,255,0.04); border:1px solid rgba(255,255,255,0.1); border-radius:12px; text-align:center; }
+  .pix-box.show { display:block; }
+  .pix-qr { width:120px; height:120px; background:white; border-radius:8px; margin:0 auto 12px; display:flex; align-items:center; justify-content:center; font-size:56px; }
+  .pix-code { background:rgba(255,255,255,0.06); border:1px solid rgba(255,255,255,0.1); border-radius:8px; padding:10px 14px; font-size:11px; font-family:monospace; color:var(--text2); word-break:break-all; margin-bottom:12px; }
+  .btn-copy { background:rgba(245,200,66,0.15); border:1px solid rgba(245,200,66,0.3); color:var(--gold); font-family:'Barlow Condensed'; font-size:13px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:10px 20px; border-radius:8px; cursor:pointer; transition:all 0.2s; }
+  .btn-copy:hover { background:rgba(245,200,66,0.25); }
+  .pending-badge { margin-top:16px; padding:12px; background:rgba(66,165,245,0.1); border:1px solid rgba(66,165,245,0.25); border-radius:10px; font-size:13px; color:var(--blue); text-align:center; }
+
+  /* ── MAIN ── */
+  .main-wrapper { max-width:1100px; margin:0 auto; padding:32px 20px 60px; }
+  .hero { background:linear-gradient(135deg,var(--dark3) 0%,rgba(27,94,32,0.4) 50%,var(--dark3) 100%); border:1px solid rgba(245,200,66,0.2); border-radius:20px; padding:36px 40px; margin-bottom:28px; display:flex; align-items:center; justify-content:space-between; position:relative; overflow:hidden; }
+  .hero::before { content:''; position:absolute; top:-40px; right:-40px; width:200px; height:200px; border-radius:50%; background:radial-gradient(circle,rgba(245,200,66,0.12) 0%,transparent 70%); }
+  .hero-left h1 { font-family:'Bebas Neue'; font-size:52px; letter-spacing:3px; line-height:1; }
+  .hero-left h1 span { color:var(--gold); }
+  .hero-left p { color:var(--text2); margin-top:8px; font-size:15px; }
+  .hero-stats { display:flex; gap:28px; }
+  .hero-stat { text-align:center; }
+  .hero-stat .val { font-family:'Bebas Neue'; font-size:38px; color:var(--gold); line-height:1; }
+  .hero-stat .lbl { font-size:11px; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); }
+  .section { margin-bottom:32px; }
+  .section-header { display:flex; align-items:center; justify-content:space-between; margin-bottom:18px; }
+  .section-title { font-family:'Barlow Condensed'; font-size:20px; font-weight:700; letter-spacing:2px; text-transform:uppercase; color:var(--text); display:flex; align-items:center; gap:10px; }
+  .section-title::before { content:''; width:4px; height:20px; background:var(--gold); border-radius:2px; }
+  .section-link { font-size:13px; color:var(--gold); font-weight:600; cursor:pointer; letter-spacing:1px; }
+
+  /* ── RANKING ── */
+  .ranking-table { background:var(--card); border:1px solid rgba(255,255,255,0.07); border-radius:16px; overflow:hidden; }
+  .ranking-header { display:grid; grid-template-columns:50px 1fr 80px 80px 80px; padding:12px 20px; background:rgba(245,200,66,0.08); font-family:'Barlow Condensed'; font-size:12px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); border-bottom:1px solid rgba(255,255,255,0.07); }
+  .ranking-row { display:grid; grid-template-columns:50px 1fr 80px 80px 80px; padding:14px 20px; border-bottom:1px solid rgba(255,255,255,0.04); align-items:center; transition:background 0.15s; }
+  .ranking-row:hover { background:rgba(255,255,255,0.03); }
+  .ranking-row:last-child { border-bottom:none; }
+  .rank-pos { font-family:'Bebas Neue'; font-size:22px; color:var(--text3); }
+  .rank-pos.gold { color:#FFD700; } .rank-pos.silver { color:#C0C0C0; } .rank-pos.bronze { color:#CD7F32; }
+  .rank-user { display:flex; align-items:center; gap:12px; }
+  .rank-avatar { width:36px; height:36px; border-radius:50%; background:linear-gradient(135deg,var(--green2),var(--green3)); display:flex; align-items:center; justify-content:center; font-size:13px; font-weight:700; color:white; flex-shrink:0; }
+  .rank-name { font-weight:600; font-size:15px; }
+  .rank-tag { font-size:11px; color:var(--text3); }
+  .rank-pts { font-family:'Bebas Neue'; font-size:24px; color:var(--gold); text-align:center; }
+  .rank-exact { text-align:center; font-size:14px; font-weight:600; color:var(--text2); }
+  .rank-win { text-align:center; font-size:14px; color:var(--text3); }
+  .prize-tag { display:inline-block; font-size:10px; font-family:'Barlow Condensed'; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:2px 8px; border-radius:20px; background:rgba(245,200,66,0.15); color:var(--gold); border:1px solid rgba(245,200,66,0.25); margin-right:4px; }
+
+  /* ── GAMES ── */
+  .games-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
+  .game-card { background:var(--card); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:20px; transition:all 0.2s; position:relative; overflow:hidden; }
+  .game-card:hover { border-color:rgba(245,200,66,0.25); transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,0,0,0.3); }
+  .game-meta { display:flex; align-items:center; justify-content:space-between; margin-bottom:16px; flex-wrap:wrap; gap:6px; }
+  .game-group { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); }
+  .game-date { font-size:12px; color:var(--text3); }
+  .game-status { font-size:10px; font-weight:700; letter-spacing:1px; text-transform:uppercase; padding:3px 8px; border-radius:20px; }
+  .game-status.live { background:rgba(239,83,80,0.2); color:var(--red); animation:pulse 1.5s infinite; }
+  .game-status.open { background:rgba(66,165,245,0.15); color:var(--blue); }
+  .game-status.done { background:rgba(255,255,255,0.08); color:var(--text3); }
+  .game-teams { display:flex; align-items:center; justify-content:space-between; gap:10px; }
+  .game-team { text-align:center; flex:1; }
+  .team-flag { font-size:36px; display:block; margin-bottom:6px; }
+  .team-name { font-family:'Barlow Condensed'; font-size:15px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
+  .game-vs { font-family:'Bebas Neue'; font-size:22px; color:var(--text3); flex-shrink:0; }
+  .game-score-actual { text-align:center; font-family:'Bebas Neue'; font-size:32px; color:var(--text); margin:0 10px; background:rgba(255,255,255,0.06); border-radius:8px; padding:4px 16px; letter-spacing:4px; }
+  .palpite-area { margin-top:16px; padding-top:16px; border-top:1px solid rgba(255,255,255,0.07); }
+  .palpite-label { font-size:11px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--text3); margin-bottom:10px; }
+  .palpite-inputs { display:flex; align-items:center; gap:10px; }
+  .palpite-input { width:56px; height:48px; text-align:center; background:rgba(255,255,255,0.07); border:1px solid rgba(255,255,255,0.15); border-radius:10px; color:var(--text); font-family:'Bebas Neue'; font-size:26px; outline:none; transition:border-color 0.2s; }
+  .palpite-input:focus { border-color:var(--gold); background:rgba(245,200,66,0.08); }
+  .palpite-input:disabled { opacity:0.4; cursor:not-allowed; }
+  .palpite-x { font-family:'Bebas Neue'; font-size:18px; color:var(--text3); }
+  .btn-palpite { flex:1; padding:12px; background:linear-gradient(135deg,var(--green2),var(--green)); border:none; border-radius:10px; color:white; font-family:'Barlow Condensed'; font-size:14px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+  .btn-palpite:hover { opacity:0.85; }
+  .btn-palpite:disabled { opacity:0.4; cursor:not-allowed; }
+  .palpite-result { margin-top:10px; padding:8px 12px; border-radius:8px; font-size:12px; font-weight:600; display:none; }
+  .palpite-result.exact { background:rgba(245,200,66,0.15); color:var(--gold); display:block; }
+  .palpite-result.win { background:rgba(56,142,60,0.15); color:var(--text3); display:block; }
+  .palpite-result.miss { background:rgba(239,83,80,0.1); color:var(--red); display:block; }
+
+  /* ── PREMIOS ── */
+  .premio-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; }
+  .premio-card { background:var(--card); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:28px 20px; text-align:center; }
+  .premio-card.primeiro { border-color:rgba(255,215,0,0.35); background:linear-gradient(135deg,var(--card),rgba(255,215,0,0.07)); }
+  .premio-icon { font-size:44px; display:block; margin-bottom:12px; }
+  .premio-pos { font-family:'Bebas Neue'; font-size:16px; letter-spacing:2px; color:var(--text3); margin-bottom:8px; }
+  .premio-val { font-family:'Bebas Neue'; font-size:38px; line-height:1; }
+  .premio-card.primeiro .premio-val { color:#FFD700; }
+  .premio-card.segundo .premio-val { color:#C0C0C0; }
+  .premio-card.terceiro .premio-val { color:#CD7F32; }
+  .premio-perc { font-size:12px; color:var(--text3); margin-top:6px; }
+  .premio-pot { text-align:center; margin-top:16px; padding:16px; background:rgba(245,200,66,0.07); border:1px solid rgba(245,200,66,0.15); border-radius:12px; }
+  .premio-pot p { font-size:13px; color:var(--text2); }
+  .premio-pot strong { font-family:'Bebas Neue'; font-size:32px; color:var(--gold); display:block; }
+
+  /* ── CONVITE ── */
+  .invite-box { background:var(--card); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:28px; }
+  .invite-link-row { display:flex; gap:10px; margin-bottom:20px; }
+  .invite-link-input { flex:1; padding:12px 16px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:10px; color:var(--text2); font-size:14px; font-family:'Barlow'; outline:none; }
+  .btn-secondary { padding:12px 20px; background:rgba(245,200,66,0.12); border:1px solid rgba(245,200,66,0.3); color:var(--gold); font-family:'Barlow Condensed'; font-size:14px; font-weight:700; letter-spacing:1px; text-transform:uppercase; border-radius:10px; cursor:pointer; transition:all 0.2s; white-space:nowrap; }
+  .btn-secondary:hover { background:rgba(245,200,66,0.2); }
+  .share-btns { display:flex; gap:10px; flex-wrap:wrap; }
+  .share-btn { display:flex; align-items:center; gap:8px; padding:11px 18px; border-radius:10px; border:none; font-family:'Barlow Condensed'; font-size:14px; font-weight:700; letter-spacing:1px; text-transform:uppercase; cursor:pointer; transition:all 0.2s; }
+  .share-whatsapp { background:rgba(37,211,102,0.15); color:#25D366; border:1px solid rgba(37,211,102,0.3); }
+  .share-telegram { background:rgba(0,136,204,0.15); color:#0088cc; border:1px solid rgba(0,136,204,0.3); }
+  .share-email-btn { background:rgba(255,255,255,0.07); color:var(--text2); border:1px solid rgba(255,255,255,0.12); }
+
+  /* ── TABS ── */
+  .tabs { display:flex; gap:4px; background:rgba(255,255,255,0.04); border-radius:10px; padding:4px; margin-bottom:20px; }
+  .tab { padding:9px 18px; border-radius:8px; background:none; border:none; font-family:'Barlow Condensed'; font-size:14px; font-weight:700; letter-spacing:1px; text-transform:uppercase; color:var(--text3); cursor:pointer; transition:all 0.2s; }
+  .tab.active { background:var(--card2); color:var(--text); }
+
+  /* ── MEUS PALPITES ── */
+  .mybets-list { display:flex; flex-direction:column; gap:14px; }
+  .mybet-row { background:var(--card); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:16px 20px; display:flex; align-items:center; gap:16px; flex-wrap:wrap; }
+  .mybet-pts { padding:4px 14px; border-radius:20px; font-family:'Bebas Neue'; font-size:18px; }
+  .mybet-pts.exact { background:rgba(245,200,66,0.15); color:var(--gold); border:1px solid rgba(245,200,66,0.3); }
+  .mybet-pts.win { background:rgba(56,142,60,0.15); color:var(--text3); border:1px solid rgba(56,142,60,0.2); }
+  .mybet-pts.pending { background:rgba(66,165,245,0.1); color:var(--blue); border:1px solid rgba(66,165,245,0.2); }
+
+  /* ── LOADING ── */
+  .loading { text-align:center; padding:40px; color:var(--text3); font-size:14px; letter-spacing:2px; }
+  .spinner { display:inline-block; width:32px; height:32px; border:3px solid rgba(245,200,66,0.2); border-top-color:var(--gold); border-radius:50%; animation:spin 0.8s linear infinite; margin-bottom:12px; }
+
+  /* ── REGRAS ── */
+  .regras-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(260px,1fr)); gap:16px; }
+  .regra-card { background:var(--card); border:1px solid rgba(255,255,255,0.07); border-radius:14px; padding:22px; display:flex; gap:16px; align-items:flex-start; }
+  .regra-icon { font-size:32px; flex-shrink:0; }
+  .regra-card h3 { font-family:'Barlow Condensed'; font-size:16px; font-weight:700; letter-spacing:1px; text-transform:uppercase; margin-bottom:6px; }
+  .regra-card p { font-size:13px; color:var(--text2); line-height:1.6; }
+  .pts-badge { display:inline-block; padding:2px 10px; border-radius:20px; font-family:'Bebas Neue'; font-size:18px; background:rgba(245,200,66,0.15); color:var(--gold); border:1px solid rgba(245,200,66,0.3); margin-right:6px; }
+
+  /* ── TOAST ── */
+  .toast { position:fixed; bottom:30px; right:30px; z-index:300; padding:14px 22px; background:var(--card); border:1px solid rgba(245,200,66,0.3); border-radius:12px; font-size:14px; font-weight:600; color:var(--gold); display:none; box-shadow:0 8px 30px rgba(0,0,0,0.4); }
+  .toast.show { display:flex; align-items:center; gap:10px; animation:toastIn 0.3s ease; }
+  .toast.error { border-color:rgba(239,83,80,0.4); color:var(--red); }
+
+  /* ── CONFIG BOX ── */
+  .config-banner { background:rgba(245,200,66,0.08); border:1px solid rgba(245,200,66,0.3); border-radius:14px; padding:20px 24px; margin-bottom:28px; }
+  .config-banner h3 { font-family:'Barlow Condensed'; font-size:16px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
+  .config-row { display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
+  .config-input { flex:1; min-width:200px; padding:10px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:var(--text); font-size:13px; font-family:'Barlow'; outline:none; }
+  .config-input:focus { border-color:rgba(245,200,66,0.4); }
+  .config-label { font-size:12px; color:var(--text3); font-weight:600; letter-spacing:1px; text-transform:uppercase; min-width:100px; }
+  .btn-config { padding:10px 20px; background:var(--gold); color:var(--dark); border:none; border-radius:8px; font-family:'Barlow Condensed'; font-size:14px; font-weight:900; letter-spacing:1px; text-transform:uppercase; cursor:pointer; white-space:nowrap; transition:all 0.2s; }
+  .btn-config:hover { opacity:0.85; }
+
+  @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
+  @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
+  @keyframes toastIn { from{opacity:0;transform:translateX(20px)} to{opacity:1;transform:translateX(0)} }
+  @keyframes spin { to{transform:rotate(360deg)} }
+
+  ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--dark2)} ::-webkit-scrollbar-thumb{background:rgba(245,200,66,0.25);border-radius:3px}
+
+  @media(max-width:600px){
+    .hero{flex-direction:column;gap:20px;padding:24px 20px}
+    .hero-stats{gap:16px}
+    .premio-grid{grid-template-columns:1fr}
+    .games-grid{grid-template-columns:1fr}
+    .ranking-header,.ranking-row{grid-template-columns:40px 1fr 60px}
+    .ranking-header>*:nth-child(4),.ranking-row>*:nth-child(4),
+    .ranking-header>*:nth-child(5),.ranking-row>*:nth-child(5){display:none}
+    .auth-box{padding:32px 24px}
+    .nav-links{display:none}
+  }
+</style>
+</head>
+<body>
+
+<!-- ════════════════════════════════════
+     BANNER DE CONFIGURAÇÃO (some após configurar)
+════════════════════════════════════ -->
+<div id="config-bar" style="background:#1a1000;border-bottom:2px solid var(--gold);padding:12px 20px;text-align:center;position:sticky;top:0;z-index:200">
+  <span style="font-family:'Barlow Condensed';font-size:14px;font-weight:700;letter-spacing:1.5px;color:var(--gold)">
+    ⚙️ CONFIGURE SUAS CREDENCIAIS DO SUPABASE ABAIXO PARA ATIVAR O SISTEMA
+  </span>
+</div>
+
+<!-- ════ NAV ════ -->
+<nav id="main-nav" style="display:none">
+  <div class="nav-logo">🏆 BOLÃO <span>COPA 2026</span></div>
+  <div class="nav-links">
+    <button class="nav-btn active" onclick="goPage('home')">🏠 Início</button>
+    <button class="nav-btn" onclick="goPage('jogos')">⚽ Jogos</button>
+    <button class="nav-btn" onclick="goPage('ranking')">🏅 Ranking</button>
+    <button class="nav-btn" onclick="goPage('meus-palpites')">📋 Meus Palpites</button>
+    <button class="nav-btn" onclick="goPage('convite')">✉️ Convidar</button>
+  </div>
+  <div class="nav-right">
+    <div class="user-avatar" id="nav-avatar">?</div>
+    <button class="logout-btn" onclick="doLogout()">Sair</button>
+  </div>
+</nav>
+
+<!-- ════ CONFIG PAGE ════ -->
+<div id="page-config" class="page active">
+  <div style="max-width:600px;margin:40px auto;padding:0 20px">
+    <div class="config-banner">
+      <h3>🔧 Passo 1 de 1 — Configure o Supabase</h3>
+      <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
+        Você precisa das credenciais do seu projeto Supabase. Vá em <strong style="color:var(--gold)">Settings → API</strong> no painel do Supabase e copie os valores abaixo:
+      </p>
+      <div class="config-row">
+        <span class="config-label">Project URL</span>
+        <input class="config-input" id="cfg-url" placeholder="https://xxxxxxxxxxxx.supabase.co" type="url">
+      </div>
+      <div class="config-row">
+        <span class="config-label">Anon Key</span>
+        <input class="config-input" id="cfg-key" placeholder="eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9..." type="text">
+      </div>
+      <button class="btn-config" onclick="saveConfig()" style="margin-top:8px;width:100%">✅ Salvar e Entrar no Sistema</button>
+    </div>
+    <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:20px">
+      <h4 style="font-family:'Barlow Condensed';font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:12px">🗺️ Como encontrar suas credenciais:</h4>
+      <ol style="font-size:13px;color:var(--text2);line-height:2;padding-left:18px">
+        <li>Acesse <a href="https://supabase.com" target="_blank" style="color:var(--gold)">supabase.com</a> e entre no seu projeto</li>
+        <li>No menu esquerdo, clique em <strong style="color:var(--text)">⚙️ Project Settings</strong></li>
+        <li>Clique em <strong style="color:var(--text)">API</strong></li>
+        <li>Copie a <strong style="color:var(--gold)">Project URL</strong> e a <strong style="color:var(--gold)">anon public key</strong></li>
+        <li>Cole nos campos acima e clique em Salvar</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ════ AUTH PAGE ════ -->
+<div id="page-auth" class="page">
+  <div class="auth-box">
+    <div class="auth-logo">
+      <span class="auth-ball">⚽</span>
+      <h1>BOLÃO</h1>
+      <p>COPA DO MUNDO 2026 · EUA · CAN · MEX</p>
+    </div>
+    <div class="auth-tabs">
+      <button class="auth-tab active" onclick="switchAuthTab('login')">Entrar</button>
+      <button class="auth-tab" onclick="switchAuthTab('register')">Cadastrar</button>
+    </div>
+
+    <div id="tab-login">
+      <div class="form-group"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
+      <div class="form-group"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+      <div id="login-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:10px;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
+      <button class="btn-primary" id="btn-login" onclick="doLogin()">⚽ Entrar no Bolão</button>
+      <div style="margin-top:20px;text-align:center;padding:14px;background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.15);border-radius:12px">
+        <p style="color:var(--text2);font-size:13px">🏆 Prêmio total estimado</p>
+        <strong id="prize-display" style="font-family:'Bebas Neue';font-size:28px;color:var(--gold)">R$ –</strong>
+      </div>
+    </div>
+
+    <div id="tab-register" style="display:none">
+      <div class="form-group"><label>Nome completo</label><input type="text" id="reg-name" placeholder="João Silva"></div>
+      <div class="form-group"><label>E-mail</label><input type="email" id="reg-email" placeholder="seu@email.com"></div>
+      <div class="form-group"><label>Senha</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"></div>
+
+      <div class="payment-section">
+        <h3>💳 Taxa de Participação — R$ 20,00</h3>
+        <div class="payment-methods">
+          <div class="pay-method" onclick="selectPayment('pix',this)"><span class="icon">📱</span>PIX</div>
+          <div class="pay-method" onclick="selectPayment('cartao',this)"><span class="icon">💳</span>Cartão</div>
+        </div>
+        <div class="pix-box" id="pix-box">
+          <div class="pix-qr">📲</div>
+          <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Escaneie o QR Code ou copie o código abaixo</p>
+          <div class="pix-code" id="pix-code-display">Configure o Mercado Pago para gerar PIX automático</div>
+          <button class="btn-copy" onclick="copiarPix()">📋 Copiar Código PIX</button>
+          <div class="pending-badge" style="margin-top:12px">⏳ Após pagar, clique em "Confirmar Cadastro"</div>
+        </div>
+      </div>
+
+      <div id="reg-error" style="display:none;color:var(--red);font-size:13px;margin:10px 0;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
+      <button class="btn-primary" id="btn-register" onclick="doRegister()" style="margin-top:16px">✅ Confirmar Cadastro</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ HOME ════ -->
+<div id="page-home" class="page">
+  <div class="main-wrapper">
+    <div class="hero">
+      <div class="hero-left">
+        <h1>BEM-VINDO,<br><span id="hero-name">–</span></h1>
+        <p>Copa do Mundo 2026 · Fase de Grupos</p>
+      </div>
+      <div class="hero-stats">
+        <div class="hero-stat"><div class="val" id="stat-pts">–</div><div class="lbl">Meus Pontos</div></div>
+        <div class="hero-stat"><div class="val" id="stat-rank">–</div><div class="lbl">Posição</div></div>
+        <div class="hero-stat"><div class="val" id="stat-players">–</div><div class="lbl">Participantes</div></div>
+        <div class="hero-stat"><div class="val" id="stat-prize">–</div><div class="lbl">Prêmio</div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">⚽ Próximos Jogos</div>
+        <span class="section-link" onclick="goPage('jogos')">Ver todos →</span>
+      </div>
+      <div class="games-grid" id="home-games"><div class="loading"><div class="spinner"></div><br>Carregando jogos...</div></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header">
+        <div class="section-title">🏅 Ranking</div>
+        <span class="section-link" onclick="goPage('ranking')">Ver completo →</span>
+      </div>
+      <div class="ranking-table">
+        <div class="ranking-header"><div>#</div><div>Jogador</div><div style="text-align:center">Pts</div><div style="text-align:center">Exatos</div><div style="text-align:center">Acertos</div></div>
+        <div id="home-ranking"><div class="loading"><div class="spinner"></div></div></div>
+      </div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><div class="section-title">🏆 Premiação</div></div>
+      <div class="premio-grid">
+        <div class="premio-card primeiro"><span class="premio-icon">🥇</span><div class="premio-pos">1º Lugar</div><div class="premio-val" id="prize1">R$ –</div><div class="premio-perc">60% do prêmio</div></div>
+        <div class="premio-card segundo"><span class="premio-icon">🥈</span><div class="premio-pos">2º Lugar</div><div class="premio-val" id="prize2">R$ –</div><div class="premio-perc">25% do prêmio</div></div>
+        <div class="premio-card terceiro"><span class="premio-icon">🥉</span><div class="premio-pos">3º Lugar</div><div class="premio-val" id="prize3">R$ –</div><div class="premio-perc">15% do prêmio</div></div>
+      </div>
+      <div class="premio-pot"><p>💰 Prêmio acumulado</p><strong id="prize-total">R$ –</strong><p style="font-size:12px;color:var(--text3);margin-top:4px">participantes pagos × R$20,00</p></div>
+    </div>
+
+    <div class="section">
+      <div class="section-header"><div class="section-title">📖 Regras de Pontuação</div></div>
+      <div class="regras-grid">
+        <div class="regra-card"><div class="regra-icon">🎯</div><div><h3><span class="pts-badge">3</span> Placar Exato</h3><p>Acertou o placar exato do jogo.</p></div></div>
+        <div class="regra-card"><div class="regra-icon">✅</div><div><h3><span class="pts-badge">1</span> Resultado Certo</h3><p>Acertou o vencedor ou o empate.</p></div></div>
+        <div class="regra-card"><div class="regra-icon">❌</div><div><h3><span class="pts-badge">0</span> Errou</h3><p>Não acertou o resultado.</p></div></div>
+        <div class="regra-card"><div class="regra-icon">⏰</div><div><h3>Prazo</h3><p>Palpites até 30 min antes do jogo.</p></div></div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ JOGOS ════ -->
+<div id="page-jogos" class="page">
+  <div class="main-wrapper">
+    <div class="section-header" style="margin-bottom:20px"><div class="section-title">⚽ Todos os Jogos</div></div>
+    <div class="tabs" id="jogos-tabs">
+      <button class="tab active" onclick="filterJogos('todos',this)">Todos</button>
+      <button class="tab" onclick="filterJogos('aberto',this)">Abertos</button>
+      <button class="tab" onclick="filterJogos('ao_vivo',this)">🔴 Ao Vivo</button>
+      <button class="tab" onclick="filterJogos('encerrado',this)">Encerrados</button>
+    </div>
+    <div class="games-grid" id="all-games"><div class="loading"><div class="spinner"></div><br>Carregando...</div></div>
+  </div>
+</div>
+
+<!-- ════ RANKING ════ -->
+<div id="page-ranking" class="page">
+  <div class="main-wrapper">
+    <div class="section-header" style="margin-bottom:20px"><div class="section-title">🏅 Ranking Geral</div></div>
+    <div class="ranking-table">
+      <div class="ranking-header"><div>#</div><div>Jogador</div><div style="text-align:center">Pts</div><div style="text-align:center">Exatos</div><div style="text-align:center">Acertos</div></div>
+      <div id="full-ranking"><div class="loading"><div class="spinner"></div></div></div>
+    </div>
+  </div>
+</div>
+
+<!-- ════ MEUS PALPITES ════ -->
+<div id="page-meus-palpites" class="page">
+  <div class="main-wrapper">
+    <div class="section-header" style="margin-bottom:20px"><div class="section-title">📋 Meus Palpites</div></div>
+    <div class="mybets-list" id="mybets-list"><div class="loading"><div class="spinner"></div></div></div>
+  </div>
+</div>
+
+<!-- ════ CONVITE ════ -->
+<div id="page-convite" class="page">
+  <div class="main-wrapper">
+    <div class="section-header" style="margin-bottom:20px"><div class="section-title">✉️ Convidar Amigos</div></div>
+    <div class="invite-box">
+      <p style="color:var(--text2);margin-bottom:20px">Chame seus amigos! Quanto mais gente, maior o prêmio. 🏆</p>
+      <div class="invite-link-row">
+        <input class="invite-link-input" id="invite-link" readonly>
+        <button class="btn-secondary" onclick="copyInviteLink()">📋 Copiar Link</button>
+      </div>
+      <div class="share-btns">
+        <button class="share-btn share-whatsapp" onclick="shareWhatsApp()">💬 WhatsApp</button>
+        <button class="share-btn share-telegram" onclick="shareTelegram()">✈️ Telegram</button>
+        <button class="share-btn share-email-btn" onclick="shareEmail()">📧 E-mail</button>
+      </div>
+      <div style="margin-top:24px;padding-top:24px;border-top:1px solid rgba(255,255,255,0.07)">
+        <h4 style="font-family:'Barlow Condensed';font-size:14px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:14px">📧 Convidar por e-mail direto</h4>
+        <div style="display:flex;gap:10px">
+          <input style="flex:1;padding:12px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-size:14px;outline:none;" id="invite-email-input" placeholder="amigo@email.com">
+          <button class="btn-secondary" onclick="sendEmailInvite()">Enviar</button>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"><span id="toast-msg"></span></div>
+
+<script>
+// ════════════════════════════════════════════════════
+// SUPABASE INIT
+// ════════════════════════════════════════════════════
+let supabase = null;
+let currentUser = null;
+let currentProfile = null;
+let allJogos = [];
+let allPalpites = [];
+
+const STORAGE_KEY = 'bolao_supabase_config';
+
+function saveConfig() {
+  const url = document.getElementById('cfg-url').value.trim();
+  const key = document.getElementById('cfg-key').value.trim();
+  if (!url || !key) { showToast('Preencha a URL e a chave ⚠️', true); return; }
+  if (!url.includes('supabase.co')) { showToast('URL do Supabase inválida ⚠️', true); return; }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ url, key }));
+  initSupabase(url, key);
+  document.getElementById('config-bar').style.display = 'none';
+}
+
+function initSupabase(url, key) {
+  try {
+    supabase = window.supabase.createClient(url, key);
+    showAuthPage();
+    loadPrizeDisplay();
+  } catch(e) {
+    showToast('Erro ao conectar ao Supabase: ' + e.message, true);
+  }
+}
+
+// Ao carregar: verifica se já tem config salva
+window.addEventListener('load', () => {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const { url, key } = JSON.parse(saved);
+      document.getElementById('cfg-url').value = url;
+      document.getElementById('cfg-key').value = key;
+      document.getElementById('config-bar').style.display = 'none';
+      initSupabase(url, key);
+    } catch(e) { /* ignore, show config page */ }
+  }
+});
+
+async function showAuthPage() {
+  // Verifica se já tem sessão ativa
+  const { data: { session } } = await supabase.auth.getSession();
+  if (session) {
+    currentUser = session.user;
+    await loadProfile();
+    enterApp();
+  } else {
+    showPage('page-auth');
+  }
+}
+
+// ════════════════════════════════════════════════════
+// AUTH
+// ════════════════════════════════════════════════════
+function switchAuthTab(tab) {
+  document.getElementById('tab-login').style.display = tab==='login'?'block':'none';
+  document.getElementById('tab-register').style.display = tab==='register'?'block':'none';
+  document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+}
+
+function selectPayment(method, el) {
+  document.querySelectorAll('.pay-method').forEach(m=>m.classList.remove('selected'));
+  el.classList.add('selected');
+  document.getElementById('pix-box').classList.toggle('show', method==='pix');
+}
+
+function copiarPix() {
+  const code = document.getElementById('pix-code-display').textContent;
+  navigator.clipboard?.writeText(code);
+  showToast('Código PIX copiado! ✅');
+}
+
+async function doLogin() {
+  const email = document.getElementById('login-email').value.trim();
+  const pass = document.getElementById('login-pass').value;
+  if (!email || !pass) { showError('login-error', 'Preencha e-mail e senha'); return; }
+  
+  const btn = document.getElementById('btn-login');
+  btn.disabled = true; btn.textContent = 'Entrando...';
+  
+  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  
+  btn.disabled = false; btn.textContent = '⚽ Entrar no Bolão';
+  
+  if (error) { showError('login-error', 'E-mail ou senha incorretos'); return; }
+  currentUser = data.user;
+  await loadProfile();
+  enterApp();
+}
+
+async function doRegister() {
+  const nome = document.getElementById('reg-name').value.trim();
+  const email = document.getElementById('reg-email').value.trim();
+  const pass = document.getElementById('reg-pass').value;
+  if (!nome || !email || !pass) { showError('reg-error', 'Preencha todos os campos'); return; }
+  if (pass.length < 6) { showError('reg-error', 'Senha deve ter pelo menos 6 caracteres'); return; }
+  
+  const btn = document.getElementById('btn-register');
+  btn.disabled = true; btn.textContent = 'Cadastrando...';
+  
+  const { data, error } = await supabase.auth.signUp({
+    email, password: pass,
+    options: { data: { nome } }
+  });
+  
+  btn.disabled = false; btn.textContent = '✅ Confirmar Cadastro';
+  
+  if (error) { showError('reg-error', error.message); return; }
+  
+  showToast('Cadastro realizado! Confirme seu e-mail se necessário. 🎉');
+  // Tenta login direto
+  setTimeout(() => switchAuthTab('login'), 2000);
+}
+
+async function doLogout() {
+  await supabase.auth.signOut();
+  currentUser = null; currentProfile = null;
+  document.getElementById('main-nav').style.display = 'none';
+  showPage('page-auth');
+}
+
+// ════════════════════════════════════════════════════
+// PERFIL & DADOS
+// ════════════════════════════════════════════════════
+async function loadProfile() {
+  const { data } = await supabase
+    .from('usuarios')
+    .select('*')
+    .eq('id', currentUser.id)
+    .single();
+  currentProfile = data;
+}
+
+async function loadPrizeDisplay() {
+  const { count } = await supabase.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true);
+  const total = (count || 0) * 20;
+  const el = document.getElementById('prize-display');
+  if (el) el.textContent = `R$ ${total.toLocaleString('pt-BR')}`;
+}
+
+function enterApp() {
+  if (!currentProfile) return;
+  document.getElementById('main-nav').style.display = 'flex';
+  document.getElementById('nav-avatar').textContent = currentProfile.avatar_iniciais || '?';
+  document.getElementById('hero-name').textContent = currentProfile.nome.split(' ')[0].toUpperCase() + '!';
+  document.getElementById('invite-link').value = `${location.origin}${location.pathname}?convite=${currentProfile.id}`;
+  goPage('home');
+}
+
+// ════════════════════════════════════════════════════
+// NAVEGAÇÃO
+// ════════════════════════════════════════════════════
+function showPage(id) {
+  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
+  document.getElementById(id).classList.add('active');
+}
+
+function goPage(page) {
+  showPage('page-'+page);
+  document.querySelectorAll('.nav-btn').forEach(b=>b.classList.remove('active'));
+  const idx = ['home','jogos','ranking','meus-palpites','convite'].indexOf(page);
+  if(idx>=0) document.querySelectorAll('.nav-btn')[idx]?.classList.add('active');
+  if(page==='home') loadHome();
+  if(page==='jogos') loadJogos();
+  if(page==='ranking') loadRanking();
+  if(page==='meus-palpites') loadMyBets();
+}
+
+// ════════════════════════════════════════════════════
+// HOME
+// ════════════════════════════════════════════════════
+async function loadHome() {
+  await Promise.all([loadHomeGames(), loadHomeRanking(), loadPrizes()]);
+  // Stats do usuário
+  const { data: ranking } = await supabase.from('usuarios').select('id,pontos').order('pontos',{ascending:false});
+  if (ranking) {
+    const myPos = ranking.findIndex(u=>u.id===currentUser.id) + 1;
+    document.getElementById('stat-pts').textContent = currentProfile?.pontos || 0;
+    document.getElementById('stat-rank').textContent = myPos ? `#${myPos}` : '–';
+    document.getElementById('stat-players').textContent = ranking.length;
+    const prize = ranking.length * 20;
+    document.getElementById('stat-prize').textContent = `R$${prize >= 1000 ? (prize/1000).toFixed(1)+'k' : prize}`;
+  }
+}
+
+async function loadHomeGames() {
+  const { data: jogos } = await supabase.from('jogos').select('*').in('status',['aberto','ao_vivo']).order('data_hora').limit(4);
+  if (!jogos) return;
+  const { data: palpites } = await supabase.from('palpites').select('*').eq('usuario_id', currentUser.id);
+  allPalpites = palpites || [];
+  document.getElementById('home-games').innerHTML = jogos.length ? jogos.map(j=>renderGameCard(j)).join('') : '<div class="loading">Nenhum jogo aberto no momento</div>';
+}
+
+async function loadHomeRanking() {
+  const { data } = await supabase.from('usuarios').select('id,nome,avatar_iniciais,pontos,palpites_exatos,palpites_certos').order('pontos',{ascending:false}).limit(5);
+  renderRankingRows('home-ranking', data || []);
+}
+
+async function loadPrizes() {
+  const { count } = await supabase.from('usuarios').select('*',{count:'exact',head:true}).eq('pago',true);
+  const total = (count||0)*20;
+  const fmt = v => `R$ ${v.toLocaleString('pt-BR')}`;
+  document.getElementById('prize1').textContent = fmt(Math.floor(total*0.6));
+  document.getElementById('prize2').textContent = fmt(Math.floor(total*0.25));
+  document.getElementById('prize3').textContent = fmt(Math.floor(total*0.15));
+  document.getElementById('prize-total').textContent = fmt(total);
+}
+
+// ════════════════════════════════════════════════════
+// JOGOS
+// ════════════════════════════════════════════════════
+async function loadJogos(filter='todos') {
+  let query = supabase.from('jogos').select('*').order('data_hora');
+  if(filter!=='todos') query = query.eq('status',filter);
+  const { data: jogos } = await query;
+  const { data: palpites } = await supabase.from('palpites').select('*').eq('usuario_id',currentUser.id);
+  allJogos = jogos || [];
+  allPalpites = palpites || [];
+  document.getElementById('all-games').innerHTML = allJogos.length ? allJogos.map(j=>renderGameCard(j)).join('') : '<div class="loading">Nenhum jogo nesta categoria</div>';
+}
+
+function filterJogos(filter, btn) {
+  document.querySelectorAll('#jogos-tabs .tab').forEach(t=>t.classList.remove('active'));
+  btn.classList.add('active');
+  loadJogos(filter);
+}
+
+function getMyPalpite(jogoId) {
+  return allPalpites.find(p=>p.jogo_id===jogoId);
+}
+
+function renderGameCard(jogo) {
+  const isOpen = jogo.status==='aberto';
+  const isLive = jogo.status==='ao_vivo';
+  const isDone = jogo.status==='encerrado';
+  const palpite = getMyPalpite(jogo.id);
+  
+  let statusHtml = isLive ? '<span class="game-status live">🔴 Ao Vivo</span>'
+    : isOpen ? '<span class="game-status open">Aberto</span>'
+    : '<span class="game-status done">Encerrado</span>';
+
+  const centerContent = (isDone||isLive)
+    ? `<div class="game-score-actual">${jogo.gol_time1??'?'} : ${jogo.gol_time2??'?'}</div>`
+    : `<div class="game-vs">VS</div>`;
+
+  let palpiteResult = '';
+  if (palpite && isDone) {
+    const pts = palpite.pontos_ganhos;
+    palpiteResult = pts===3 ? '<div class="palpite-result exact">🏆 Placar exato! +3 pontos</div>'
+      : pts===1 ? '<div class="palpite-result win">✅ Acertou o resultado! +1 ponto</div>'
+      : '<div class="palpite-result miss">❌ Não acertou</div>';
+  }
+
+  const dataFmt = new Date(jogo.data_hora).toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'});
+
+  return `
+  <div class="game-card">
+    <div class="game-meta">
+      <span class="game-group">${jogo.grupo}</span>
+      <span class="game-date">${dataFmt}</span>
+      ${statusHtml}
+    </div>
+    <div class="game-teams">
+      <div class="game-team"><span class="team-flag">${jogo.flag1||'🏳️'}</span><div class="team-name">${jogo.time1}</div></div>
+      ${centerContent}
+      <div class="game-team"><span class="team-flag">${jogo.flag2||'🏳️'}</span><div class="team-name">${jogo.time2}</div></div>
+    </div>
+    <div class="palpite-area">
+      <div class="palpite-label">🎯 Seu Palpite</div>
+      <div class="palpite-inputs">
+        <input class="palpite-input" type="number" min="0" max="20" id="p-${jogo.id}-1"
+          value="${palpite?palpite.palpite_time1:''}" placeholder="–" ${!isOpen?'disabled':''}>
+        <span class="palpite-x">×</span>
+        <input class="palpite-input" type="number" min="0" max="20" id="p-${jogo.id}-2"
+          value="${palpite?palpite.palpite_time2:''}" placeholder="–" ${!isOpen?'disabled':''}>
+        <button class="btn-palpite" onclick="savePalpite(${jogo.id})" ${!isOpen?'disabled':''}>
+          ${palpite&&isOpen?'✏️ Alterar':palpite?'✅ Salvo':'💾 Salvar'}
+        </button>
+      </div>
+      ${palpiteResult}
+    </div>
+  </div>`;
+}
+
+async function savePalpite(jogoId) {
+  const v1 = parseInt(document.getElementById(`p-${jogoId}-1`)?.value);
+  const v2 = parseInt(document.getElementById(`p-${jogoId}-2`)?.value);
+  if (isNaN(v1)||isNaN(v2)) { showToast('Preencha os dois placares ⚠️', true); return; }
+  
+  const existing = getMyPalpite(jogoId);
+  const payload = { usuario_id: currentUser.id, jogo_id: jogoId, palpite_time1: v1, palpite_time2: v2 };
+  
+  let error;
+  if (existing) {
+    ({ error } = await supabase.from('palpites').update({palpite_time1:v1,palpite_time2:v2,updated_at:new Date().toISOString()}).eq('id',existing.id));
+  } else {
+    ({ error } = await supabase.from('palpites').insert(payload));
+  }
+  
+  if (error) { showToast('Erro ao salvar palpite: '+error.message, true); return; }
+  showToast(`Palpite ${v1}×${v2} salvo! ✅`);
+  
+  // Recarrega palpites
+  const { data } = await supabase.from('palpites').select('*').eq('usuario_id',currentUser.id);
+  allPalpites = data || [];
+  // Re-renderiza o card
+  const page = document.getElementById('all-games').children.length ? 'all-games' : 'home-games';
+  const cards = document.getElementById(page);
+  if (cards) {
+    const jogo = allJogos.find(j=>j.id===jogoId) || (await supabase.from('jogos').select('*').eq('id',jogoId).single()).data;
+    if (jogo) {
+      const newCard = document.createElement('div');
+      newCard.innerHTML = renderGameCard(jogo);
+      cards.querySelectorAll('.game-card').forEach(c => {
+        if (c.querySelector(`#p-${jogoId}-1`)) c.replaceWith(newCard.firstElementChild);
+      });
+    }
+  }
+}
+
+// ════════════════════════════════════════════════════
+// RANKING
+// ════════════════════════════════════════════════════
+async function loadRanking() {
+  const { data } = await supabase.from('usuarios').select('id,nome,avatar_iniciais,pontos,palpites_exatos,palpites_certos').order('pontos',{ascending:false});
+  renderRankingRows('full-ranking', data || []);
+}
+
+function renderRankingRows(containerId, users) {
+  const medals = ['🥇','🥈','🥉'];
+  const prizes = ['R$','R$','R$'];
+  const container = document.getElementById(containerId);
+  if (!container) return;
+  if (!users.length) { container.innerHTML = '<div class="loading">Nenhum participante ainda</div>'; return; }
+  const total = users.length * 20;
+  const prizeVals = [Math.floor(total*0.6),Math.floor(total*0.25),Math.floor(total*0.15)];
+  const posClass = ['gold','silver','bronze'];
+  container.innerHTML = users.map((u,i)=>{
+    const isMe = currentUser && u.id===currentUser.id;
+    const pos = i+1;
+    return `
+    <div class="ranking-row" style="${isMe?'background:rgba(245,200,66,0.06);':''}">
+      <div class="rank-pos ${posClass[i]||''}">${medals[i]||pos}</div>
+      <div class="rank-user">
+        <div class="rank-avatar" style="${isMe?'background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark)':''}">${u.avatar_iniciais||'?'}</div>
+        <div>
+          <div class="rank-name">${u.nome}${isMe?' <span style="font-size:11px;color:var(--gold)">(você)</span>':''}</div>
+          <div class="rank-tag">${prizeVals[i]?`<span class="prize-tag">R$${prizeVals[i]}</span>`:''}</div>
+        </div>
+      </div>
+      <div class="rank-pts">${u.pontos||0}</div>
+      <div class="rank-exact">${u.palpites_exatos||0}</div>
+      <div class="rank-win">${u.palpites_certos||0}</div>
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════
+// MEUS PALPITES
+// ════════════════════════════════════════════════════
+async function loadMyBets() {
+  const { data: palpites } = await supabase
+    .from('palpites')
+    .select('*, jogo:jogos(*)')
+    .eq('usuario_id', currentUser.id)
+    .order('created_at', {ascending:false});
+
+  const container = document.getElementById('mybets-list');
+  if (!palpites?.length) {
+    container.innerHTML = '<div class="loading">Nenhum palpite ainda. Vá para Jogos! ⚽</div>';
+    return;
+  }
+  container.innerHTML = palpites.map(p=>{
+    const jogo = p.jogo;
+    const isPending = jogo.status==='aberto';
+    let badge = isPending
+      ? '<span class="mybet-pts pending">Aguardando ⏳</span>'
+      : p.pontos_ganhos===3 ? '<span class="mybet-pts exact">+3 pts 🏆</span>'
+      : p.pontos_ganhos===1 ? '<span class="mybet-pts win">+1 pt ✅</span>'
+      : '<span class="mybet-pts" style="background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.2)">0 pts ❌</span>';
+    return `
+    <div class="mybet-row">
+      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px">
+        <span style="font-size:22px">${jogo.flag1||'🏳️'}</span>
+        <span style="font-weight:600">${jogo.time1}</span>
+        <span style="color:var(--text3);font-size:12px;font-weight:700">VS</span>
+        <span style="font-weight:600">${jogo.time2}</span>
+        <span style="font-size:22px">${jogo.flag2||'🏳️'}</span>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Resultado</div>
+        <div style="font-family:'Bebas Neue';font-size:20px;letter-spacing:3px">${jogo.status!=='aberto'?`${jogo.gol_time1}:${jogo.gol_time2}`:'Não iniciado'}</div>
+      </div>
+      <div>
+        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Palpite</div>
+        <div style="font-family:'Bebas Neue';font-size:20px;color:var(--gold);letter-spacing:3px">${p.palpite_time1}:${p.palpite_time2}</div>
+      </div>
+      ${badge}
+    </div>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════
+// CONVITE
+// ════════════════════════════════════════════════════
+function copyInviteLink() {
+  navigator.clipboard?.writeText(document.getElementById('invite-link').value);
+  showToast('Link copiado! Compartilhe com seus amigos 🔗');
+}
+function shareWhatsApp() {
+  const link = document.getElementById('invite-link').value;
+  const msg = encodeURIComponent(`🏆 Participe do Bolão Copa 2026! Taxa R$20 · Prêmio R$1.200+\n${link}`);
+  window.open(`https://wa.me/?text=${msg}`, '_blank');
+}
+function shareTelegram() {
+  const link = encodeURIComponent(document.getElementById('invite-link').value);
+  window.open(`https://t.me/share/url?url=${link}&text=${encodeURIComponent('🏆 Bolão Copa 2026!')}`, '_blank');
+}
+function shareEmail() {
+  const link = document.getElementById('invite-link').value;
+  window.location.href = `mailto:?subject=${encodeURIComponent('Convite: Bolão Copa 2026')}&body=${encodeURIComponent('Participe do Bolão Copa 2026!\n'+link)}`;
+}
+function sendEmailInvite() {
+  const email = document.getElementById('invite-email-input').value;
+  if (!email) { showToast('Digite um e-mail ⚠️', true); return; }
+  document.getElementById('invite-email-input').value = '';
+  showToast(`Convite enviado para ${email} 📧`);
+}
+
+// ════════════════════════════════════════════════════
+// UTILS
+// ════════════════════════════════════════════════════
+function showError(id, msg) {
+  const el = document.getElementById(id);
+  if (el) { el.textContent = msg; el.style.display = 'block'; }
+}
+function showToast(msg, isError=false) {
+  const t = document.getElementById('toast');
+  document.getElementById('toast-msg').textContent = msg;
+  t.className = 'toast show' + (isError?' error':'');
+  clearTimeout(t._timer);
+  t._timer = setTimeout(()=>t.classList.remove('show'), 3500);
+}
+</script>
+</body>
+</html>
