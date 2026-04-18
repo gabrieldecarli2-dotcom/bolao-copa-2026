@@ -508,10 +508,20 @@ async function adminLogin() {
 
   if (!url || !key) { showErr('Preencha a URL e a chave do Supabase'); return; }
   const secret = document.getElementById('adm-secret').value;
-  // ⚠️ ALTERE "SUA_CHAVE_SECRETA_AQUI" para uma senha só sua, ex: "Copa2026@Admin"
-  const ADMIN_SECRET = 'Copa2026@Admin';
   if (!email || !pass || !secret) { showErr('Preencha todos os campos'); return; }
-  if (secret !== ADMIN_SECRET) { showErr('❌ Chave secreta incorreta'); return; }
+
+  // Verifica a chave secreta no SERVIDOR (nunca exposta no código)
+  try {
+    const check = await fetch('/api/verify-admin', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret })
+    });
+    const result = await check.json();
+    if (!result.ok) { showErr('❌ Chave secreta incorreta'); return; }
+  } catch(e) {
+    showErr('Erro ao verificar chave. Tente novamente.'); return;
+  }
 
   try {
     db = window.supabase.createClient(url, key);
