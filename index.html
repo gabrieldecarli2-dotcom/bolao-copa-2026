@@ -153,10 +153,6 @@
   .premio-card.primeiro .premio-val { color:#FFD700; }
   .premio-card.segundo .premio-val { color:#C0C0C0; }
   .premio-card.terceiro .premio-val { color:#CD7F32; }
-  .premio-perc { font-size:12px; color:var(--text3); margin-top:6px; }
-  .premio-pot { text-align:center; margin-top:16px; padding:16px; background:rgba(245,200,66,0.07); border:1px solid rgba(245,200,66,0.15); border-radius:12px; }
-  .premio-pot p { font-size:13px; color:var(--text2); }
-  .premio-pot strong { font-family:'Bebas Neue'; font-size:32px; color:var(--gold); display:block; }
 
   /* ── CONVITE ── */
   .invite-box { background:var(--card); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:28px; }
@@ -274,10 +270,7 @@
       <div class="form-group"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••"></div>
       <div id="login-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:10px;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
       <button class="btn-primary" id="btn-login" onclick="doLogin()">⚽ Entrar no Bolão</button>
-      <div style="margin-top:20px;text-align:center;padding:14px;background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.15);border-radius:12px">
-        <p style="color:var(--text2);font-size:13px">🏆 Prêmio total estimado</p>
-        <strong id="prize-display" style="font-family:'Bebas Neue';font-size:28px;color:var(--gold)">R$ –</strong>
-      </div>
+
     </div>
 
     <div id="tab-register" style="display:none">
@@ -344,20 +337,19 @@
     <div class="section">
       <div class="section-header"><div class="section-title">🏆 Premiação</div></div>
       <div class="premio-grid">
-        <div class="premio-card primeiro"><span class="premio-icon">🥇</span><div class="premio-pos">1º Lugar</div><div class="premio-val" id="prize1">R$ –</div><div class="premio-perc">60% do prêmio</div></div>
-        <div class="premio-card segundo"><span class="premio-icon">🥈</span><div class="premio-pos">2º Lugar</div><div class="premio-val" id="prize2">R$ –</div><div class="premio-perc">25% do prêmio</div></div>
-        <div class="premio-card terceiro"><span class="premio-icon">🥉</span><div class="premio-pos">3º Lugar</div><div class="premio-val" id="prize3">R$ –</div><div class="premio-perc">15% do prêmio</div></div>
+        <div class="premio-card primeiro"><span class="premio-icon">🥇</span><div class="premio-pos">1º Lugar</div><div class="premio-val" id="prize1">R$ –</div></div>
+        <div class="premio-card segundo"><span class="premio-icon">🥈</span><div class="premio-pos">2º Lugar</div><div class="premio-val" id="prize2">R$ –</div></div>
+        <div class="premio-card terceiro"><span class="premio-icon">🥉</span><div class="premio-pos">3º Lugar</div><div class="premio-val" id="prize3">R$ –</div></div>
       </div>
-      <div class="premio-pot"><p>💰 Prêmio acumulado</p><strong id="prize-total">R$ –</strong><p style="font-size:12px;color:var(--text3);margin-top:4px">participantes pagos × R$20,00</p></div>
     </div>
 
     <div class="section">
       <div class="section-header"><div class="section-title">📖 Regras de Pontuação</div></div>
       <div class="regras-grid">
-        <div class="regra-card"><div class="regra-icon">🎯</div><div><h3><span class="pts-badge">3</span> Placar Exato</h3><p>Acertou o placar exato do jogo.</p></div></div>
-        <div class="regra-card"><div class="regra-icon">✅</div><div><h3><span class="pts-badge">1</span> Resultado Certo</h3><p>Acertou o vencedor ou o empate.</p></div></div>
-        <div class="regra-card"><div class="regra-icon">❌</div><div><h3><span class="pts-badge">0</span> Errou</h3><p>Não acertou o resultado.</p></div></div>
-        <div class="regra-card"><div class="regra-icon">⏰</div><div><h3>Prazo</h3><p>Palpites até 30 min antes do jogo.</p></div></div>
+        <div class="regra-card"><div class="regra-icon">🎯</div><div><h3><span class="pts-badge">3</span> Placar Exato</h3><p>Acertou o número exato de gols dos dois times. Ex: chutou 2×1 e o jogo terminou 2×1. <strong style="color:var(--gold)">Vale 3 pontos!</strong></p></div></div>
+        <div class="regra-card"><div class="regra-icon">✅</div><div><h3><span class="pts-badge">1</span> Resultado Certo</h3><p>Acertou quem venceu ou que seria empate, mas errou o placar exato. Ex: chutou 1×0 e terminou 2×0. <strong style="color:var(--text2)">Vale 1 ponto.</strong></p></div></div>
+        <div class="regra-card"><div class="regra-icon">❌</div><div><h3><span class="pts-badge">0</span> Errou</h3><p>Não acertou nem o vencedor. Ex: chutou vitória do Brasil e o jogo terminou em empate ou derrota. <strong style="color:var(--red)">Zero pontos.</strong></p></div></div>
+        <div class="regra-card"><div class="regra-icon">⏰</div><div><h3>Prazo do Palpite</h3><p>Os palpites devem ser enviados até <strong style="color:var(--gold)">30 minutos antes</strong> do início do jogo. Após isso, o jogo trava.</p></div></div>
       </div>
     </div>
   </div>
@@ -452,7 +444,6 @@ function initDB(url, key) {
     }
     db = createFn(url, key);
     showAuthPage();
-    loadPrizeDisplay();
   } catch(e) {
     showToast('Erro ao conectar: ' + e.message, true);
   }
@@ -585,12 +576,6 @@ async function loadProfile() {
   currentProfile = data;
 }
 
-async function loadPrizeDisplay() {
-  const { count } = await db.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true);
-  const total = (count || 0) * 20;
-  const el = document.getElementById('prize-display');
-  if (el) el.textContent = `R$ ${total.toLocaleString('pt-BR')}`;
-}
 
 function enterApp() {
   if (!currentProfile) return;
@@ -654,13 +639,16 @@ async function loadHomeRanking() {
 }
 
 async function loadPrizes() {
-  const { count } = await db.from('usuarios').select('*',{count:'exact',head:true}).eq('pago',true);
-  const total = (count||0)*20;
-  const fmt = v => `R$ ${v.toLocaleString('pt-BR')}`;
-  document.getElementById('prize1').textContent = fmt(Math.floor(total*0.6));
-  document.getElementById('prize2').textContent = fmt(Math.floor(total*0.25));
-  document.getElementById('prize3').textContent = fmt(Math.floor(total*0.15));
-  document.getElementById('prize-total').textContent = fmt(total);
+  const { data } = await db.from('configuracoes').select('*');
+  if (!data) return;
+  const get = chave => data.find(c=>c.chave===chave)?.valor || '–';
+  const fmt = v => v === '–' ? 'R$ –' : `R$ ${parseInt(v).toLocaleString('pt-BR')}`;
+  const el1 = document.getElementById('prize1');
+  const el2 = document.getElementById('prize2');
+  const el3 = document.getElementById('prize3');
+  if (el1) el1.textContent = fmt(get('premio_1'));
+  if (el2) el2.textContent = fmt(get('premio_2'));
+  if (el3) el3.textContent = fmt(get('premio_3'));
 }
 
 // ════════════════════════════════════════════════════
