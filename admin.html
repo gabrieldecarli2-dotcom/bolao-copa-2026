@@ -184,7 +184,7 @@
     <h1>🔐 ADMIN</h1>
     <p>Painel de administração do Bolão Copa 2026</p>
 
-    <div id="cfg-section">
+    <div id="cfg-section" style="display:none">
       <div class="form-row">
         <label>Supabase URL</label>
         <input class="form-input" id="cfg-url" type="url" placeholder="https://xxx.supabase.co">
@@ -193,6 +193,7 @@
         <label>Anon Key</label>
         <input class="form-input" id="cfg-key" type="text" placeholder="eyJ...">
       </div>
+      <div style="font-size:11px;color:var(--text3);margin-bottom:12px">Após salvar, esses campos não aparecem mais no login.</div>
     </div>
 
     <div class="form-row">
@@ -376,6 +377,23 @@
       </div>
 
       <div class="config-box" style="margin-top:20px">
+        <h2>🔌 Conexão Supabase</h2>
+        <p>Credenciais do banco de dados. Salvas localmente no seu navegador.</p>
+        <div class="form-row">
+          <label>Project URL</label>
+          <input class="form-input" id="cfg-url-settings" type="url" placeholder="https://xxx.supabase.co">
+        </div>
+        <div class="form-row">
+          <label>Anon Key</label>
+          <input class="form-input" id="cfg-key-settings" type="text" placeholder="eyJ...">
+        </div>
+        <div style="display:flex;gap:10px">
+          <button class="btn btn-primary" onclick="saveSupabaseConfig()">💾 Salvar Credenciais</button>
+          <button class="btn btn-danger" onclick="clearSupabaseConfig()">🗑️ Limpar e Reconectar</button>
+        </div>
+      </div>
+
+      <div class="config-box" style="margin-top:20px">
         <h2>🔗 Link do Sistema</h2>
         <p>Compartilhe esse link com os participantes</p>
         <div style="display:flex;gap:10px">
@@ -489,9 +507,15 @@ window.addEventListener('load', () => {
       const { url, key } = JSON.parse(saved);
       document.getElementById('cfg-url').value = url;
       document.getElementById('cfg-key').value = key;
-    } catch(e) {}
+      // Já tem credenciais salvas — esconde os campos no login
+      document.getElementById('cfg-section').style.display = 'none';
+    } catch(e) {
+      document.getElementById('cfg-section').style.display = 'block';
+    }
+  } else {
+    // Primeira vez — mostra os campos
+    document.getElementById('cfg-section').style.display = 'block';
   }
-  // Atualiza link do site
   const siteLink = location.href.replace('admin.html','index.html');
   const el = document.getElementById('site-link');
   if (el) el.value = siteLink;
@@ -562,6 +586,21 @@ function goSection(sec) {
   if (sec==='participantes') loadParticipantes();
   if (sec==='jogos') loadJogos();
   if (sec==='ranking') loadRanking();
+  if (sec==='config') loadConfigSettings();
+}
+
+function loadConfigSettings() {
+  const saved = localStorage.getItem(STORAGE_KEY);
+  if (saved) {
+    try {
+      const { url, key } = JSON.parse(saved);
+      document.getElementById('cfg-url-settings').value = url;
+      // Mostra chave parcialmente mascarada por segurança
+      document.getElementById('cfg-key-settings').value = key;
+    } catch(e) {}
+  }
+  const siteLink = location.href.replace('admin.html','index.html');
+  document.getElementById('site-link').value = siteLink;
 }
 
 // ════════════════════════════════════════════
@@ -893,6 +932,24 @@ function saveConfigSettings() {
 function copySiteLink() {
   navigator.clipboard?.writeText(document.getElementById('site-link').value);
   showToast('🔗 Link copiado!');
+}
+
+function saveSupabaseConfig() {
+  const url = document.getElementById('cfg-url-settings').value.trim();
+  const key = document.getElementById('cfg-key-settings').value.trim();
+  if (!url || !key) { showToast('Preencha URL e chave ⚠️', true); return; }
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({ url, key }));
+  // Atualiza campos ocultos do login também
+  document.getElementById('cfg-url').value = url;
+  document.getElementById('cfg-key').value = key;
+  showToast('✅ Credenciais salvas com sucesso!');
+}
+
+function clearSupabaseConfig() {
+  if (!confirm('Isso vai desconectar do Supabase e você precisará inserir as credenciais novamente. Continuar?')) return;
+  localStorage.removeItem(STORAGE_KEY);
+  showToast('🗑️ Credenciais removidas. Recarregando...');
+  setTimeout(() => location.reload(), 1500);
 }
 
 // ════════════════════════════════════════════
