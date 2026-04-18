@@ -29,10 +29,10 @@ export default async function handler(req, res) {
   const inicioJogo = new Date(jogo.data_hora);
   const minutosRestantes = (inicioJogo - agora) / 60000;
 
-  if (minutosRestantes <= 30) {
+  if (minutosRestantes <= 5) {
     return res.status(403).json({
       ok: false,
-      error: `Prazo encerrado. Palpites são bloqueados 30 minutos antes do jogo.`
+      error: `Prazo encerrado. Palpites são bloqueados 5 minutos antes do jogo.`
     });
   }
 
