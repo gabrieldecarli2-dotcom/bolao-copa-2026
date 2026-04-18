@@ -249,6 +249,7 @@
       <button class="nav-item" onclick="goSection('participantes')"><span class="icon">👥</span><span>Participantes</span></button>
       <button class="nav-item" onclick="goSection('jogos')"><span class="icon">⚽</span><span>Jogos</span></button>
       <button class="nav-item" onclick="goSection('ranking')"><span class="icon">🏅</span><span>Ranking</span></button>
+      <button class="nav-item" onclick="goSection('palpites')"><span class="icon">🎯</span><span>Palpites</span></button>
       <button class="nav-item" onclick="goSection('config')"><span class="icon">⚙️</span><span>Config</span></button>
     </nav>
     <div class="sidebar-footer">
@@ -390,6 +391,59 @@
       </div>
     </div>
 
+    <!-- ── PALPITES ── -->
+    <div class="section" id="sec-palpites">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h1>🎯 Palpites</h1>
+          <p>Todos os palpites de todos os participantes</p>
+        </div>
+        <div id="palpites-summary" style="font-size:13px;color:var(--text3)"></div>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end">
+        <div>
+          <label style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Filtrar por jogo</label>
+          <select id="palpite-filter-jogo" onchange="renderPalpitesTable()" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none;min-width:200px">
+            <option value="todos">Todos os jogos</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Filtrar por participante</label>
+          <select id="palpite-filter-user" onchange="renderPalpitesTable()" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none;min-width:180px">
+            <option value="todos">Todos os participantes</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Resultado</label>
+          <select id="palpite-filter-result" onchange="renderPalpitesTable()" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none">
+            <option value="todos">Todos</option>
+            <option value="3">🏆 Exato (3 pts)</option>
+            <option value="1">✅ Certo (1 pt)</option>
+            <option value="0">❌ Errou (0 pts)</option>
+            <option value="pendente">⏳ Pendente</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <div class="table-header-row">
+          <span class="table-title" id="palpites-count">Palpites</span>
+        </div>
+        <table>
+          <thead><tr>
+            <th>Participante</th>
+            <th>Jogo</th>
+            <th>Palpite</th>
+            <th>Resultado Real</th>
+            <th>Pontos</th>
+          </tr></thead>
+          <tbody id="palpites-table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
     <!-- ── RANKING ── -->
     <div class="section" id="sec-ranking">
       <div class="page-header">
@@ -412,6 +466,60 @@
           </tr></thead>
           <tbody id="rank-table"></tbody>
         </table>
+      </div>
+    </div>
+
+    <!-- ── PALPITES ── -->
+    <div class="section" id="sec-palpites">
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px">
+        <div>
+          <h1>🎯 Palpites</h1>
+          <p>Todos os palpites de todos os participantes</p>
+        </div>
+      </div>
+
+      <!-- Filtros -->
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:20px;align-items:flex-end">
+        <div>
+          <label style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Participante</label>
+          <select id="palpites-user-filter" onchange="renderPalpitesTable()" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none;min-width:180px">
+            <option value="todos">Todos</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Jogo</label>
+          <select id="palpites-jogo-filter" onchange="renderPalpitesTable()" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none;min-width:200px">
+            <option value="todos">Todos os jogos</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;display:block;margin-bottom:6px">Resultado</label>
+          <select id="palpites-pts-filter" onchange="renderPalpitesTable()" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none">
+            <option value="todos">Todos</option>
+            <option value="3">🏆 Placar exato (3pts)</option>
+            <option value="1">✅ Resultado certo (1pt)</option>
+            <option value="0">❌ Errou (0pts)</option>
+            <option value="pendente">⏳ Aguardando</option>
+          </select>
+        </div>
+        <div style="margin-left:auto;align-self:flex-end">
+          <span id="palpites-count" style="font-size:13px;color:var(--text3)">0 palpites</span>
+        </div>
+      </div>
+
+      <div class="table-wrap">
+        <table>
+          <thead><tr>
+            <th>Participante</th>
+            <th>Jogo</th>
+            <th>Grupo</th>
+            <th style="text-align:center">Resultado</th>
+            <th style="text-align:center">Palpite</th>
+            <th style="text-align:center">Pontos</th>
+          </tr></thead>
+          <tbody id="palpites-table-body"></tbody>
+        </table>
+        <div id="palpites-loading" class="loading"><div class="spinner"></div></div>
       </div>
     </div>
 
@@ -729,6 +837,7 @@ function goSection(sec) {
   if (sec==='participantes') loadParticipantes();
   if (sec==='jogos') loadJogos();
   if (sec==='ranking') loadRanking();
+  if (sec==='palpites') loadPalpites();
   if (sec==='config') loadConfigSettings();
 }
 
@@ -1425,6 +1534,194 @@ async function limparJogos() {
   await db.from('jogos').delete().neq('id', 0);
   showToast('🗑️ Todos os jogos removidos');
   loadJogos();
+}
+
+// ════════════════════════════════════════════════════
+// PALPITES
+// ════════════════════════════════════════════════════
+let allPalpitesAdmin = [];
+let allJogosAdmin = [];
+let allUsersAdmin = [];
+
+async function loadPalpites() {
+  document.getElementById('palpites-table-body').innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr>';
+
+  const [{ data: palpites }, { data: jogos }, { data: users }] = await Promise.all([
+    db.from('palpites').select('*, usuario:usuarios(id,nome,avatar_iniciais), jogo:jogos(id,grupo,time1,flag1,time2,flag2,gol_time1,gol_time2,status)').order('created_at', {ascending:false}),
+    db.from('jogos').select('id,grupo,time1,flag1,time2,flag2,status').order('data_hora'),
+    db.from('usuarios').select('id,nome').order('nome')
+  ]);
+
+  allPalpitesAdmin = palpites || [];
+  allJogosAdmin = jogos || [];
+  allUsersAdmin = users || [];
+
+  // Preenche filtro de jogos
+  const jogoSelect = document.getElementById('palpite-filter-jogo');
+  jogoSelect.innerHTML = '<option value="todos">Todos os jogos</option>' +
+    (jogos || []).map(j => `<option value="${j.id}">${j.flag1||''} ${j.time1} × ${j.time2} ${j.flag2||''}</option>`).join('');
+
+  // Preenche filtro de usuários
+  const userSelect = document.getElementById('palpite-filter-user');
+  userSelect.innerHTML = '<option value="todos">Todos os participantes</option>' +
+    (users || []).map(u => `<option value="${u.id}">${u.nome}</option>`).join('');
+
+  // Summary
+  const totalPalpites = palpites?.length || 0;
+  const exatos = palpites?.filter(p=>p.pontos_ganhos===3).length || 0;
+  const certos = palpites?.filter(p=>p.pontos_ganhos===1).length || 0;
+  document.getElementById('palpites-summary').textContent = `${totalPalpites} palpites · ${exatos} exatos · ${certos} acertos`;
+
+  renderPalpitesTable();
+}
+
+function renderPalpitesTable() {
+  const filterJogo = document.getElementById('palpite-filter-jogo')?.value || 'todos';
+  const filterUser = document.getElementById('palpite-filter-user')?.value || 'todos';
+  const filterResult = document.getElementById('palpite-filter-result')?.value || 'todos';
+
+  let list = [...allPalpitesAdmin];
+  if (filterJogo !== 'todos') list = list.filter(p => String(p.jogo_id) === filterJogo);
+  if (filterUser !== 'todos') list = list.filter(p => p.usuario_id === filterUser);
+  if (filterResult === 'pendente') list = list.filter(p => !p.calculado);
+  else if (filterResult !== 'todos') list = list.filter(p => p.calculado && String(p.pontos_ganhos) === filterResult);
+
+  document.getElementById('palpites-count').textContent = `${list.length} palpite${list.length!==1?'s':''}`;
+
+  if (!list.length) {
+    document.getElementById('palpites-table-body').innerHTML = '<tr><td colspan="5" class="loading">Nenhum palpite encontrado</td></tr>';
+    return;
+  }
+
+  document.getElementById('palpites-table-body').innerHTML = list.map(p => {
+    const jogo = p.jogo || {};
+    const user = p.usuario || {};
+    const isPending = !p.calculado || jogo.status === 'aberto';
+
+    let ptsBadge = '';
+    if (isPending) ptsBadge = '<span class="badge badge-blue">⏳ Pendente</span>';
+    else if (p.pontos_ganhos === 3) ptsBadge = '<span class="badge badge-gold">🏆 +3 pts</span>';
+    else if (p.pontos_ganhos === 1) ptsBadge = '<span class="badge badge-green">✅ +1 pt</span>';
+    else ptsBadge = '<span class="badge badge-red">❌ 0 pts</span>';
+
+    const resultadoReal = jogo.status !== 'aberto' && jogo.gol_time1 !== null
+      ? `<span style="font-family:'Bebas Neue';font-size:18px;letter-spacing:2px">${jogo.gol_time1} × ${jogo.gol_time2}</span>`
+      : '<span style="color:var(--text3);font-size:13px">Não iniciado</span>';
+
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="user-ava">${user.avatar_iniciais||'?'}</div>
+          <span style="font-weight:600">${user.nome||'–'}</span>
+        </div>
+      </td>
+      <td>
+        <div style="font-size:13px;font-weight:600">${jogo.flag1||''} ${jogo.time1||'–'} × ${jogo.time2||'–'} ${jogo.flag2||''}</div>
+        <div style="font-size:11px;color:var(--text3)">${jogo.grupo||''}</div>
+      </td>
+      <td><span style="font-family:'Bebas Neue';font-size:20px;color:var(--gold);letter-spacing:3px">${p.palpite_time1} × ${p.palpite_time2}</span></td>
+      <td>${resultadoReal}</td>
+      <td>${ptsBadge}</td>
+    </tr>`;
+  }).join('');
+}
+
+// ════════════════════════════════════════════════════
+// PALPITES
+// ════════════════════════════════════════════════════
+let allPalpitesAdmin = [];
+let allUsersAdmin = [];
+let allJogosAdmin = [];
+
+async function loadPalpites() {
+  document.getElementById('palpites-loading').style.display = 'block';
+  document.getElementById('palpites-table-body').innerHTML = '';
+
+  // Busca tudo em paralelo
+  const [{ data: palpites }, { data: users }, { data: jogos }] = await Promise.all([
+    db.from('palpites').select('*').order('created_at', {ascending:false}),
+    db.from('usuarios').select('id,nome,avatar_iniciais').order('nome'),
+    db.from('jogos').select('id,time1,flag1,time2,flag2,grupo,status,gol_time1,gol_time2').order('data_hora')
+  ]);
+
+  allPalpitesAdmin = palpites || [];
+  allUsersAdmin = users || [];
+  allJogosAdmin = jogos || [];
+
+  // Popula filtro de participantes
+  const userSel = document.getElementById('palpites-user-filter');
+  userSel.innerHTML = '<option value="todos">Todos</option>' +
+    (users||[]).map(u => `<option value="${u.id}">${u.nome}</option>`).join('');
+
+  // Popula filtro de jogos
+  const jogoSel = document.getElementById('palpites-jogo-filter');
+  jogoSel.innerHTML = '<option value="todos">Todos os jogos</option>' +
+    (jogos||[]).map(j => `<option value="${j.id}">${j.flag1||''} ${j.time1} × ${j.time2} ${j.flag2||''}</option>`).join('');
+
+  document.getElementById('palpites-loading').style.display = 'none';
+  renderPalpitesTable();
+}
+
+function renderPalpitesTable() {
+  const userFilter = document.getElementById('palpites-user-filter').value;
+  const jogoFilter = document.getElementById('palpites-jogo-filter').value;
+  const ptsFilter = document.getElementById('palpites-pts-filter').value;
+
+  let list = allPalpitesAdmin;
+  if (userFilter !== 'todos') list = list.filter(p => p.usuario_id === userFilter);
+  if (jogoFilter !== 'todos') list = list.filter(p => String(p.jogo_id) === jogoFilter);
+  if (ptsFilter === 'pendente') list = list.filter(p => !p.calculado);
+  else if (ptsFilter !== 'todos') list = list.filter(p => p.calculado && String(p.pontos_ganhos) === ptsFilter);
+
+  document.getElementById('palpites-count').textContent = `${list.length} palpites`;
+
+  if (!list.length) {
+    document.getElementById('palpites-table-body').innerHTML =
+      '<tr><td colspan="6" class="loading">Nenhum palpite encontrado</td></tr>';
+    return;
+  }
+
+  document.getElementById('palpites-table-body').innerHTML = list.map(p => {
+    const user = allUsersAdmin.find(u => u.id === p.usuario_id);
+    const jogo = allJogosAdmin.find(j => j.id === p.jogo_id);
+    if (!jogo) return '';
+
+    const isDone = jogo.status === 'encerrado';
+    const resultado = isDone
+      ? `<span style="font-family:'Bebas Neue';font-size:18px;letter-spacing:2px">${jogo.gol_time1}:${jogo.gol_time2}</span>`
+      : `<span style="color:var(--text3);font-size:12px">Não iniciado</span>`;
+
+    let ptsBadge = '';
+    if (!p.calculado || !isDone) {
+      ptsBadge = '<span class="badge badge-blue">⏳</span>';
+    } else if (p.pontos_ganhos === 3) {
+      ptsBadge = '<span class="badge badge-gold">🏆 +3</span>';
+    } else if (p.pontos_ganhos === 1) {
+      ptsBadge = '<span class="badge badge-green">✅ +1</span>';
+    } else {
+      ptsBadge = '<span class="badge badge-red">❌ 0</span>';
+    }
+
+    return `<tr>
+      <td>
+        <div style="display:flex;align-items:center;gap:10px">
+          <div class="user-ava">${user?.avatar_iniciais||'?'}</div>
+          <span style="font-weight:600">${user?.nome||'–'}</span>
+        </div>
+      </td>
+      <td>
+        <div style="font-weight:600">${jogo.flag1||''} ${jogo.time1} × ${jogo.time2} ${jogo.flag2||''}</div>
+      </td>
+      <td style="color:var(--text3);font-size:13px">${jogo.grupo}</td>
+      <td style="text-align:center">${resultado}</td>
+      <td style="text-align:center">
+        <span style="font-family:'Bebas Neue';font-size:20px;color:var(--gold);letter-spacing:3px">
+          ${p.palpite_time1}:${p.palpite_time2}
+        </span>
+      </td>
+      <td style="text-align:center">${ptsBadge}</td>
+    </tr>`;
+  }).join('');
 }
 
 function showToast(msg, isError=false) {
