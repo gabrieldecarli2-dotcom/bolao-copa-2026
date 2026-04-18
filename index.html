@@ -257,7 +257,7 @@
     <button class="nav-btn" onclick="goPage('convite')">✉️ Convidar</button>
   </div>
   <div class="nav-right">
-    <div class="user-avatar" id="nav-avatar">?</div>
+    <div class="user-avatar" id="nav-avatar" onclick="goPage('perfil')" title="Meu Perfil">?</div>
     <button class="logout-btn" onclick="doLogout()">Sair</button>
   </div>
 </nav>
@@ -434,6 +434,80 @@
         </div>
       </div>
     </div>
+  </div>
+</div>
+
+<!-- ════ PERFIL ════ -->
+<div id="page-perfil" class="page">
+  <div class="main-wrapper" style="max-width:600px">
+    <div class="section-header" style="margin-bottom:24px">
+      <div class="section-title">👤 Meu Perfil</div>
+    </div>
+
+    <!-- Avatar e nome -->
+    <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:20px;padding:28px;margin-bottom:20px;text-align:center">
+      <div id="perfil-avatar" style="width:72px;height:72px;border-radius:50%;background:linear-gradient(135deg,var(--green2),var(--gold));display:flex;align-items:center;justify-content:center;font-size:26px;font-weight:700;color:var(--dark);margin:0 auto 14px;border:3px solid rgba(245,200,66,0.4)">GD</div>
+      <div id="perfil-nome-display" style="font-family:'Bebas Neue';font-size:28px;letter-spacing:2px;color:var(--text)">–</div>
+      <div id="perfil-email-display" style="font-size:13px;color:var(--text3);margin-top:4px">–</div>
+      <div style="display:flex;gap:20px;justify-content:center;margin-top:16px">
+        <div style="text-align:center">
+          <div style="font-family:'Bebas Neue';font-size:28px;color:var(--gold)" id="perfil-pts">0</div>
+          <div style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase">Pontos</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Bebas Neue';font-size:28px;color:var(--text2)" id="perfil-exatos">0</div>
+          <div style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase">Exatos</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-family:'Bebas Neue';font-size:28px;color:var(--text3)" id="perfil-rank">#–</div>
+          <div style="font-size:11px;color:var(--text3);letter-spacing:1px;text-transform:uppercase">Posição</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Editar nome -->
+    <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;margin-bottom:16px">
+      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">✏️ Editar Nome</h3>
+      <div class="form-group">
+        <label>Nome completo</label>
+        <input type="text" id="perfil-nome-input" class="form-group input" style="width:100%;padding:13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Seu nome">
+      </div>
+      <button onclick="salvarNome()" style="padding:12px 24px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;color:var(--dark);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s">💾 Salvar Nome</button>
+    </div>
+
+    <!-- Alterar e-mail -->
+    <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;margin-bottom:16px">
+      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">📧 Alterar E-mail</h3>
+      <div class="form-group" style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Novo e-mail</label>
+        <input type="email" id="perfil-email-input" style="width:100%;padding:13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="novo@email.com">
+      </div>
+      <div id="email-msg" style="display:none;font-size:12px;color:var(--blue);margin-bottom:10px;padding:8px 12px;background:rgba(66,165,245,0.1);border-radius:8px">
+        📧 Um link de confirmação será enviado para o novo e-mail.
+      </div>
+      <button onclick="alterarEmail()" style="padding:12px 24px;background:rgba(66,165,245,0.15);border:1px solid rgba(66,165,245,0.3);border-radius:10px;color:var(--blue);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s">📧 Alterar E-mail</button>
+    </div>
+
+    <!-- Alterar senha -->
+    <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;margin-bottom:16px">
+      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">🔒 Alterar Senha</h3>
+      <div style="margin-bottom:12px">
+        <label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Nova senha</label>
+        <div style="position:relative">
+          <input type="password" id="perfil-senha-input" style="width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Mínimo 6 caracteres">
+          <button type="button" onclick="toggleEyePerfil('perfil-senha-input',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">👁️</button>
+        </div>
+      </div>
+      <div style="margin-bottom:16px">
+        <label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Confirmar nova senha</label>
+        <div style="position:relative">
+          <input type="password" id="perfil-senha-confirm" style="width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Repita a senha">
+          <button type="button" onclick="toggleEyePerfil('perfil-senha-confirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">👁️</button>
+        </div>
+      </div>
+      <button onclick="alterarSenha()" style="padding:12px 24px;background:rgba(239,83,80,0.15);border:1px solid rgba(239,83,80,0.3);border-radius:10px;color:var(--red);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;transition:all 0.2s">🔒 Alterar Senha</button>
+    </div>
+
   </div>
 </div>
 
@@ -629,6 +703,7 @@ function goPage(page) {
   if(page==='jogos') loadJogos();
   if(page==='ranking') loadRanking();
   if(page==='meus-palpites') loadMyBets();
+  if(page==='perfil') loadPerfil();
 }
 
 // ════════════════════════════════════════════════════
@@ -937,6 +1012,74 @@ function showError(id, msg) {
   const el = document.getElementById(id);
   if (el) { el.textContent = msg; el.style.display = 'block'; }
 }
+// ════════════════════════════════════════════════════
+// PERFIL
+// ════════════════════════════════════════════════════
+async function loadPerfil() {
+  if (!currentProfile) return;
+  document.getElementById('perfil-avatar').textContent = currentProfile.avatar_iniciais || '?';
+  document.getElementById('perfil-nome-display').textContent = currentProfile.nome || '–';
+  document.getElementById('perfil-email-display').textContent = currentUser.email || '–';
+  document.getElementById('perfil-nome-input').value = currentProfile.nome || '';
+  document.getElementById('perfil-pts').textContent = currentProfile.pontos || 0;
+  document.getElementById('perfil-exatos').textContent = currentProfile.palpites_exatos || 0;
+
+  // Busca posição no ranking
+  const { data: ranking } = await db.from('usuarios').select('id,pontos').order('pontos',{ascending:false});
+  if (ranking) {
+    const pos = ranking.findIndex(u=>u.id===currentUser.id) + 1;
+    document.getElementById('perfil-rank').textContent = pos ? `#${pos}` : '#–';
+  }
+}
+
+async function salvarNome() {
+  const nome = document.getElementById('perfil-nome-input').value.trim();
+  if (!nome) { showToast('Digite um nome ⚠️', true); return; }
+
+  const iniciais = nome.split(' ').map(w=>w[0]).join('').substring(0,2).toUpperCase();
+  const { error } = await db.from('usuarios').update({ nome, avatar_iniciais: iniciais }).eq('id', currentUser.id);
+  if (error) { showToast('Erro ao salvar: '+error.message, true); return; }
+
+  currentProfile.nome = nome;
+  currentProfile.avatar_iniciais = iniciais;
+  document.getElementById('nav-avatar').textContent = iniciais;
+  document.getElementById('perfil-avatar').textContent = iniciais;
+  document.getElementById('perfil-nome-display').textContent = nome;
+  document.getElementById('hero-name').textContent = nome.split(' ')[0].toUpperCase() + '!';
+  showToast('✅ Nome atualizado!');
+}
+
+async function alterarEmail() {
+  const email = document.getElementById('perfil-email-input').value.trim();
+  if (!email || !email.includes('@')) { showToast('Digite um e-mail válido ⚠️', true); return; }
+
+  const { error } = await db.auth.updateUser({ email });
+  if (error) { showToast('Erro: '+error.message, true); return; }
+
+  document.getElementById('email-msg').style.display = 'block';
+  showToast('📧 Confirmação enviada para o novo e-mail!');
+}
+
+async function alterarSenha() {
+  const senha = document.getElementById('perfil-senha-input').value;
+  const confirma = document.getElementById('perfil-senha-confirm').value;
+  if (!senha || senha.length < 6) { showToast('Senha deve ter pelo menos 6 caracteres ⚠️', true); return; }
+  if (senha !== confirma) { showToast('As senhas não coincidem ⚠️', true); return; }
+
+  const { error } = await db.auth.updateUser({ password: senha });
+  if (error) { showToast('Erro: '+error.message, true); return; }
+
+  document.getElementById('perfil-senha-input').value = '';
+  document.getElementById('perfil-senha-confirm').value = '';
+  showToast('🔒 Senha alterada com sucesso!');
+}
+
+function toggleEyePerfil(fieldId, btn) {
+  const input = document.getElementById(fieldId);
+  input.type = input.type === 'password' ? 'text' : 'password';
+  btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+}
+
 function showToast(msg, isError=false) {
   const t = document.getElementById('toast');
   document.getElementById('toast-msg').textContent = msg;
