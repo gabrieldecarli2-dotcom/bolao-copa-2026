@@ -423,31 +423,37 @@
       </div>
       <div class="config-box">
         <h2>💰 Configuração de Prêmios</h2>
-        <p>Defina os valores exatos de cada prêmio. Esses valores aparecerão para os participantes.</p>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
-          <div class="form-row">
-            <label>💵 Taxa de participação (R$)</label>
-            <input class="form-input" id="cfg-taxa" type="number" value="20" min="0">
-          </div>
-          <div class="form-row">
-            <label>🥇 Prêmio 1º lugar (R$)</label>
-            <input class="form-input" id="cfg-prize1" type="number" placeholder="Ex: 500">
-          </div>
-          <div class="form-row">
-            <label>🥈 Prêmio 2º lugar (R$)</label>
-            <input class="form-input" id="cfg-prize2" type="number" placeholder="Ex: 200">
-          </div>
-          <div class="form-row">
-            <label>🥉 Prêmio 3º lugar (R$)</label>
-            <input class="form-input" id="cfg-prize3" type="number" placeholder="Ex: 100">
-          </div>
-        </div>
+        <p>Defina a taxa e a % de cada prêmio. O valor final é calculado automaticamente conforme participantes pagam.</p>
         <div class="form-row">
-          <label>📝 Observação sobre os prêmios (opcional)</label>
-          <input class="form-input" id="cfg-obs" type="text" placeholder="Ex: Prêmios sujeitos a alteração conforme número de participantes">
+          <label>💵 Taxa de participação (R$)</label>
+          <input class="form-input" id="cfg-taxa" type="number" placeholder="20" min="0" oninput="previewPremios()">
         </div>
-        <div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--text2)">
-          💡 Os valores são salvos no banco e aparecem automaticamente para os participantes na tela inicial.
+        <div style="background:rgba(255,255,255,0.04);border-radius:10px;padding:16px;margin-bottom:16px">
+          <div style="font-size:12px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:14px">Distribuição do Prêmio (%)</div>
+          <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:12px;margin-bottom:14px">
+            <div>
+              <label style="font-size:12px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">🥇 1º Lugar %</label>
+              <input class="form-input" id="cfg-p1" type="number" min="0" max="100" placeholder="60" oninput="previewPremios()">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">🥈 2º Lugar %</label>
+              <input class="form-input" id="cfg-p2" type="number" min="0" max="100" placeholder="25" oninput="previewPremios()">
+            </div>
+            <div>
+              <label style="font-size:12px;color:var(--text3);font-weight:700;display:block;margin-bottom:6px">🥉 3º Lugar %</label>
+              <input class="form-input" id="cfg-p3" type="number" min="0" max="100" placeholder="15" oninput="previewPremios()">
+            </div>
+          </div>
+          <div id="premio-preview" style="background:rgba(245,200,66,0.08);border:1px solid rgba(245,200,66,0.2);border-radius:10px;padding:12px;font-size:13px;display:none">
+            <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase;margin-bottom:8px">Preview com participantes pagos atuais</div>
+            <div style="display:flex;gap:16px;flex-wrap:wrap">
+              <span>🥇 <strong id="prev-p1" style="color:var(--gold)">R$ –</strong></span>
+              <span>🥈 <strong id="prev-p2" style="color:#C0C0C0">R$ –</strong></span>
+              <span>🥉 <strong id="prev-p3" style="color:#CD7F32">R$ –</strong></span>
+              <span style="color:var(--text3)">Total arrecadado: <strong id="prev-total">R$ –</strong></span>
+            </div>
+            <div id="perc-warning" style="display:none;color:var(--red);font-size:12px;margin-top:8px">⚠️ A soma das % deve ser 100%</div>
+          </div>
         </div>
         <button class="btn btn-primary" onclick="saveConfigSettings()">💾 Salvar Configurações</button>
       </div>
@@ -697,19 +703,7 @@ function goSection(sec) {
   if (sec==='config') loadConfigSettings();
 }
 
-function loadConfigSettings() {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      const { url, key } = JSON.parse(saved);
-      document.getElementById('cfg-url-settings').value = url;
-      // Mostra chave parcialmente mascarada por segurança
-      document.getElementById('cfg-key-settings').value = key;
-    } catch(e) {}
-  }
-  const siteLink = location.href.replace('admin.html','index.html');
-  document.getElementById('site-link').value = siteLink;
-}
+// loadConfigSettings handled by async version below
 
 // ════════════════════════════════════════════
 // DASHBOARD
@@ -1077,28 +1071,32 @@ async function loadRanking() {
 // CONFIG
 // ════════════════════════════════════════════
 async function saveConfigSettings() {
-  const taxa = document.getElementById('cfg-taxa').value;
-  const prize1 = document.getElementById('cfg-prize1').value;
-  const prize2 = document.getElementById('cfg-prize2').value;
-  const prize3 = document.getElementById('cfg-prize3').value;
-  const obs = document.getElementById('cfg-obs').value;
+  const taxa = parseFloat(document.getElementById('cfg-taxa').value);
+  const p1 = parseFloat(document.getElementById('cfg-p1').value);
+  const p2 = parseFloat(document.getElementById('cfg-p2').value);
+  const p3 = parseFloat(document.getElementById('cfg-p3').value);
 
-  // Salva em uma tabela de config no Supabase
-  // Usa upsert para criar ou atualizar
+  if (!taxa || taxa <= 0) { showToast('Informe a taxa de participação ⚠️', true); return; }
+  if (!p1 || !p2 || !p3) { showToast('Informe as 3 porcentagens ⚠️', true); return; }
+
+  const soma = p1 + p2 + p3;
+  if (Math.abs(soma - 100) > 0.01) {
+    showToast(`A soma das % deve ser 100% (atual: ${soma}%) ⚠️`, true); return;
+  }
+
   const configs = [
-    { chave: 'taxa_participacao', valor: taxa },
-    { chave: 'premio_1', valor: prize1 },
-    { chave: 'premio_2', valor: prize2 },
-    { chave: 'premio_3', valor: prize3 },
-    { chave: 'premio_obs', valor: obs },
+    { chave: 'taxa_participacao', valor: String(taxa) },
+    { chave: 'perc_premio_1', valor: String(p1) },
+    { chave: 'perc_premio_2', valor: String(p2) },
+    { chave: 'perc_premio_3', valor: String(p3) },
   ];
 
-  let ok = true;
-  for (const c of configs) {
-    const { error } = await db.from('configuracoes').upsert(c, { onConflict: 'chave' });
-    if (error) { ok = false; showToast('Erro: ' + error.message, true); break; }
+  for (const cfg of configs) {
+    await db.from('configuracoes').upsert({ chave: cfg.chave, valor: cfg.valor }, { onConflict: 'chave' });
   }
-  if (ok) showToast('✅ Configurações salvas com sucesso!');
+
+  showToast('✅ Configurações salvas!');
+  previewPremios();
 }
 
 async function loadConfigSettings() {
@@ -1106,15 +1104,66 @@ async function loadConfigSettings() {
   if (data) {
     data.forEach(c => {
       if (c.chave === 'taxa_participacao') document.getElementById('cfg-taxa').value = c.valor;
-      if (c.chave === 'premio_1') document.getElementById('cfg-prize1').value = c.valor;
-      if (c.chave === 'premio_2') document.getElementById('cfg-prize2').value = c.valor;
-      if (c.chave === 'premio_3') document.getElementById('cfg-prize3').value = c.valor;
-      if (c.chave === 'premio_obs') document.getElementById('cfg-obs').value = c.valor;
+      if (c.chave === 'perc_premio_1') document.getElementById('cfg-p1').value = c.valor;
+      if (c.chave === 'perc_premio_2') document.getElementById('cfg-p2').value = c.valor;
+      if (c.chave === 'perc_premio_3') document.getElementById('cfg-p3').value = c.valor;
     });
   }
   const siteLink = location.href.replace('admin.html','index.html');
   const el = document.getElementById('site-link');
   if (el) el.value = siteLink;
+  setTimeout(previewPremios, 300);
+}
+
+async function previewPremios() {
+  const taxa = parseFloat(document.getElementById('cfg-taxa').value) || 0;
+  const p1 = parseFloat(document.getElementById('cfg-p1').value) || 0;
+  const p2 = parseFloat(document.getElementById('cfg-p2').value) || 0;
+  const p3 = parseFloat(document.getElementById('cfg-p3').value) || 0;
+  if (!taxa) return;
+
+  const preview = document.getElementById('premio-preview');
+  if (!preview) return;
+  preview.style.display = 'block';
+
+  const { count } = await db.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true);
+  const total = (count || 0) * taxa;
+  const fmt = v => `R$ ${Math.floor(v).toLocaleString('pt-BR')}`;
+
+  document.getElementById('prev-p1').textContent = fmt(total * p1 / 100);
+  document.getElementById('prev-p2').textContent = fmt(total * p2 / 100);
+  document.getElementById('prev-p3').textContent = fmt(total * p3 / 100);
+  document.getElementById('prev-total').textContent = fmt(total);
+
+  const soma = p1 + p2 + p3;
+  document.getElementById('perc-warning').style.display = Math.abs(soma - 100) > 0.01 ? 'block' : 'none';
+}
+
+async function previewPremios() {
+  const taxa = parseFloat(document.getElementById('cfg-taxa').value) || 0;
+  const p1 = parseFloat(document.getElementById('cfg-p1').value) || 0;
+  const p2 = parseFloat(document.getElementById('cfg-p2').value) || 0;
+  const p3 = parseFloat(document.getElementById('cfg-p3').value) || 0;
+  if (!taxa) return;
+
+  const preview = document.getElementById('premio-preview');
+  if (preview) preview.style.display = 'block';
+
+  const { count } = await db.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true);
+  const total = (count || 0) * taxa;
+  const fmt = v => `R$ ${Math.floor(v).toLocaleString('pt-BR')}`;
+
+  const el1 = document.getElementById('prev-p1');
+  const el2 = document.getElementById('prev-p2');
+  const el3 = document.getElementById('prev-p3');
+  const elT = document.getElementById('prev-total');
+  const elW = document.getElementById('perc-warning');
+
+  if (el1) el1.textContent = fmt(total * p1 / 100);
+  if (el2) el2.textContent = fmt(total * p2 / 100);
+  if (el3) el3.textContent = fmt(total * p3 / 100);
+  if (elT) elT.textContent = fmt(total);
+  if (elW) elW.style.display = Math.abs((p1+p2+p3) - 100) > 0.01 ? 'block' : 'none';
 }
 
 function copySiteLink() {
