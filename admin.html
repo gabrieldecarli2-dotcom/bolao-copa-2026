@@ -448,23 +448,28 @@
     <button class="modal-close" onclick="closeModal('modal-jogo')">✕</button>
     <div class="modal-title" id="modal-jogo-title">✏️ Atualizar Jogo</div>
     <input type="hidden" id="modal-jogo-id">
-    <div style="display:flex;gap:16px;margin-bottom:20px;align-items:center;background:rgba(255,255,255,0.04);border-radius:12px;padding:14px">
+    <div style="display:flex;gap:12px;margin-bottom:16px;align-items:center;background:rgba(255,255,255,0.04);border-radius:12px;padding:14px">
       <div style="text-align:center;flex:1">
-        <div style="font-size:32px" id="mj-flag1">🏳️</div>
-        <div style="font-family:'Barlow Condensed';font-weight:700;font-size:15px;text-transform:uppercase" id="mj-time1">Time 1</div>
+        <div style="font-size:28px;margin-bottom:4px" id="mj-flag1">🏳️</div>
+        <input type="text" id="mj-time1-input" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-family:'Barlow Condensed';font-size:14px;font-weight:700;text-transform:uppercase;text-align:center;padding:6px 8px;outline:none" placeholder="Time 1">
+        <input type="text" id="mj-flag1-input" style="width:60px;margin-top:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:var(--text);font-size:18px;text-align:center;padding:4px;outline:none" placeholder="🏳️">
       </div>
-      <div style="text-align:center">
-        <div style="font-family:'Bebas Neue';font-size:14px;color:var(--text3)">PLACAR</div>
-        <div style="display:flex;align-items:center;gap:8px;margin-top:6px">
+      <div style="text-align:center;flex-shrink:0">
+        <div style="font-family:'Bebas Neue';font-size:13px;color:var(--text3);margin-bottom:6px">PLACAR</div>
+        <div style="display:flex;align-items:center;gap:6px">
           <input class="score-input" type="number" min="0" max="30" id="mj-g1" placeholder="0">
           <span class="score-x">×</span>
           <input class="score-input" type="number" min="0" max="30" id="mj-g2" placeholder="0">
         </div>
       </div>
       <div style="text-align:center;flex:1">
-        <div style="font-size:32px" id="mj-flag2">🏳️</div>
-        <div style="font-family:'Barlow Condensed';font-weight:700;font-size:15px;text-transform:uppercase" id="mj-time2">Time 2</div>
+        <div style="font-size:28px;margin-bottom:4px" id="mj-flag2">🏳️</div>
+        <input type="text" id="mj-time2-input" style="width:100%;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.15);border-radius:8px;color:var(--text);font-family:'Barlow Condensed';font-size:14px;font-weight:700;text-transform:uppercase;text-align:center;padding:6px 8px;outline:none" placeholder="Time 2">
+        <input type="text" id="mj-flag2-input" style="width:60px;margin-top:4px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:6px;color:var(--text);font-size:18px;text-align:center;padding:4px;outline:none" placeholder="🏳️">
       </div>
+    </div>
+    <div style="font-size:11px;color:var(--text3);margin-bottom:14px;padding:8px 12px;background:rgba(255,255,255,0.03);border-radius:8px">
+      💡 Você pode editar o nome e bandeira das seleções ainda não definidas (ex: "1A", "Vencedor Quartas 1")
     </div>
     <div class="form-row">
       <label>Status do Jogo</label>
@@ -870,8 +875,10 @@ async function openEditJogo(id) {
   document.getElementById('modal-jogo-title').textContent = `✏️ ${j.time1} × ${j.time2}`;
   document.getElementById('mj-flag1').textContent = j.flag1||'🏳️';
   document.getElementById('mj-flag2').textContent = j.flag2||'🏳️';
-  document.getElementById('mj-time1').textContent = j.time1;
-  document.getElementById('mj-time2').textContent = j.time2;
+  document.getElementById('mj-time1-input').value = j.time1||'';
+  document.getElementById('mj-time2-input').value = j.time2||'';
+  document.getElementById('mj-flag1-input').value = j.flag1||'🏳️';
+  document.getElementById('mj-flag2-input').value = j.flag2||'🏳️';
   document.getElementById('mj-g1').value = j.gol_time1??'';
   document.getElementById('mj-g2').value = j.gol_time2??'';
   document.getElementById('mj-status').value = j.status;
@@ -884,9 +891,18 @@ async function saveJogo() {
   const g2 = parseInt(document.getElementById('mj-g2').value);
   const status = document.getElementById('mj-status').value;
 
+  const time1 = document.getElementById('mj-time1-input').value.trim();
+  const time2 = document.getElementById('mj-time2-input').value.trim();
+  const flag1 = document.getElementById('mj-flag1-input').value.trim();
+  const flag2 = document.getElementById('mj-flag2-input').value.trim();
+
   const update = { status };
   if (!isNaN(g1)) update.gol_time1 = g1;
   if (!isNaN(g2)) update.gol_time2 = g2;
+  if (time1) update.time1 = time1;
+  if (time2) update.time2 = time2;
+  if (flag1) update.flag1 = flag1;
+  if (flag2) update.flag2 = flag2;
 
   const { error } = await db.from('jogos').update(update).eq('id', id);
   if (error) { showToast('Erro: '+error.message, true); return; }
@@ -901,6 +917,10 @@ async function saveJogo() {
 
   closeModal('modal-jogo');
   loadJogos();
+  // Se estiver no dashboard, recarrega também
+  if (document.getElementById('sec-dashboard').classList.contains('active')) {
+    loadDashboard();
+  }
 }
 
 async function calcularPontos(jogoId, gol1, gol2) {
