@@ -333,9 +333,16 @@
 
     <!-- ── JOGOS ── -->
     <div class="section" id="sec-jogos">
-      <div class="page-header">
-        <h1>⚽ Gerenciar Jogos</h1>
-        <p>Atualize placares e encerre jogos para calcular pontos automaticamente</p>
+      <div class="page-header" style="display:flex;align-items:flex-start;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+        <div>
+          <h1>⚽ Gerenciar Jogos</h1>
+          <p>Atualize placares e encerre jogos para calcular pontos automaticamente</p>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="openAddJogo()">➕ Adicionar Jogo</button>
+          <button class="btn btn-neutral" onclick="openImportJogos()">📋 Importar em Massa</button>
+          <button class="btn btn-danger" onclick="limparJogos()">🗑️ Limpar Todos</button>
+        </div>
       </div>
       <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
         <div>
@@ -384,11 +391,7 @@
         </div>
       </div>
       <div id="jogos-list"><div class="loading"><div class="spinner"></div></div></div>
-      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
-        <button class="btn btn-primary" onclick="openAddJogo()">➕ Adicionar Jogo</button>
-        <button class="btn btn-neutral" onclick="openImportJogos()">📋 Importar Jogos em Massa</button>
-        <button class="btn btn-danger" onclick="limparJogos()">🗑️ Limpar Todos os Jogos</button>
-      </div>
+
     </div>
 
     <!-- ── PALPITES ── -->
