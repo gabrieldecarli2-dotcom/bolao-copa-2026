@@ -201,14 +201,7 @@
   .toast.error { border-color:rgba(239,83,80,0.4); color:var(--red); }
 
   /* ── CONFIG BOX ── */
-  .config-banner { background:rgba(245,200,66,0.08); border:1px solid rgba(245,200,66,0.3); border-radius:14px; padding:20px 24px; margin-bottom:28px; }
-  .config-banner h3 { font-family:'Barlow Condensed'; font-size:16px; font-weight:700; letter-spacing:1.5px; text-transform:uppercase; color:var(--gold); margin-bottom:12px; }
-  .config-row { display:flex; gap:10px; align-items:center; margin-bottom:10px; flex-wrap:wrap; }
-  .config-input { flex:1; min-width:200px; padding:10px 14px; background:rgba(255,255,255,0.05); border:1px solid rgba(255,255,255,0.1); border-radius:8px; color:var(--text); font-size:13px; font-family:'Barlow'; outline:none; }
-  .config-input:focus { border-color:rgba(245,200,66,0.4); }
-  .config-label { font-size:12px; color:var(--text3); font-weight:600; letter-spacing:1px; text-transform:uppercase; min-width:100px; }
-  .btn-config { padding:10px 20px; background:var(--gold); color:var(--dark); border:none; border-radius:8px; font-family:'Barlow Condensed'; font-size:14px; font-weight:900; letter-spacing:1px; text-transform:uppercase; cursor:pointer; white-space:nowrap; transition:all 0.2s; }
-  .btn-config:hover { opacity:0.85; }
+
 
   @keyframes fadeUp { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:translateY(0)} }
   @keyframes pulse { 0%,100%{opacity:1} 50%{opacity:0.5} }
@@ -442,17 +435,7 @@ let currentProfile = null;
 let allJogos = [];
 let allPalpites = [];
 
-const STORAGE_KEY = 'bolao_supabase_config';
-
-function saveConfig() {
-  const url = document.getElementById('cfg-url').value.trim();
-  const key = document.getElementById('cfg-key').value.trim();
-  if (!url || !key) { showToast('Preencha a URL e a chave ⚠️', true); return; }
-  if (!url.includes('supabase.co')) { showToast('URL do Supabase inválida ⚠️', true); return; }
-  localStorage.setItem(STORAGE_KEY, JSON.stringify({ url, key }));
-  initDB(url, key);
-  document.getElementById('config-bar').style.display = 'none';
-}
+// credenciais carregadas do servidor via /api/get-config
 
 function initDB(url, key) {
   try {
@@ -475,19 +458,32 @@ function initDB(url, key) {
   }
 }
 
-// Ao carregar: verifica se já tem config salva
+// Ao carregar: busca credenciais do servidor automaticamente
 window.addEventListener('load', () => {
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      const { url, key } = JSON.parse(saved);
-      document.getElementById('cfg-url').value = url;
-      document.getElementById('cfg-key').value = key;
-      document.getElementById('config-bar').style.display = 'none';
-      initDB(url, key);
-    } catch(e) { /* ignore, show config page */ }
-  }
+  initFromServer();
 });
+
+async function initFromServer() {
+  try {
+    const res = await fetch('/api/get-config', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret: '__PUBLIC_SITE__' })
+    });
+    if (!res.ok) throw new Error('Servidor retornou erro ' + res.status);
+    const { url, key } = await res.json();
+    if (!url || !key) throw new Error('Credenciais inválidas');
+    initDB(url, key);
+  } catch(e) {
+    showLoadError('Não foi possível conectar. Recarregue a página.');
+    console.error('initFromServer error:', e);
+  }
+}
+
+function showLoadError(msg) {
+  const el = document.getElementById('load-error');
+  if (el) { el.textContent = '❌ ' + msg; el.style.display = 'block'; }
+}
 
 async function showAuthPage() {
   // Verifica se já tem sessão ativa
