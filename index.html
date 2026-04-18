@@ -461,7 +461,7 @@
 // ════════════════════════════════════════════════════
 // SUPABASE INIT
 // ════════════════════════════════════════════════════
-let supabase = null;
+let db = null; // Supabase client
 let currentUser = null;
 let currentProfile = null;
 let allJogos = [];
@@ -475,11 +475,11 @@ function saveConfig() {
   if (!url || !key) { showToast('Preencha a URL e a chave ⚠️', true); return; }
   if (!url.includes('supabase.co')) { showToast('URL do Supabase inválida ⚠️', true); return; }
   localStorage.setItem(STORAGE_KEY, JSON.stringify({ url, key }));
-  initSupabase(url, key);
+  initDB(url, key);
   document.getElementById('config-bar').style.display = 'none';
 }
 
-function initSupabase(url, key) {
+function initDB(url, key) {
   try {
     const client = window.supabase || window.Supabase;
     if (!client) { showToast('Erro: biblioteca Supabase não carregou. Recarregue a página.', true); return; }
@@ -500,14 +500,14 @@ window.addEventListener('load', () => {
       document.getElementById('cfg-url').value = url;
       document.getElementById('cfg-key').value = key;
       document.getElementById('config-bar').style.display = 'none';
-      initSupabase(url, key);
+      initDB(url, key);
     } catch(e) { /* ignore, show config page */ }
   }
 });
 
 async function showAuthPage() {
   // Verifica se já tem sessão ativa
-  const { data: { session } } = await supabase.auth.getSession();
+  const { data: { session } } = await db.auth.getSession();
   if (session) {
     currentUser = session.user;
     await loadProfile();
@@ -546,7 +546,7 @@ async function doLogin() {
   const btn = document.getElementById('btn-login');
   btn.disabled = true; btn.textContent = 'Entrando...';
   
-  const { data, error } = await supabase.auth.signInWithPassword({ email, password: pass });
+  const { data, error } = await db.auth.signInWithPassword({ email, password: pass });
   
   btn.disabled = false; btn.textContent = '⚽ Entrar no Bolão';
   
@@ -566,7 +566,7 @@ async function doRegister() {
   const btn = document.getElementById('btn-register');
   btn.disabled = true; btn.textContent = 'Cadastrando...';
   
-  const { data, error } = await supabase.auth.signUp({
+  const { data, error } = await db.auth.signUp({
     email, password: pass,
     options: { data: { nome } }
   });
@@ -581,7 +581,7 @@ async function doRegister() {
 }
 
 async function doLogout() {
-  await supabase.auth.signOut();
+  await db.auth.signOut();
   currentUser = null; currentProfile = null;
   document.getElementById('main-nav').style.display = 'none';
   showPage('page-auth');
@@ -600,7 +600,7 @@ async function loadProfile() {
 }
 
 async function loadPrizeDisplay() {
-  const { count } = await supabase.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true);
+  const { count } = await db.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true);
   const total = (count || 0) * 20;
   const el = document.getElementById('prize-display');
   if (el) el.textContent = `R$ ${total.toLocaleString('pt-BR')}`;
@@ -640,7 +640,7 @@ function goPage(page) {
 async function loadHome() {
   await Promise.all([loadHomeGames(), loadHomeRanking(), loadPrizes()]);
   // Stats do usuário
-  const { data: ranking } = await supabase.from('usuarios').select('id,pontos').order('pontos',{ascending:false});
+  const { data: ranking } = await db.from('usuarios').select('id,pontos').order('pontos',{ascending:false});
   if (ranking) {
     const myPos = ranking.findIndex(u=>u.id===currentUser.id) + 1;
     document.getElementById('stat-pts').textContent = currentProfile?.pontos || 0;
@@ -652,20 +652,20 @@ async function loadHome() {
 }
 
 async function loadHomeGames() {
-  const { data: jogos } = await supabase.from('jogos').select('*').in('status',['aberto','ao_vivo']).order('data_hora').limit(4);
+  const { data: jogos } = await db.from('jogos').select('*').in('status',['aberto','ao_vivo']).order('data_hora').limit(4);
   if (!jogos) return;
-  const { data: palpites } = await supabase.from('palpites').select('*').eq('usuario_id', currentUser.id);
+  const { data: palpites } = await db.from('palpites').select('*').eq('usuario_id', currentUser.id);
   allPalpites = palpites || [];
   document.getElementById('home-games').innerHTML = jogos.length ? jogos.map(j=>renderGameCard(j)).join('') : '<div class="loading">Nenhum jogo aberto no momento</div>';
 }
 
 async function loadHomeRanking() {
-  const { data } = await supabase.from('usuarios').select('id,nome,avatar_iniciais,pontos,palpites_exatos,palpites_certos').order('pontos',{ascending:false}).limit(5);
+  const { data } = await db.from('usuarios').select('id,nome,avatar_iniciais,pontos,palpites_exatos,palpites_certos').order('pontos',{ascending:false}).limit(5);
   renderRankingRows('home-ranking', data || []);
 }
 
 async function loadPrizes() {
-  const { count } = await supabase.from('usuarios').select('*',{count:'exact',head:true}).eq('pago',true);
+  const { count } = await db.from('usuarios').select('*',{count:'exact',head:true}).eq('pago',true);
   const total = (count||0)*20;
   const fmt = v => `R$ ${v.toLocaleString('pt-BR')}`;
   document.getElementById('prize1').textContent = fmt(Math.floor(total*0.6));
@@ -678,10 +678,10 @@ async function loadPrizes() {
 // JOGOS
 // ════════════════════════════════════════════════════
 async function loadJogos(filter='todos') {
-  let query = supabase.from('jogos').select('*').order('data_hora');
+  let query = db.from('jogos').select('*').order('data_hora');
   if(filter!=='todos') query = query.eq('status',filter);
   const { data: jogos } = await query;
-  const { data: palpites } = await supabase.from('palpites').select('*').eq('usuario_id',currentUser.id);
+  const { data: palpites } = await db.from('palpites').select('*').eq('usuario_id',currentUser.id);
   allJogos = jogos || [];
   allPalpites = palpites || [];
   document.getElementById('all-games').innerHTML = allJogos.length ? allJogos.map(j=>renderGameCard(j)).join('') : '<div class="loading">Nenhum jogo nesta categoria</div>';
@@ -760,22 +760,22 @@ async function savePalpite(jogoId) {
   
   let error;
   if (existing) {
-    ({ error } = await supabase.from('palpites').update({palpite_time1:v1,palpite_time2:v2,updated_at:new Date().toISOString()}).eq('id',existing.id));
+    ({ error } = await db.from('palpites').update({palpite_time1:v1,palpite_time2:v2,updated_at:new Date().toISOString()}).eq('id',existing.id));
   } else {
-    ({ error } = await supabase.from('palpites').insert(payload));
+    ({ error } = await db.from('palpites').insert(payload));
   }
   
   if (error) { showToast('Erro ao salvar palpite: '+error.message, true); return; }
   showToast(`Palpite ${v1}×${v2} salvo! ✅`);
   
   // Recarrega palpites
-  const { data } = await supabase.from('palpites').select('*').eq('usuario_id',currentUser.id);
+  const { data } = await db.from('palpites').select('*').eq('usuario_id',currentUser.id);
   allPalpites = data || [];
   // Re-renderiza o card
   const page = document.getElementById('all-games').children.length ? 'all-games' : 'home-games';
   const cards = document.getElementById(page);
   if (cards) {
-    const jogo = allJogos.find(j=>j.id===jogoId) || (await supabase.from('jogos').select('*').eq('id',jogoId).single()).data;
+    const jogo = allJogos.find(j=>j.id===jogoId) || (await db.from('jogos').select('*').eq('id',jogoId).single()).data;
     if (jogo) {
       const newCard = document.createElement('div');
       newCard.innerHTML = renderGameCard(jogo);
@@ -790,7 +790,7 @@ async function savePalpite(jogoId) {
 // RANKING
 // ════════════════════════════════════════════════════
 async function loadRanking() {
-  const { data } = await supabase.from('usuarios').select('id,nome,avatar_iniciais,pontos,palpites_exatos,palpites_certos').order('pontos',{ascending:false});
+  const { data } = await db.from('usuarios').select('id,nome,avatar_iniciais,pontos,palpites_exatos,palpites_certos').order('pontos',{ascending:false});
   renderRankingRows('full-ranking', data || []);
 }
 
