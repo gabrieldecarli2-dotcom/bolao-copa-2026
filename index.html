@@ -301,23 +301,67 @@
       <div class="form-group"><label>E-mail</label><input type="email" id="reg-email" placeholder="seu@email.com"></div>
       <div class="form-group"><label>Senha</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"></div>
 
-      <div class="payment-section">
-        <h3>💳 Taxa de Participação — R$ 20,00</h3>
-        <div class="payment-methods">
-          <div class="pay-method" onclick="selectPayment('pix',this)"><span class="icon">📱</span>PIX</div>
-          <div class="pay-method" onclick="selectPayment('cartao',this)"><span class="icon">💳</span>Cartão</div>
-        </div>
-        <div class="pix-box" id="pix-box">
-          <div class="pix-qr">📲</div>
-          <p style="font-size:12px;color:var(--text2);margin-bottom:10px">Escaneie o QR Code ou copie o código abaixo</p>
-          <div class="pix-code" id="pix-code-display">Configure o Mercado Pago para gerar PIX automático</div>
-          <button class="btn-copy" onclick="copiarPix()">📋 Copiar Código PIX</button>
-          <div class="pending-badge" style="margin-top:12px">⏳ Após pagar, clique em "Confirmar Cadastro"</div>
-        </div>
+      <div id="reg-error" style="display:none;color:var(--red);font-size:13px;margin:10px 0;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
+      <button class="btn-primary" id="btn-register" onclick="doRegister()" style="margin-top:8px">✅ Criar Conta e Pagar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ════ PAGAMENTO ════ -->
+<div id="page-pagamento" class="page">
+  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px">
+    <div style="width:100%;max-width:460px;background:rgba(23,32,23,0.95);border:1px solid rgba(245,200,66,0.2);border-radius:20px;padding:40px;animation:fadeUp 0.5s ease">
+      
+      <div id="pay-loading" style="text-align:center;padding:20px">
+        <div class="spinner" style="margin:0 auto 16px"></div>
+        <p style="color:var(--text3);font-size:14px">Gerando seu PIX...</p>
       </div>
 
-      <div id="reg-error" style="display:none;color:var(--red);font-size:13px;margin:10px 0;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
-      <button class="btn-primary" id="btn-register" onclick="doRegister()" style="margin-top:16px">✅ Confirmar Cadastro</button>
+      <div id="pay-content" style="display:none">
+        <div style="text-align:center;margin-bottom:24px">
+          <div style="font-size:36px;margin-bottom:8px">⚽</div>
+          <h2 style="font-family:'Bebas Neue';font-size:28px;letter-spacing:2px;color:var(--gold)">PAGAR TAXA</h2>
+          <p style="color:var(--text2);font-size:13px;margin-top:4px">Bolão Copa 2026 — Participação</p>
+        </div>
+
+        <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:20px;text-align:center;margin-bottom:20px">
+          <p style="font-size:12px;color:var(--text3);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase">Valor a pagar</p>
+          <div style="font-family:'Bebas Neue';font-size:48px;color:var(--gold);line-height:1" id="pay-valor">R$ 20</div>
+        </div>
+
+        <!-- QR Code -->
+        <div style="text-align:center;margin-bottom:16px">
+          <img id="pix-qr-img" src="" alt="QR Code PIX" style="width:180px;height:180px;border-radius:12px;border:3px solid white;display:none">
+          <div id="pix-qr-placeholder" style="width:180px;height:180px;background:white;border-radius:12px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:64px">📲</div>
+        </div>
+
+        <p style="font-size:12px;color:var(--text2);text-align:center;margin-bottom:12px">Ou copie o código PIX abaixo:</p>
+        <div id="pix-code-display" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:12px 14px;font-size:11px;font-family:monospace;color:var(--text2);word-break:break-all;margin-bottom:12px;max-height:80px;overflow:auto"></div>
+        
+        <button onclick="copiarPix()" style="width:100%;padding:13px;background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.3);border-radius:10px;color:var(--gold);font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:10px">📋 Copiar Código PIX</button>
+
+        <div style="background:rgba(66,165,245,0.1);border:1px solid rgba(66,165,245,0.2);border-radius:10px;padding:12px;text-align:center;font-size:13px;color:var(--blue);margin-bottom:16px">
+          ⏳ Após pagar, sua participação será confirmada automaticamente em até 1 minuto.
+        </div>
+
+        <button onclick="verificarPagamento()" id="btn-verificar" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;color:var(--dark);font-family:'Barlow Condensed';font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">✅ Já Paguei — Verificar</button>
+        
+        <button onclick="doLogout()" style="width:100%;padding:11px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;margin-top:8px">Sair e pagar depois</button>
+      </div>
+
+      <div id="pay-success" style="display:none;text-align:center;padding:20px">
+        <div style="font-size:64px;margin-bottom:16px">🎉</div>
+        <h2 style="font-family:'Bebas Neue';font-size:32px;color:var(--gold);letter-spacing:2px">PAGAMENTO CONFIRMADO!</h2>
+        <p style="color:var(--text2);margin:12px 0">Bem-vindo ao Bolão Copa 2026!</p>
+        <button onclick="enterApp()" style="margin-top:16px;padding:14px 32px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:var(--dark);font-family:'Barlow Condensed';font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer">⚽ Entrar no Bolão</button>
+      </div>
+
+      <div id="pay-error" style="display:none;text-align:center;padding:20px">
+        <div style="font-size:48px;margin-bottom:12px">⚠️</div>
+        <p style="color:var(--red);font-size:14px" id="pay-error-msg">Erro ao gerar PIX</p>
+        <button onclick="gerarPix()" style="margin-top:16px;padding:12px 24px;background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.3);border-radius:10px;color:var(--gold);font-family:'Barlow Condensed';font-size:14px;font-weight:700;cursor:pointer">🔄 Tentar novamente</button>
+      </div>
+
     </div>
   </div>
 </div>
@@ -621,7 +665,13 @@ async function doLogin() {
   if (error) { showError('login-error', 'E-mail ou senha incorretos'); return; }
   currentUser = data.user;
   await loadProfile();
-  enterApp();
+  // Verifica se pagou
+  if (currentProfile?.pago) {
+    enterApp();
+  } else {
+    showPage('page-pagamento');
+    gerarPix();
+  }
 }
 
 async function doRegister() {
@@ -648,9 +698,24 @@ async function doRegister() {
     showError('reg-error', msg); return;
   }
   
-  showToast('Cadastro realizado! Confirme seu e-mail se necessário. 🎉');
-  // Tenta login direto
-  setTimeout(() => switchAuthTab('login'), 2000);
+  showToast('Conta criada! Gerando seu PIX... 🎉');
+  // Faz login automático e redireciona para pagamento
+  setTimeout(async () => {
+    const { data: loginData, error: loginErr } = await db.auth.signInWithPassword({ email, password: pass });
+    if (!loginErr && loginData.user) {
+      currentUser = loginData.user;
+      await loadProfile();
+      // Se já pagou, entra direto
+      if (currentProfile?.pago) {
+        enterApp();
+      } else {
+        showPage('page-pagamento');
+        gerarPix();
+      }
+    } else {
+      switchAuthTab('login');
+    }
+  }, 1000);
 }
 
 async function doLogout() {
@@ -663,6 +728,71 @@ async function doLogout() {
   const authPage = document.getElementById('page-auth');
   authPage.style.display = 'flex';
   authPage.classList.add('active');
+}
+
+// ════════════════════════════════════════════════════
+// PAGAMENTO PIX
+// ════════════════════════════════════════════════════
+let pixCodigoAtual = '';
+let verificarInterval = null;
+
+async function gerarPix() {
+  document.getElementById('pay-loading').style.display = 'block';
+  document.getElementById('pay-content').style.display = 'none';
+  document.getElementById('pay-error').style.display = 'none';
+
+  try {
+    const res = await fetch('/api/criar-pix', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario_id: currentUser.id,
+        email: currentUser.email,
+        nome: currentProfile?.nome || ''
+      })
+    });
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error || 'Erro ao gerar PIX');
+
+    pixCodigoAtual = data.pix_copia_cola || '';
+    document.getElementById('pix-code-display').textContent = pixCodigoAtual;
+    document.getElementById('pay-valor').textContent = `R$ ${data.valor}`;
+
+    // QR Code
+    if (data.pix_qr_base64) {
+      const img = document.getElementById('pix-qr-img');
+      img.src = `data:image/png;base64,${data.pix_qr_base64}`;
+      img.style.display = 'block';
+      document.getElementById('pix-qr-placeholder').style.display = 'none';
+    }
+
+    document.getElementById('pay-loading').style.display = 'none';
+    document.getElementById('pay-content').style.display = 'block';
+
+    // Verifica automaticamente a cada 10s
+    verificarInterval = setInterval(verificarPagamento, 10000);
+
+  } catch(e) {
+    document.getElementById('pay-loading').style.display = 'none';
+    document.getElementById('pay-error').style.display = 'block';
+    document.getElementById('pay-error-msg').textContent = e.message;
+  }
+}
+
+async function verificarPagamento() {
+  const { data } = await db.from('usuarios').select('pago').eq('id', currentUser.id).single();
+  if (data?.pago) {
+    clearInterval(verificarInterval);
+    currentProfile.pago = true;
+    document.getElementById('pay-content').style.display = 'none';
+    document.getElementById('pay-success').style.display = 'block';
+  }
+}
+
+function copiarPix() {
+  if (pixCodigoAtual) navigator.clipboard?.writeText(pixCodigoAtual);
+  showToast('Código PIX copiado! ✅');
 }
 
 // ════════════════════════════════════════════════════
@@ -1045,6 +1175,71 @@ function showError(id, msg) {
   const el = document.getElementById(id);
   if (el) { el.textContent = msg; el.style.display = 'block'; }
 }
+// ════════════════════════════════════════════════════
+// PAGAMENTO PIX
+// ════════════════════════════════════════════════════
+let pixCodigoAtual = '';
+let verificarInterval = null;
+
+async function gerarPix() {
+  document.getElementById('pay-loading').style.display = 'block';
+  document.getElementById('pay-content').style.display = 'none';
+  document.getElementById('pay-error').style.display = 'none';
+
+  try {
+    const res = await fetch('/api/criar-pix', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        usuario_id: currentUser.id,
+        email: currentUser.email,
+        nome: currentProfile?.nome || ''
+      })
+    });
+    const data = await res.json();
+
+    if (!data.ok) throw new Error(data.error || 'Erro ao gerar PIX');
+
+    pixCodigoAtual = data.pix_copia_cola || '';
+    document.getElementById('pix-code-display').textContent = pixCodigoAtual;
+    document.getElementById('pay-valor').textContent = `R$ ${data.valor}`;
+
+    // QR Code
+    if (data.pix_qr_base64) {
+      const img = document.getElementById('pix-qr-img');
+      img.src = `data:image/png;base64,${data.pix_qr_base64}`;
+      img.style.display = 'block';
+      document.getElementById('pix-qr-placeholder').style.display = 'none';
+    }
+
+    document.getElementById('pay-loading').style.display = 'none';
+    document.getElementById('pay-content').style.display = 'block';
+
+    // Verifica automaticamente a cada 10s
+    verificarInterval = setInterval(verificarPagamento, 10000);
+
+  } catch(e) {
+    document.getElementById('pay-loading').style.display = 'none';
+    document.getElementById('pay-error').style.display = 'block';
+    document.getElementById('pay-error-msg').textContent = e.message;
+  }
+}
+
+async function verificarPagamento() {
+  const { data } = await db.from('usuarios').select('pago').eq('id', currentUser.id).single();
+  if (data?.pago) {
+    clearInterval(verificarInterval);
+    currentProfile.pago = true;
+    document.getElementById('pay-content').style.display = 'none';
+    document.getElementById('pay-success').style.display = 'block';
+  }
+}
+
+function copiarPix() {
+  if (pixCodigoAtual) navigator.clipboard?.writeText(pixCodigoAtual);
+  showToast('Código PIX copiado! ✅');
+}
+
 // ════════════════════════════════════════════════════
 // PERFIL
 // ════════════════════════════════════════════════════
