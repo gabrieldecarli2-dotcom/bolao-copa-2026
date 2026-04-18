@@ -343,7 +343,11 @@
         <button class="filter-tab" onclick="filterJogos('encerrado',this)">Encerrados</button>
       </div>
       <div id="jogos-list"><div class="loading"><div class="spinner"></div></div></div>
-      <button class="btn btn-primary" onclick="openAddJogo()" style="margin-top:8px">➕ Adicionar Jogo</button>
+      <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
+        <button class="btn btn-primary" onclick="openAddJogo()">➕ Adicionar Jogo</button>
+        <button class="btn btn-neutral" onclick="openImportJogos()">📋 Importar Jogos em Massa</button>
+        <button class="btn btn-danger" onclick="limparJogos()">🗑️ Limpar Todos os Jogos</button>
+      </div>
     </div>
 
     <!-- ── RANKING ── -->
@@ -467,6 +471,29 @@
     <div style="display:flex;gap:10px">
       <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="saveJogo()">✅ Salvar Alterações</button>
       <button class="btn btn-neutral" onclick="closeModal('modal-jogo')">Cancelar</button>
+    </div>
+  </div>
+</div>
+
+<!-- ── MODAL IMPORTAR JOGOS ── -->
+<div class="modal-overlay" id="modal-import">
+  <div class="modal-box" style="max-width:640px">
+    <button class="modal-close" onclick="closeModal('modal-import')">✕</button>
+    <div class="modal-title">📋 Importar Jogos em Massa</div>
+    <p style="font-size:13px;color:var(--text2);margin-bottom:16px">
+      Cole abaixo os jogos no formato: <code style="background:rgba(255,255,255,0.08);padding:2px 6px;border-radius:4px;font-size:12px">Time1 | Flag1 | Time2 | Flag2 | Grupo | Data (DD/MM/AAAA) | Hora (HH:MM)</code>
+    </p>
+    <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:10px;padding:12px;margin-bottom:14px;font-size:12px;color:var(--text3)">
+      <strong style="color:var(--text2)">Exemplo:</strong><br>
+      Brasil | 🇧🇷 | Croácia | 🇭🇷 | Grupo C | 13/06/2026 | 15:00<br>
+      Argentina | 🇦🇷 | Polônia | 🇵🇱 | Grupo A | 13/06/2026 | 18:00
+    </div>
+    <textarea id="import-textarea" style="width:100%;height:220px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow',monospace;font-size:13px;padding:12px;outline:none;resize:vertical;line-height:1.8" placeholder="Brasil | 🇧🇷 | Croácia | 🇭🇷 | Grupo C | 13/06/2026 | 15:00&#10;Argentina | 🇦🇷 | Polônia | 🇵🇱 | Grupo A | 13/06/2026 | 18:00"></textarea>
+    <div id="import-result" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:13px"></div>
+    <div style="display:flex;gap:10px;margin-top:14px">
+      <button class="btn btn-primary" style="flex:1;justify-content:center" onclick="importarJogos()">📥 Importar Jogos</button>
+      <button class="btn btn-neutral" onclick="preencherExemplo()">📝 Preencher com Copa 2026</button>
+      <button class="btn btn-neutral" onclick="closeModal('modal-import')">Cancelar</button>
     </div>
   </div>
 </div>
@@ -1075,6 +1102,97 @@ async function syncJogos() {
 
   btn.disabled = false;
   btn.textContent = '⚽ Sincronizar Jogos Agora';
+}
+
+function openImportJogos() {
+  document.getElementById('modal-import').classList.add('open');
+  document.getElementById('import-result').style.display = 'none';
+}
+
+function preencherExemplo() {
+  document.getElementById('import-textarea').value = `Brasil | 🇧🇷 | Croácia | 🇭🇷 | Grupo C | 13/06/2026 | 15:00
+Argentina | 🇦🇷 | México | 🇲🇽 | Grupo A | 13/06/2026 | 18:00
+Portugal | 🇵🇹 | Espanha | 🇪🇸 | Grupo B | 14/06/2026 | 12:00
+França | 🇫🇷 | Bélgica | 🇧🇪 | Grupo D | 14/06/2026 | 15:00
+Alemanha | 🇩🇪 | Japão | 🇯🇵 | Grupo E | 14/06/2026 | 18:00
+Inglaterra | 🏴󠁧󠁢󠁥󠁮󠁧󠁿 | Senegal | 🇸🇳 | Grupo F | 15/06/2026 | 12:00
+Holanda | 🇳🇱 | Marrocos | 🇲🇦 | Grupo G | 15/06/2026 | 15:00
+EUA | 🇺🇸 | Irã | 🇮🇷 | Grupo H | 15/06/2026 | 18:00
+Uruguai | 🇺🇾 | Coreia do Sul | 🇰🇷 | Grupo A | 16/06/2026 | 12:00
+Polônia | 🇵🇱 | Arábia Saudita | 🇸🇦 | Grupo B | 16/06/2026 | 15:00
+Austrália | 🇦🇺 | Nigéria | 🇳🇬 | Grupo C | 16/06/2026 | 18:00
+Canadá | 🇨🇦 | Suíça | 🇨🇭 | Grupo D | 17/06/2026 | 12:00
+Sérvia | 🇷🇸 | Colômbia | 🇨🇴 | Grupo E | 17/06/2026 | 15:00
+México | 🇲🇽 | Polônia | 🇵🇱 | Grupo A | 17/06/2026 | 18:00
+Brasil | 🇧🇷 | Costa Rica | 🇨🇷 | Grupo C | 18/06/2026 | 12:00
+Argentina | 🇦🇷 | Islândia | 🇮🇸 | Grupo A | 18/06/2026 | 15:00
+Portugal | 🇵🇹 | Marrocos | 🇲🇦 | Grupo B | 18/06/2026 | 18:00
+Alemanha | 🇩🇪 | Costa Rica | 🇨🇷 | Grupo E | 19/06/2026 | 12:00
+França | 🇫🇷 | Paraguai | 🇵🇾 | Grupo D | 19/06/2026 | 15:00
+Espanha | 🇪🇸 | Japão | 🇯🇵 | Grupo B | 19/06/2026 | 18:00`;
+}
+
+async function importarJogos() {
+  const textarea = document.getElementById('import-textarea').value.trim();
+  const resultEl = document.getElementById('import-result');
+  if (!textarea) { 
+    resultEl.style.cssText = 'display:block;padding:12px;border-radius:8px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3);font-size:13px';
+    resultEl.textContent = '⚠️ Cole os jogos antes de importar'; 
+    return; 
+  }
+
+  const linhas = textarea.split('\n').map(l => l.trim()).filter(l => l.length > 0);
+  let ok = 0, erros = 0, erroDetails = [];
+
+  for (const linha of linhas) {
+    const partes = linha.split('|').map(p => p.trim());
+    if (partes.length < 7) { 
+      erros++; 
+      erroDetails.push(`Linha inválida: "${linha}"`);
+      continue; 
+    }
+
+    const [time1, flag1, time2, flag2, grupo, data, hora] = partes;
+
+    // Converte DD/MM/AAAA HH:MM para ISO
+    try {
+      const [dia, mes, ano] = data.split('/');
+      const [h, m] = hora.split(':');
+      const dataISO = new Date(parseInt(ano), parseInt(mes)-1, parseInt(dia), parseInt(h), parseInt(m));
+      
+      if (isNaN(dataISO.getTime())) throw new Error('Data inválida');
+
+      const { error } = await db.from('jogos').insert({
+        time1, flag1, time2, flag2, grupo,
+        data_hora: dataISO.toISOString(),
+        status: 'aberto'
+      });
+
+      if (error) { erros++; erroDetails.push(error.message); }
+      else ok++;
+    } catch(e) {
+      erros++;
+      erroDetails.push(`Erro em "${linha}": ${e.message}`);
+    }
+  }
+
+  if (ok > 0) {
+    resultEl.style.cssText = 'display:block;padding:12px;border-radius:8px;background:rgba(56,142,60,0.15);color:#81C784;border:1px solid rgba(56,142,60,0.3);font-size:13px';
+    resultEl.innerHTML = `✅ <strong>${ok} jogos importados com sucesso!</strong>${erros > 0 ? '<br>⚠️ '+erros+' erros: '+erroDetails.slice(0,3).join(', ') : ''}`;
+    setTimeout(() => { closeModal('modal-import'); loadJogos(); }, 2000);
+  } else {
+    resultEl.style.cssText = 'display:block;padding:12px;border-radius:8px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3);font-size:13px';
+    resultEl.innerHTML = `❌ Nenhum jogo importado. Erros:<br>${erroDetails.slice(0,5).join('<br>')}`;
+  }
+}
+
+async function limparJogos() {
+  if (!confirm('⚠️ Isso vai apagar TODOS os jogos e palpites! Tem certeza?')) return;
+  if (!confirm('Segunda confirmação: apagar tudo mesmo?')) return;
+  await db.from('palpites').delete().neq('id', 0);
+  await db.from('jogos').delete().neq('id', 0);
+  showToast('🗑️ Todos os jogos removidos');
+  loadJogos();
 }
 
 function showToast(msg, isError=false) {
