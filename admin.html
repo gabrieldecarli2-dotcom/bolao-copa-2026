@@ -382,23 +382,32 @@
         <p>Configurações gerais do bolão</p>
       </div>
       <div class="config-box">
-        <h2>💰 Prêmio e Taxas</h2>
-        <p>Defina como o prêmio é distribuído</p>
-        <div class="form-row">
-          <label>Taxa de participação (R$)</label>
-          <input class="form-input" id="cfg-taxa" type="number" value="20">
+        <h2>💰 Configuração de Prêmios</h2>
+        <p>Defina os valores exatos de cada prêmio. Esses valores aparecerão para os participantes.</p>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:12px">
+          <div class="form-row">
+            <label>💵 Taxa de participação (R$)</label>
+            <input class="form-input" id="cfg-taxa" type="number" value="20" min="0">
+          </div>
+          <div class="form-row">
+            <label>🥇 Prêmio 1º lugar (R$)</label>
+            <input class="form-input" id="cfg-prize1" type="number" placeholder="Ex: 500">
+          </div>
+          <div class="form-row">
+            <label>🥈 Prêmio 2º lugar (R$)</label>
+            <input class="form-input" id="cfg-prize2" type="number" placeholder="Ex: 200">
+          </div>
+          <div class="form-row">
+            <label>🥉 Prêmio 3º lugar (R$)</label>
+            <input class="form-input" id="cfg-prize3" type="number" placeholder="Ex: 100">
+          </div>
         </div>
         <div class="form-row">
-          <label>% para 1º lugar</label>
-          <input class="form-input" id="cfg-p1" type="number" value="60">
+          <label>📝 Observação sobre os prêmios (opcional)</label>
+          <input class="form-input" id="cfg-obs" type="text" placeholder="Ex: Prêmios sujeitos a alteração conforme número de participantes">
         </div>
-        <div class="form-row">
-          <label>% para 2º lugar</label>
-          <input class="form-input" id="cfg-p2" type="number" value="25">
-        </div>
-        <div class="form-row">
-          <label>% para 3º lugar</label>
-          <input class="form-input" id="cfg-p3" type="number" value="15">
+        <div style="background:rgba(245,200,66,0.07);border:1px solid rgba(245,200,66,0.2);border-radius:10px;padding:12px;margin-bottom:16px;font-size:13px;color:var(--text2)">
+          💡 Os valores são salvos no banco e aparecem automaticamente para os participantes na tela inicial.
         </div>
         <button class="btn btn-primary" onclick="saveConfigSettings()">💾 Salvar Configurações</button>
       </div>
@@ -849,9 +858,14 @@ function filterJogos(filter, btn) {
   loadJogos(filter);
 }
 
-function openEditJogo(id) {
-  const j = allJogos.find(x=>x.id===id);
-  if (!j) return;
+async function openEditJogo(id) {
+  // Busca o jogo direto do banco para garantir dados atualizados
+  let j = allJogos.find(x=>x.id===id);
+  if (!j) {
+    const { data } = await db.from('jogos').select('*').eq('id',id).single();
+    if (!data) { showToast('Jogo não encontrado ⚠️', true); return; }
+    j = data;
+  }
   document.getElementById('modal-jogo-id').value = id;
   document.getElementById('modal-jogo-title').textContent = `✏️ ${j.time1} × ${j.time2}`;
   document.getElementById('mj-flag1').textContent = j.flag1||'🏳️';
@@ -979,8 +993,45 @@ async function loadRanking() {
 // ════════════════════════════════════════════
 // CONFIG
 // ════════════════════════════════════════════
-function saveConfigSettings() {
-  showToast('✅ Configurações salvas!');
+async function saveConfigSettings() {
+  const taxa = document.getElementById('cfg-taxa').value;
+  const prize1 = document.getElementById('cfg-prize1').value;
+  const prize2 = document.getElementById('cfg-prize2').value;
+  const prize3 = document.getElementById('cfg-prize3').value;
+  const obs = document.getElementById('cfg-obs').value;
+
+  // Salva em uma tabela de config no Supabase
+  // Usa upsert para criar ou atualizar
+  const configs = [
+    { chave: 'taxa_participacao', valor: taxa },
+    { chave: 'premio_1', valor: prize1 },
+    { chave: 'premio_2', valor: prize2 },
+    { chave: 'premio_3', valor: prize3 },
+    { chave: 'premio_obs', valor: obs },
+  ];
+
+  let ok = true;
+  for (const c of configs) {
+    const { error } = await db.from('configuracoes').upsert(c, { onConflict: 'chave' });
+    if (error) { ok = false; showToast('Erro: ' + error.message, true); break; }
+  }
+  if (ok) showToast('✅ Configurações salvas com sucesso!');
+}
+
+async function loadConfigSettings() {
+  const { data } = await db.from('configuracoes').select('*');
+  if (data) {
+    data.forEach(c => {
+      if (c.chave === 'taxa_participacao') document.getElementById('cfg-taxa').value = c.valor;
+      if (c.chave === 'premio_1') document.getElementById('cfg-prize1').value = c.valor;
+      if (c.chave === 'premio_2') document.getElementById('cfg-prize2').value = c.valor;
+      if (c.chave === 'premio_3') document.getElementById('cfg-prize3').value = c.valor;
+      if (c.chave === 'premio_obs') document.getElementById('cfg-obs').value = c.valor;
+    });
+  }
+  const siteLink = location.href.replace('admin.html','index.html');
+  const el = document.getElementById('site-link');
+  if (el) el.value = siteLink;
 }
 
 function copySiteLink() {
