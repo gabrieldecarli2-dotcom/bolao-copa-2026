@@ -582,7 +582,12 @@ async function doRegister() {
   
   btn.disabled = false; btn.textContent = '✅ Confirmar Cadastro';
   
-  if (error) { showError('reg-error', error.message); return; }
+  if (error) {
+    let msg = error.message;
+    if (msg.includes('already registered')) msg = 'Este e-mail já está cadastrado. Tente fazer login.';
+    if (msg.includes('422') || msg.includes('weak')) msg = 'Senha fraca. Use pelo menos 6 caracteres com letras e números.';
+    showError('reg-error', msg); return;
+  }
   
   showToast('Cadastro realizado! Confirme seu e-mail se necessário. 🎉');
   // Tenta login direto
@@ -600,7 +605,7 @@ async function doLogout() {
 // PERFIL & DADOS
 // ════════════════════════════════════════════════════
 async function loadProfile() {
-  const { data } = await supabase
+  const { data } = await db
     .from('usuarios')
     .select('*')
     .eq('id', currentUser.id)
@@ -836,7 +841,7 @@ function renderRankingRows(containerId, users) {
 // MEUS PALPITES
 // ════════════════════════════════════════════════════
 async function loadMyBets() {
-  const { data: palpites } = await supabase
+  const { data: palpites } = await db
     .from('palpites')
     .select('*, jogo:jogos(*)')
     .eq('usuario_id', currentUser.id)
