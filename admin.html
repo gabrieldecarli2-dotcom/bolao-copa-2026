@@ -615,19 +615,44 @@ let allJogos = [];
 const STORAGE_KEY = 'bolao_supabase_config'; // usado apenas para campos manuais de fallback
 
 window.addEventListener('load', () => {
-  // Credenciais SEMPRE ocultas — só aparecem ao clicar no botão
-  const saved = localStorage.getItem(STORAGE_KEY);
-  if (saved) {
-    try {
-      const { url, key } = JSON.parse(saved);
-      document.getElementById('cfg-url').value = url;
-      document.getElementById('cfg-key').value = key;
-    } catch(e) {}
-  }
   const siteLink = location.href.replace('admin.html','index.html');
   const el = document.getElementById('site-link');
   if (el) el.value = siteLink;
+  checkExistingSession();
 });
+
+async function checkExistingSession() {
+  // Tenta restaurar sessão salva
+  const savedSecret = sessionStorage.getItem('admin_secret');
+  const savedConfig = localStorage.getItem(STORAGE_KEY);
+
+  if (!savedConfig) return; // Sem credenciais, mostra login normal
+
+  try {
+    const { url, key } = JSON.parse(savedConfig);
+    document.getElementById('cfg-url').value = url;
+    document.getElementById('cfg-key').value = key;
+
+    // Inicializa o Supabase
+    db = window.supabase.createClient(url, key);
+
+    // Verifica se ainda há sessão ativa no Supabase
+    const { data: { session } } = await db.auth.getSession();
+
+    if (session) {
+      // Sessão ainda válida — entra direto sem pedir login
+      adminUser = session.user;
+      const email = session.user.email;
+      document.getElementById('adm-avatar').textContent = email.substring(0,2).toUpperCase();
+      document.getElementById('adm-name').textContent = email.split('@')[0];
+      document.getElementById('admin-login').style.display = 'none';
+      document.getElementById('admin-app').style.display = 'flex';
+      loadDashboard();
+    }
+  } catch(e) {
+    console.log('No active session:', e.message);
+  }
+}
 
 function toggleCfg() {
   const sec = document.getElementById('cfg-section');
