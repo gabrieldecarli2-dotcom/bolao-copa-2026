@@ -308,9 +308,9 @@
 </div>
 
 <!-- ════ PAGAMENTO ════ -->
-<div id="page-pagamento" class="page">
-  <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px">
-    <div style="width:100%;max-width:460px;background:rgba(23,32,23,0.95);border:1px solid rgba(245,200,66,0.2);border-radius:20px;padding:40px;animation:fadeUp 0.5s ease">
+<div id="page-pagamento" class="page" style="min-height:100vh;align-items:center;justify-content:center;padding:40px 20px">
+  <div style="width:100%">
+    <div style="width:100%;max-width:460px;margin:0 auto;background:rgba(23,32,23,0.95);border:1px solid rgba(245,200,66,0.2);border-radius:20px;padding:40px;animation:fadeUp 0.5s ease">
       
       <div id="pay-loading" style="text-align:center;padding:20px">
         <div class="spinner" style="margin:0 auto 16px"></div>
@@ -723,11 +723,7 @@ async function doLogout() {
   currentUser = null; currentProfile = null;
   document.getElementById('main-nav').style.display = 'none';
   // Reseta todas as páginas
-  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
-  // Mostra auth com flex (necessário para centralizar)
-  const authPage = document.getElementById('page-auth');
-  authPage.style.display = 'flex';
-  authPage.classList.add('active');
+  showPage('page-auth');
 }
 
 // ════════════════════════════════════════════════════
@@ -813,6 +809,9 @@ function enterApp() {
   // Esconde todas as páginas de configuração/auth
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.getElementById('main-nav').style.display = 'flex';
+  document.getElementById('page-config').style.display = 'none';
+  document.getElementById('page-auth').style.display = 'none';
+  document.getElementById('page-pagamento').style.display = 'none';
   document.getElementById('nav-avatar').textContent = currentProfile.avatar_iniciais || '?';
   document.getElementById('hero-name').textContent = currentProfile.nome.split(' ')[0].toUpperCase() + '!';
   document.getElementById('invite-link').value = `${location.origin}${location.pathname}?convite=${currentProfile.id}`;
@@ -822,16 +821,17 @@ function enterApp() {
 // ════════════════════════════════════════════════════
 // NAVEGAÇÃO
 // ════════════════════════════════════════════════════
+// Páginas que precisam de display:flex para centralizar
+const FLEX_PAGES = ['page-auth', 'page-pagamento', 'page-config'];
+
 function showPage(id) {
-  // Esconde todas as páginas — tanto via classe quanto via style
   document.querySelectorAll('.page').forEach(p => {
     p.classList.remove('active');
     p.style.display = 'none';
   });
-  // Mostra só a página alvo
   const target = document.getElementById(id);
   if (target) {
-    target.style.display = 'block';
+    target.style.display = FLEX_PAGES.includes(id) ? 'flex' : 'block';
     target.classList.add('active');
   }
 }
