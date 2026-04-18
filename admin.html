@@ -336,11 +336,51 @@
         <h1>⚽ Gerenciar Jogos</h1>
         <p>Atualize placares e encerre jogos para calcular pontos automaticamente</p>
       </div>
-      <div class="filter-tabs">
-        <button class="filter-tab active" onclick="filterJogos('todos',this)">Todos</button>
-        <button class="filter-tab" onclick="filterJogos('aberto',this)">Abertos</button>
-        <button class="filter-tab" onclick="filterJogos('ao_vivo',this)">🔴 Ao Vivo</button>
-        <button class="filter-tab" onclick="filterJogos('encerrado',this)">Encerrados</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap;margin-bottom:16px;align-items:center">
+        <div>
+          <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px">Status</label>
+          <div class="filter-tabs" style="margin-bottom:0">
+            <button class="filter-tab active" onclick="filterJogosStatus('todos',this)">Todos</button>
+            <button class="filter-tab" onclick="filterJogosStatus('aberto',this)">Abertos</button>
+            <button class="filter-tab" onclick="filterJogosStatus('ao_vivo',this)">🔴 Ao Vivo</button>
+            <button class="filter-tab" onclick="filterJogosStatus('encerrado',this)">Encerrados</button>
+          </div>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px">Fase</label>
+          <select id="fase-select" onchange="filterJogosFase(this.value)" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none">
+            <option value="todas">Todas as fases</option>
+            <option value="grupo">Fase de Grupos</option>
+            <option value="16avos">16 Avos de Final</option>
+            <option value="oitavas">Oitavas de Final</option>
+            <option value="quartas">Quartas de Final</option>
+            <option value="semi">Semifinais</option>
+            <option value="terceiro">3º Lugar</option>
+            <option value="final">Final</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px">Grupo</label>
+          <select id="grupo-select" onchange="filterJogosGrupo(this.value)" style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none">
+            <option value="todos">Todos os grupos</option>
+            <option value="Grupo A">Grupo A</option>
+            <option value="Grupo B">Grupo B</option>
+            <option value="Grupo C">Grupo C</option>
+            <option value="Grupo D">Grupo D</option>
+            <option value="Grupo E">Grupo E</option>
+            <option value="Grupo F">Grupo F</option>
+            <option value="Grupo G">Grupo G</option>
+            <option value="Grupo H">Grupo H</option>
+            <option value="Grupo I">Grupo I</option>
+            <option value="Grupo J">Grupo J</option>
+            <option value="Grupo K">Grupo K</option>
+            <option value="Grupo L">Grupo L</option>
+          </select>
+        </div>
+        <div>
+          <label style="font-size:11px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);display:block;margin-bottom:6px">Buscar time</label>
+          <input id="search-time" oninput="filterJogosSearch(this.value)" placeholder="🔍 Ex: Brasil..." style="padding:8px 12px;background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.12);border-radius:8px;color:var(--text);font-family:'Barlow';font-size:13px;outline:none;width:160px">
+        </div>
       </div>
       <div id="jogos-list"><div class="loading"><div class="spinner"></div></div></div>
       <div style="display:flex;gap:10px;margin-top:8px;flex-wrap:wrap">
@@ -820,14 +860,14 @@ async function removerParticipante(id, nome) {
 let jogoFilter = 'todos';
 
 async function loadJogos(filter) {
-  if (filter) jogoFilter = filter;
-  let query = db.from('jogos').select('*').order('data_hora');
-  if (jogoFilter !== 'todos') query = query.eq('status', jogoFilter);
-  const { data } = await query;
+  const { data } = await db.from('jogos').select('*').order('data_hora');
   allJogos = data || [];
+  renderJogosFiltered();
+}
 
-  document.getElementById('jogos-list').innerHTML = allJogos.length
-    ? allJogos.map(j=>`
+function renderJogosList(list) {
+  document.getElementById('jogos-list').innerHTML = list.length
+    ? list.map(j=>`
       <div class="game-editor">
         <div class="game-editor-header">
           <div class="game-teams-display">
@@ -857,10 +897,33 @@ async function loadJogos(filter) {
     : '<div class="loading">Nenhum jogo encontrado</div>';
 }
 
-function filterJogos(filter, btn) {
-  document.querySelectorAll('#sec-jogos .filter-tab').forEach(t=>t.classList.remove('active'));
+let jogosFilters = { status: 'todos', fase: 'todas', grupo: 'todos', search: '' };
+
+function filterJogosStatus(val, btn) {
+  jogosFilters.status = val;
+  document.querySelectorAll('#sec-jogos .filter-tabs .filter-tab').forEach(t=>t.classList.remove('active'));
   btn.classList.add('active');
-  loadJogos(filter);
+  renderJogosFiltered();
+}
+function filterJogosFase(val) { jogosFilters.fase = val; renderJogosFiltered(); }
+function filterJogosGrupo(val) { jogosFilters.grupo = val; renderJogosFiltered(); }
+function filterJogosSearch(val) { jogosFilters.search = val.toLowerCase(); renderJogosFiltered(); }
+
+function filterJogos(filter, btn) {
+  filterJogosStatus(filter, btn);
+}
+
+function renderJogosFiltered() {
+  let list = allJogos;
+  if (jogosFilters.status !== 'todos') list = list.filter(j=>j.status===jogosFilters.status);
+  if (jogosFilters.fase !== 'todas') list = list.filter(j=>j.fase===jogosFilters.fase);
+  if (jogosFilters.grupo !== 'todos') list = list.filter(j=>j.grupo===jogosFilters.grupo);
+  if (jogosFilters.search) list = list.filter(j=>
+    j.time1.toLowerCase().includes(jogosFilters.search) ||
+    j.time2.toLowerCase().includes(jogosFilters.search) ||
+    j.grupo.toLowerCase().includes(jogosFilters.search)
+  );
+  renderJogosList(list);
 }
 
 async function openEditJogo(id) {
