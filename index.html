@@ -7,7 +7,7 @@
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Barlow:wght@300;400;500;600;700;900&family=Barlow+Condensed:wght@400;600;700;900&display=swap" rel="stylesheet">
 <!-- Supabase SDK -->
-<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/dist/umd/supabase.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2.39.0/dist/umd/supabase.min.js"></script>
 <style>
   :root {
     --gold: #F5C842; --gold2: #E8A020;
@@ -481,13 +481,22 @@ function saveConfig() {
 
 function initDB(url, key) {
   try {
-    const client = window.supabase || window.Supabase;
-    if (!client) { showToast('Erro: biblioteca Supabase não carregou. Recarregue a página.', true); return; }
-    supabase = client.createClient(url, key);
+    // A lib UMD expõe createClient direto em window.supabase.createClient
+    // ou em window.createClient dependendo da versão
+    let createFn = null;
+    if (window.supabase && typeof window.supabase.createClient === 'function') {
+      createFn = window.supabase.createClient;
+    } else if (typeof window.createClient === 'function') {
+      createFn = window.createClient;
+    } else {
+      showToast('Biblioteca Supabase não encontrada. Recarregue a página.', true);
+      return;
+    }
+    db = createFn(url, key);
     showAuthPage();
     loadPrizeDisplay();
   } catch(e) {
-    showToast('Erro ao conectar ao Supabase: ' + e.message, true);
+    showToast('Erro ao conectar: ' + e.message, true);
   }
 }
 
