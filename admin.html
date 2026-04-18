@@ -1265,37 +1265,6 @@ async function loadConfigSettings() {
   setTimeout(previewPremios, 300);
 }
 
-async function previewPremios() {
-  const taxa = parseFloat(document.getElementById('cfg-taxa').value) || 0;
-  const p1 = parseFloat(document.getElementById('cfg-p1').value) || 0;
-  const p2 = parseFloat(document.getElementById('cfg-p2').value) || 0;
-  const p3 = parseFloat(document.getElementById('cfg-p3').value) || 0;
-  if (!taxa) return;
-
-  const preview = document.getElementById('premio-preview');
-  if (!preview) return;
-  preview.style.display = 'block';
-
-  const adminFee = parseFloat(document.getElementById('cfg-admin-fee')?.value) || 0;
-  const { count } = await db.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true);
-  const total = (count || 0) * taxa;
-  const fmt = v => `R$ ${Math.floor(v).toLocaleString('pt-BR')}`;
-
-  document.getElementById('prev-p1').textContent = fmt(total * p1 / 100);
-  document.getElementById('prev-p2').textContent = fmt(total * p2 / 100);
-  document.getElementById('prev-p3').textContent = fmt(total * p3 / 100);
-  document.getElementById('prev-admin').textContent = fmt(total * adminFee / 100);
-  document.getElementById('prev-total').textContent = fmt(total);
-
-  const soma = p1 + p2 + p3 + adminFee;
-  const restante = total * (100 - soma) / 100;
-  const restanteWrap = document.getElementById('prev-restante-wrap');
-  if (restanteWrap) {
-    restanteWrap.style.display = soma < 99.99 ? 'inline' : 'none';
-    document.getElementById('prev-restante').textContent = fmt(restante);
-  }
-  document.getElementById('perc-warning').style.display = soma > 100.01 ? 'block' : 'none';
-}
 
 async function previewPremios() {
   const taxa = parseFloat(document.getElementById('cfg-taxa').value) || 0;
@@ -1543,88 +1512,7 @@ let allPalpitesAdmin = [];
 let allJogosAdmin = [];
 let allUsersAdmin = [];
 
-async function loadPalpites() {
-  document.getElementById('palpites-table-body').innerHTML = '<tr><td colspan="5" class="loading"><div class="spinner"></div></td></tr>';
 
-  const [{ data: palpites }, { data: jogos }, { data: users }] = await Promise.all([
-    db.from('palpites').select('*, usuario:usuarios(id,nome,avatar_iniciais), jogo:jogos(id,grupo,time1,flag1,time2,flag2,gol_time1,gol_time2,status)').order('created_at', {ascending:false}),
-    db.from('jogos').select('id,grupo,time1,flag1,time2,flag2,status').order('data_hora'),
-    db.from('usuarios').select('id,nome').order('nome')
-  ]);
-
-  allPalpitesAdmin = palpites || [];
-  allJogosAdmin = jogos || [];
-  allUsersAdmin = users || [];
-
-  // Preenche filtro de jogos
-  const jogoSelect = document.getElementById('palpite-filter-jogo');
-  jogoSelect.innerHTML = '<option value="todos">Todos os jogos</option>' +
-    (jogos || []).map(j => `<option value="${j.id}">${j.flag1||''} ${j.time1} × ${j.time2} ${j.flag2||''}</option>`).join('');
-
-  // Preenche filtro de usuários
-  const userSelect = document.getElementById('palpite-filter-user');
-  userSelect.innerHTML = '<option value="todos">Todos os participantes</option>' +
-    (users || []).map(u => `<option value="${u.id}">${u.nome}</option>`).join('');
-
-  // Summary
-  const totalPalpites = palpites?.length || 0;
-  const exatos = palpites?.filter(p=>p.pontos_ganhos===3).length || 0;
-  const certos = palpites?.filter(p=>p.pontos_ganhos===1).length || 0;
-  document.getElementById('palpites-summary').textContent = `${totalPalpites} palpites · ${exatos} exatos · ${certos} acertos`;
-
-  renderPalpitesTable();
-}
-
-function renderPalpitesTable() {
-  const filterJogo = document.getElementById('palpite-filter-jogo')?.value || 'todos';
-  const filterUser = document.getElementById('palpite-filter-user')?.value || 'todos';
-  const filterResult = document.getElementById('palpite-filter-result')?.value || 'todos';
-
-  let list = [...allPalpitesAdmin];
-  if (filterJogo !== 'todos') list = list.filter(p => String(p.jogo_id) === filterJogo);
-  if (filterUser !== 'todos') list = list.filter(p => p.usuario_id === filterUser);
-  if (filterResult === 'pendente') list = list.filter(p => !p.calculado);
-  else if (filterResult !== 'todos') list = list.filter(p => p.calculado && String(p.pontos_ganhos) === filterResult);
-
-  document.getElementById('palpites-count').textContent = `${list.length} palpite${list.length!==1?'s':''}`;
-
-  if (!list.length) {
-    document.getElementById('palpites-table-body').innerHTML = '<tr><td colspan="5" class="loading">Nenhum palpite encontrado</td></tr>';
-    return;
-  }
-
-  document.getElementById('palpites-table-body').innerHTML = list.map(p => {
-    const jogo = p.jogo || {};
-    const user = p.usuario || {};
-    const isPending = !p.calculado || jogo.status === 'aberto';
-
-    let ptsBadge = '';
-    if (isPending) ptsBadge = '<span class="badge badge-blue">⏳ Pendente</span>';
-    else if (p.pontos_ganhos === 3) ptsBadge = '<span class="badge badge-gold">🏆 +3 pts</span>';
-    else if (p.pontos_ganhos === 1) ptsBadge = '<span class="badge badge-green">✅ +1 pt</span>';
-    else ptsBadge = '<span class="badge badge-red">❌ 0 pts</span>';
-
-    const resultadoReal = jogo.status !== 'aberto' && jogo.gol_time1 !== null
-      ? `<span style="font-family:'Bebas Neue';font-size:18px;letter-spacing:2px">${jogo.gol_time1} × ${jogo.gol_time2}</span>`
-      : '<span style="color:var(--text3);font-size:13px">Não iniciado</span>';
-
-    return `<tr>
-      <td>
-        <div style="display:flex;align-items:center;gap:10px">
-          <div class="user-ava">${user.avatar_iniciais||'?'}</div>
-          <span style="font-weight:600">${user.nome||'–'}</span>
-        </div>
-      </td>
-      <td>
-        <div style="font-size:13px;font-weight:600">${jogo.flag1||''} ${jogo.time1||'–'} × ${jogo.time2||'–'} ${jogo.flag2||''}</div>
-        <div style="font-size:11px;color:var(--text3)">${jogo.grupo||''}</div>
-      </td>
-      <td><span style="font-family:'Bebas Neue';font-size:20px;color:var(--gold);letter-spacing:3px">${p.palpite_time1} × ${p.palpite_time2}</span></td>
-      <td>${resultadoReal}</td>
-      <td>${ptsBadge}</td>
-    </tr>`;
-  }).join('');
-}
 
 // ════════════════════════════════════════════════════
 // PALPITES
