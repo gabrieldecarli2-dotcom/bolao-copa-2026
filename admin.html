@@ -721,31 +721,40 @@ async function loadDashboard() {
 
   const total = users?.length || 0;
   const pagosCount = pagos || 0;
-  const arrecadado = pagosCount * 20;
   const pendentes = total - pagosCount;
   const jogosEncerrados = jogos?.filter(j=>j.status==='encerrado').length || 0;
   const jogosAbertos = jogos?.filter(j=>j.status!=='encerrado').length || 0;
 
+  // Busca configurações de prêmio
+  const { data: configs } = await db.from('configuracoes').select('*');
+  const getCfg = k => parseFloat(configs?.find(c=>c.chave===k)?.valor || 0);
+  const taxa = getCfg('taxa_participacao') || 20;
+  const p1 = getCfg('perc_premio_1');
+  const p2 = getCfg('perc_premio_2');
+  const p3 = getCfg('perc_premio_3');
+  const arrecadado = pagosCount * taxa;
+  const fmt = v => `R$${Math.floor(v).toLocaleString('pt-BR')}`;
+
   document.getElementById('dash-stats').innerHTML = `
-    <div class="stat-card highlight">
-      <div class="stat-label">💰 Total Arrecadado</div>
-      <div class="stat-value">R$${arrecadado}</div>
-      <div class="stat-sub">${pagosCount} pagamentos confirmados</div>
-    </div>
     <div class="stat-card">
       <div class="stat-label">👥 Participantes</div>
       <div class="stat-value green">${total}</div>
-      <div class="stat-sub">${pendentes} aguardando pagamento</div>
+      <div class="stat-sub">${pagosCount} pagos · ${pendentes} pendentes</div>
     </div>
     <div class="stat-card">
       <div class="stat-label">⚽ Jogos Abertos</div>
       <div class="stat-value blue">${jogosAbertos}</div>
       <div class="stat-sub">${jogosEncerrados} encerrados</div>
     </div>
+    <div class="stat-card highlight">
+      <div class="stat-label">🥇 Prêmio 1º Lugar</div>
+      <div class="stat-value">${p1 ? fmt(arrecadado * p1 / 100) : 'A definir'}</div>
+      <div class="stat-sub">${p1 ? `de ${fmt(arrecadado)} arrecadados` : 'Configure os prêmios'}</div>
+    </div>
     <div class="stat-card">
-      <div class="stat-label">🏆 Prêmio 1º Lugar</div>
-      <div class="stat-value">R$${Math.floor(arrecadado*0.6)}</div>
-      <div class="stat-sub">60% do total arrecadado</div>
+      <div class="stat-label">🥈 Prêmio 2º Lugar</div>
+      <div class="stat-value" style="font-size:28px">${p2 ? fmt(arrecadado * p2 / 100) : 'A definir'}</div>
+      <div class="stat-sub">${p3 ? `🥉 3º: ${fmt(arrecadado * p3 / 100)}` : ''}</div>
     </div>`;
 
   // Jogos pendentes de resultado
