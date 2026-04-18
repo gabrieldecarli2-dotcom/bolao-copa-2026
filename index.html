@@ -657,8 +657,12 @@ async function doLogout() {
   await db.auth.signOut();
   currentUser = null; currentProfile = null;
   document.getElementById('main-nav').style.display = 'none';
-  document.getElementById('page-auth').style.display = 'flex';
-  showPage('page-auth');
+  // Reseta todas as páginas
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
+  // Mostra auth com flex (necessário para centralizar)
+  const authPage = document.getElementById('page-auth');
+  authPage.style.display = 'flex';
+  authPage.classList.add('active');
 }
 
 // ════════════════════════════════════════════════════
@@ -677,8 +681,7 @@ async function loadProfile() {
 function enterApp() {
   if (!currentProfile) return;
   // Esconde todas as páginas de configuração/auth
-  document.getElementById('page-config').style.display = 'none';
-  document.getElementById('page-auth').style.display = 'none';
+  document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.getElementById('main-nav').style.display = 'flex';
   document.getElementById('nav-avatar').textContent = currentProfile.avatar_iniciais || '?';
   document.getElementById('hero-name').textContent = currentProfile.nome.split(' ')[0].toUpperCase() + '!';
@@ -690,8 +693,17 @@ function enterApp() {
 // NAVEGAÇÃO
 // ════════════════════════════════════════════════════
 function showPage(id) {
-  document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));
-  document.getElementById(id).classList.add('active');
+  // Esconde todas as páginas — tanto via classe quanto via style
+  document.querySelectorAll('.page').forEach(p => {
+    p.classList.remove('active');
+    p.style.display = 'none';
+  });
+  // Mostra só a página alvo
+  const target = document.getElementById(id);
+  if (target) {
+    target.style.display = 'block';
+    target.classList.add('active');
+  }
 }
 
 function goPage(page) {
