@@ -803,13 +803,21 @@ function getMyPalpite(jogoId) {
 }
 
 function renderGameCard(jogo) {
-  const isOpen = jogo.status==='aberto';
   const isLive = jogo.status==='ao_vivo';
   const isDone = jogo.status==='encerrado';
   const palpite = getMyPalpite(jogo.id);
+
+  // Bloqueia palpites 30 minutos antes do jogo
+  const agora = new Date();
+  const inicioJogo = new Date(jogo.data_hora);
+  const minutosRestantes = (inicioJogo - agora) / 60000;
+  const prazoEncerrado = minutosRestantes <= 30;
+  const isOpen = jogo.status==='aberto' && !prazoEncerrado;
+  const isFechado = jogo.status==='aberto' && prazoEncerrado; // aberto mas travado
   
   let statusHtml = isLive ? '<span class="game-status live">🔴 Ao Vivo</span>'
     : isOpen ? '<span class="game-status open">Aberto</span>'
+    : isFechado ? '<span class="game-status done" style="background:rgba(255,167,38,0.15);color:#FFA726;border:none">⏰ Fechado</span>'
     : '<span class="game-status done">Encerrado</span>';
 
   const centerContent = (isDone||isLive)
@@ -853,6 +861,7 @@ function renderGameCard(jogo) {
       </div>
       ${isOpen && palpite ? '<div class="palpite-saved-badge">✅ Palpite salvo — clique em Alterar para mudar</div>' : ''}
       ${isOpen && !palpite ? '<div class="palpite-pending-badge">⚠️ Palpite pendente</div>' : ''}
+      ${isFechado ? `<div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(255,167,38,0.1);border:1px solid rgba(255,167,38,0.25);font-size:12px;font-weight:600;color:#FFA726">⏰ Palpites encerrados — faltam ${Math.max(0,Math.ceil(minutosRestantes))} minutos para o jogo</div>` : ''}
       ${palpiteResult}
     </div>
   </div>`;
@@ -866,14 +875,26 @@ async function savePalpite(jogoId) {
   const existing = getMyPalpite(jogoId);
   const payload = { usuario_id: currentUser.id, jogo_id: jogoId, palpite_time1: v1, palpite_time2: v2 };
 
-  let error;
-  if (existing) {
-    ({ error } = await db.from('palpites').update({palpite_time1:v1,palpite_time2:v2,updated_at:new Date().toISOString()}).eq('id',existing.id));
-  } else {
-    ({ error } = await db.from('palpites').insert(payload));
+  // Valida no servidor (não pode ser burlado pelo usuário)
+  try {
+    const validation = await fetch('/api/validate-palpite', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ jogo_id: jogoId, usuario_id: currentUser.id, palpite_time1: v1, palpite_time2: v2 })
+    });
+    const result = await validation.json();
+    if (!result.ok) { showToast(result.error || 'Não foi possível salvar ⚠️', true); return; }
+    // Palpite salvo pelo servidor — atualiza cache local
+  } catch(e) {
+    // Fallback: salva direto se API não disponível
+    let error;
+    if (existing) {
+      ({ error } = await db.from('palpites').update({palpite_time1:v1,palpite_time2:v2,updated_at:new Date().toISOString()}).eq('id',existing.id));
+    } else {
+      ({ error } = await db.from('palpites').insert(payload));
+    }
+    if (error) { showToast('Erro ao salvar palpite: '+error.message, true); return; }
   }
-
-  if (error) { showToast('Erro ao salvar palpite: '+error.message, true); return; }
   showToast(`Palpite ${v1}×${v2} salvo! ✅`);
 
   // Atualiza o palpite no cache local IMEDIATAMENTE (sem buscar do banco)
