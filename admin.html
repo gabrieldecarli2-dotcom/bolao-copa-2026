@@ -456,7 +456,7 @@
               <span>🥉 <strong id="prev-p3" style="color:#CD7F32">R$ –</strong></span>
               <span style="color:var(--text3)">Total arrecadado: <strong id="prev-total">R$ –</strong></span>
             </div>
-            <div id="perc-warning" style="display:none;color:var(--red);font-size:12px;margin-top:8px">⚠️ A soma das % deve ser 100%</div>
+            <div id="perc-warning" style="display:none;color:var(--red);font-size:12px;margin-top:8px">⚠️ A soma das porcentagens ultrapassou 100%</div>
           </div>
         </div>
         <button class="btn btn-primary" onclick="saveConfigSettings()">💾 Salvar Configurações</button>
@@ -1178,7 +1178,7 @@ async function previewPremios() {
   if (el2) el2.textContent = fmt(total * p2 / 100);
   if (el3) el3.textContent = fmt(total * p3 / 100);
   if (elT) elT.textContent = fmt(total);
-  if (elW) elW.style.display = Math.abs((p1+p2+p3) - 100) > 0.01 ? 'block' : 'none';
+  if (elW) elW.style.display = (p1+p2+p3+adminFee) > 100.01 ? 'block' : 'none';
 }
 
 function copySiteLink() {
