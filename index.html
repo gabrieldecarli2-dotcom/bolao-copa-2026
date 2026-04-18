@@ -672,16 +672,24 @@ async function loadHomeRanking() {
 }
 
 async function loadPrizes() {
-  const { data } = await db.from('configuracoes').select('*');
-  if (!data) return;
-  const get = chave => data.find(c=>c.chave===chave)?.valor || '–';
-  const fmt = v => v === '–' ? 'R$ –' : `R$ ${parseInt(v).toLocaleString('pt-BR')}`;
+  const [{ data: configs }, { count: pagos }] = await Promise.all([
+    db.from('configuracoes').select('*'),
+    db.from('usuarios').select('*', {count:'exact',head:true}).eq('pago', true)
+  ]);
+  if (!configs) return;
+  const getCfg = k => parseFloat(configs.find(c=>c.chave===k)?.valor || 0);
+  const taxa = getCfg('taxa_participacao') || 20;
+  const p1 = getCfg('perc_premio_1');
+  const p2 = getCfg('perc_premio_2');
+  const p3 = getCfg('perc_premio_3');
+  const total = (pagos || 0) * taxa;
+  const fmt = v => v > 0 ? 'R$ ' + Math.floor(v).toLocaleString('pt-BR') : 'A definir';
   const el1 = document.getElementById('prize1');
   const el2 = document.getElementById('prize2');
   const el3 = document.getElementById('prize3');
-  if (el1) el1.textContent = fmt(get('premio_1'));
-  if (el2) el2.textContent = fmt(get('premio_2'));
-  if (el3) el3.textContent = fmt(get('premio_3'));
+  if (el1) el1.textContent = fmt(total * p1 / 100);
+  if (el2) el2.textContent = fmt(total * p2 / 100);
+  if (el3) el3.textContent = fmt(total * p3 / 100);
 }
 
 // ════════════════════════════════════════════════════
