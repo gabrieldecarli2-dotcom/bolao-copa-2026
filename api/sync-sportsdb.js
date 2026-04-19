@@ -79,10 +79,10 @@ module.exports = async function handler(req, res) {
     if (action === 'live') {
       const BASE_V2 = 'https://www.thesportsdb.com/api/v2/json';
 
-      // v2 livescore não filtra por liga — retorna todos ao vivo
+      // v2 livescores — endpoint correto sem .php, chave no header
       const endpoints = [
-        `${BASE_V2}/livescore.php?s=Soccer`,
-        `${BASE_V2}/livescore.php`,
+        `${BASE_V2}/livescore/soccer`,
+        `${BASE_V2}/livescore/Soccer`,
       ];
 
       let events = [];
