@@ -828,12 +828,11 @@ async function loadHome() {
 async function loadHomeGames() {
   const { data: jogos } = await db.from('jogos').select('*').in('status',['aberto','ao_vivo']).order('data_hora').limit(4);
   if (!jogos) return;
-  // Debug: verifica se flag1 tem URL
-  console.log('loadHomeGames flag1[0]:', jogos[0]?.flag1?.substring(0,40));
-  // Atualiza allJogos com dados frescos (incluindo badges)
+  // Atualiza allJogos completamente com dados frescos do banco
   jogos.forEach(j => {
     const idx = allJogos.findIndex(aj => aj.id === j.id);
-    if (idx >= 0) allJogos[idx] = j; else allJogos.push(j);
+    if (idx >= 0) { allJogos[idx] = {...allJogos[idx], ...j}; }
+    else allJogos.push(j);
   });
   const { data: palpites } = await db.from('palpites').select('*').eq('usuario_id', currentUser.id);
   allPalpites = palpites || [];
@@ -874,7 +873,7 @@ async function loadJogos(filter='todos') {
   if(filter!=='todos') query = query.eq('status',filter);
   const { data: jogos } = await query;
   const { data: palpites } = await db.from('palpites').select('*').eq('usuario_id',currentUser.id);
-  allJogos = jogos || [];
+  allJogos = jogos || []; // dados frescos do banco — sobrescreve cache
   allPalpites = palpites || [];
   document.getElementById('all-games').innerHTML = allJogos.length ? allJogos.map(j=>renderGameCard(j)).join('') : '<div class="loading">Nenhum jogo nesta categoria</div>';
 }
@@ -893,16 +892,8 @@ function renderFlag(flag, name, size=48) {
   if (!flag) return '🏳️';
   const f = String(flag).trim();
   if (f.startsWith('http')) {
-    // Use URL as-is from DB, just ensure no duplicate suffix
     const url = f.replace('/small/small','').replace('/tiny/tiny','');
-    const img = document.createElement('img');
-    img.src = url;
-    img.alt = name || '';
-    img.width = size;
-    img.height = size;
-    img.style.cssText = 'object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));border-radius:4px';
-    img.onerror = function(){ this.outerHTML = '🏳️'; };
-    return img.outerHTML;
+    return `<img src="${url}" alt="${(name||'').replace(/"/g,"'")}" width="${size}" height="${size}" style="object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))" onerror="this.src='';this.style.display='none'">`;
   }
   return f;
 }
