@@ -897,7 +897,7 @@ function renderPalpitesByUser() {
               </tr></thead>
               <tbody>
                 ${userPalpites.map(p => {
-                  const jogo = allJogosAdmin.find(j => j.id === p.jogo_id);
+                  const jogo = allJogosAdmin.find(j => String(j.id) === String(p.jogo_id));
                   if (!jogo) return '';
                   const isDone = jogo.status === 'encerrado';
                   const resultado = isDone ? `${jogo.gol_time1}:${jogo.gol_time2}` : '–';
