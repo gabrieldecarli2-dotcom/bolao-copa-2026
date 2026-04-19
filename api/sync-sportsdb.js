@@ -79,9 +79,8 @@ module.exports = async function handler(req, res) {
     if (action === 'live') {
       const BASE_V2 = 'https://www.thesportsdb.com/api/v2/json';
 
-      // Tenta diferentes endpoints da v2
+      // v2 livescore não filtra por liga — retorna todos ao vivo
       const endpoints = [
-        `${BASE_V2}/livescore.php?l=${lid}`,
         `${BASE_V2}/livescore.php?s=Soccer`,
         `${BASE_V2}/livescore.php`,
       ];
