@@ -1296,10 +1296,10 @@ async function syncSports(action) {
   resultEl.textContent = '⏳ Sincronizando...';
 
   try {
-    const r = await fetch('/api/sync-sports', {
+    const r = await fetch('/api/sync-sportsdb', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, league_id: leagueId, action })
+      body: JSON.stringify({ secret, league_id: leagueId, action: action === 'import_jogos' ? 'next' : 'results' })
     });
     const data = await r.json();
     if (data.ok) {
@@ -1422,7 +1422,7 @@ async function syncSportsDB(action) {
     const res = await fetch('/api/sync-sportsdb', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, league_id: leagueId, action })
+      body: JSON.stringify({ secret, league_id: leagueId, action: action === 'import_jogos' ? 'next' : 'results' })
     });
     const data = await res.json();
 
