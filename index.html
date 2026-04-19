@@ -786,12 +786,23 @@ function goPage(page) {
 // ════════════════════════════════════════════════════
 // HOME
 // ════════════════════════════════════════════════════
+let liveRefreshInterval = null;
+
 async function loadHome() {
   // Mostra banner de pagamento se não pagou
   const banner = document.getElementById('banner-pagamento');
   if (banner) banner.style.display = currentProfile?.pago ? 'none' : 'flex';
 
   await Promise.all([loadHomeGames(), loadHomeRanking(), loadPrizes()]);
+
+  // Auto-refresh a cada 60s se tiver jogos ao vivo
+  clearInterval(liveRefreshInterval);
+  liveRefreshInterval = setInterval(async () => {
+    const { data: liveJogos } = await db.from('jogos').select('id').eq('status','ao_vivo');
+    if (liveJogos?.length) {
+      await loadHomeGames();
+    }
+  }, 60000);
   // Stats do usuário
   const { data: ranking } = await db.from('usuarios').select('id,pontos').order('pontos',{ascending:false});
   if (ranking) {
