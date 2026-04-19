@@ -885,6 +885,7 @@ function getMyPalpite(jogoId) {
 function renderFlag(flag, name, size=48) {
   if (!flag) return '🏳️';
   const f = String(flag).trim();
+  console.log('renderFlag:', name, '->', f.substring(0,50));
   if (f.startsWith('http')) {
     // Use URL as-is from DB, just ensure no duplicate suffix
     const url = f.replace('/small/small','').replace('/tiny/tiny','');
