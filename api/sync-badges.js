@@ -1,6 +1,6 @@
 // api/sync-badges.js
-// Estratégia simplificada: busca 1 evento, pega os IDs dos times,
-// depois usa search_all_teams para pegar todos os badges de uma vez
+// Busca badges usando lookupevent para pegar team IDs,
+// depois lookupteam para pegar o badge de cada time único
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -21,73 +21,53 @@ module.exports = async function handler(req, res) {
     'Prefer': 'return=minimal'
   };
 
-  const lid = league_id || '4351';
-
   try {
-    // 1. Busca 1 jogo do banco para pegar um api_jogo_id válido
+    // 1. Pega todos os api_jogo_ids do banco
     const jogosRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,api_jogo_id,time1,time2&limit=1`,
+      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,api_jogo_id,time1,time2`,
       { headers: dbH }
     );
-    const jogos = await jogosRes.json();
-    if (!jogos?.length)
+    const jogos = await jogosRes.json() || [];
+    if (!jogos.length)
       return res.status(200).json({ ok: false, msg: 'Nenhum jogo com api_jogo_id no banco' });
 
-    // 2. Lookup do evento para pegar idHomeTeam
-    const evRes = await fetch(`${BASE}/lookupevent.php?id=${jogos[0].api_jogo_id}`);
-    const evData = await evRes.json();
-    const ev = evData.events?.[0];
-    if (!ev)
-      return res.status(200).json({ ok: false, msg: 'Evento não encontrado na API', api_jogo_id: jogos[0].api_jogo_id });
+    // 2. Busca eventos em lotes de 10 para extrair team IDs únicos
+    // Limita a 10 eventos para não exceder rate limit
+    const sample = jogos.slice(0, 10);
+    const teamIdMap = {}; // teamName -> teamId
 
-    // 3. Lookup do time para pegar idLeague e buscar todos os times da liga
-    const teamRes = await fetch(`${BASE}/lookupteam.php?id=${ev.idHomeTeam}`);
-    const teamData = await teamRes.json();
-    const team = teamData.teams?.[0];
-    if (!team)
-      return res.status(200).json({ ok: false, msg: 'Time não encontrado', idHomeTeam: ev.idHomeTeam });
-
-    // 4. Busca todos os times da liga pelo ID correto
-    const allTeamsRes = await fetch(`${BASE}/lookup_all_teams.php?id=${team.idLeague || lid}`);
-    const allTeamsData = await allTeamsRes.json();
-    const allTeams = allTeamsData.teams || [];
-
-    // Se não funcionou, tenta pelo nome da liga
-    let teamsList = allTeams;
-    if (!teamsList.length) {
-      const byNameRes = await fetch(`${BASE}/search_all_teams.php?l=${encodeURIComponent(ev.strLeague || 'Brazilian Serie A')}`);
-      const byNameData = await byNameRes.json();
-      teamsList = byNameData.teams || [];
+    for (const jogo of sample) {
+      try {
+        const r = await fetch(`${BASE}/lookupevent.php?id=${jogo.api_jogo_id}`);
+        const d = await r.json();
+        const e = d.events?.[0];
+        if (!e) continue;
+        if (e.idHomeTeam && e.strHomeTeam) teamIdMap[e.strHomeTeam] = e.idHomeTeam;
+        if (e.idAwayTeam && e.strAwayTeam) teamIdMap[e.strAwayTeam] = e.idAwayTeam;
+      } catch(e) { continue; }
     }
 
-    if (!teamsList.length)
-      return res.status(200).json({
-        ok: false,
-        msg: 'Nenhum time encontrado',
-        tried_league_id: team.idLeague,
-        league_name: ev.strLeague,
-        team_sample: team
-      });
+    if (!Object.keys(teamIdMap).length)
+      return res.status(200).json({ ok: false, msg: 'Não foi possível extrair IDs dos times', sample_jogo: sample[0] });
 
-    // 5. Monta mapa nome -> badge
-    const badgeMap = {};
-    for (const t of teamsList) {
-      if (t.strTeamBadge) {
-        badgeMap[t.strTeam] = t.strTeamBadge + '/small';
-      }
+    // 3. Busca badge de cada time único (máx 20 times)
+    const badgeMap = {}; // teamName -> badgeUrl
+    const uniqueTeams = Object.entries(teamIdMap).slice(0, 20);
+
+    for (const [name, tid] of uniqueTeams) {
+      try {
+        const r = await fetch(`${BASE}/lookupteam.php?id=${tid}`);
+        const d = await r.json();
+        const badge = d.teams?.[0]?.strTeamBadge;
+        if (badge) badgeMap[name] = badge + '/small';
+      } catch(e) { continue; }
     }
 
-    // 6. Busca todos os jogos do banco e atualiza
-    const allJogosRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,time1,time2`,
-      { headers: dbH }
-    );
-    const allJogos = await allJogosRes.json() || [];
-
+    // 4. Atualiza todos os jogos no banco
     let updated = 0;
     const noMatch = new Set();
 
-    for (const jogo of allJogos) {
+    for (const jogo of jogos) {
       const b1 = badgeMap[jogo.time1];
       const b2 = badgeMap[jogo.time2];
       if (!b1) noMatch.add(jogo.time1);
@@ -102,12 +82,11 @@ module.exports = async function handler(req, res) {
     }
 
     return res.status(200).json({
-      ok: true,
+      ok: updated > 0,
       msg: `${updated} jogos atualizados com escudos`,
       updated,
-      teams_in_api: teamsList.length,
-      teams_with_badge: Object.keys(badgeMap).length,
-      api_team_names: Object.keys(badgeMap).slice(0, 10),
+      badges_found: Object.keys(badgeMap).length,
+      team_names_api: Object.keys(badgeMap),
       no_match: [...noMatch].slice(0, 10)
     });
 
