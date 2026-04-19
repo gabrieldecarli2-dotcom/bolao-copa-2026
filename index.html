@@ -828,6 +828,13 @@ async function loadHome() {
 async function loadHomeGames() {
   const { data: jogos } = await db.from('jogos').select('*').in('status',['aberto','ao_vivo']).order('data_hora').limit(4);
   if (!jogos) return;
+  // Debug: verifica se flag1 tem URL
+  console.log('loadHomeGames flag1[0]:', jogos[0]?.flag1?.substring(0,40));
+  // Atualiza allJogos com dados frescos (incluindo badges)
+  jogos.forEach(j => {
+    const idx = allJogos.findIndex(aj => aj.id === j.id);
+    if (idx >= 0) allJogos[idx] = j; else allJogos.push(j);
+  });
   const { data: palpites } = await db.from('palpites').select('*').eq('usuario_id', currentUser.id);
   allPalpites = palpites || [];
   document.getElementById('home-games').innerHTML = jogos.length ? jogos.map(j=>renderGameCard(j)).join('') : '<div class="loading">Nenhum jogo aberto no momento</div>';
@@ -885,7 +892,6 @@ function getMyPalpite(jogoId) {
 function renderFlag(flag, name, size=48) {
   if (!flag) return '🏳️';
   const f = String(flag).trim();
-  console.log('renderFlag:', name, '->', f.substring(0,50));
   if (f.startsWith('http')) {
     // Use URL as-is from DB, just ensure no duplicate suffix
     const url = f.replace('/small/small','').replace('/tiny/tiny','');
