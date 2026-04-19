@@ -522,6 +522,7 @@
           <button class="btn btn-neutral" onclick="syncSports('import_jogos')">📥 Próximos Jogos</button>
           <button class="btn" style="background:rgba(239,83,80,0.2);color:var(--red);border:1px solid rgba(239,83,80,0.3)" onclick="syncSports('live')">🔴 Placares Ao Vivo</button>
           <button class="btn btn-success" onclick="syncSports('sync_resultados')">🔄 Resultados + Pontos</button>
+          <button class="btn" style="background:rgba(66,165,245,0.15);color:var(--blue);border:1px solid rgba(66,165,245,0.3)" onclick="syncBadges()">🛡️ Buscar Escudos</button>
         </div>
         <div id="sync-sports-result" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:13px"></div>
       </div>
@@ -1285,6 +1286,29 @@ async function previewPremios() {
     elR.style.display = soma < 99.99 ? 'inline' : 'none';
     const elRVal = document.getElementById('prev-restante');
     if (elRVal) elRVal.textContent = fmt(restante);
+  }
+}
+
+async function syncBadges() {
+  const leagueId = document.getElementById('sports-league-id').value.trim() || '4351';
+  const resultEl = document.getElementById('sync-sports-result');
+  const secret = sessionStorage.getItem('admin_secret');
+
+  resultEl.style.cssText = 'display:block;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;background:rgba(66,165,245,0.1);color:var(--blue);border:1px solid rgba(66,165,245,0.2)';
+  resultEl.textContent = '⏳ Buscando escudos...';
+
+  try {
+    const r = await fetch('/api/sync-badges', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, league_id: leagueId })
+    });
+    const data = await r.json();
+    resultEl.style.cssText = `display:block;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;${data.ok ? 'background:rgba(56,142,60,0.15);color:#81C784;border:1px solid rgba(56,142,60,0.3)' : 'background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3)'}`;
+    resultEl.textContent = data.ok ? `🛡️ ${data.msg}` : `❌ ${data.error}`;
+  } catch(e) {
+    resultEl.style.cssText = 'display:block;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3)';
+    resultEl.textContent = '❌ ' + e.message;
   }
 }
 
