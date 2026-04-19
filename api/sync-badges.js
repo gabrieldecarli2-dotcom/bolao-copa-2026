@@ -1,6 +1,4 @@
 // api/sync-badges.js
-// Busca badges usando lookupevent para pegar team IDs,
-// depois lookupteam para pegar o badge de cada time único
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -22,73 +20,62 @@ module.exports = async function handler(req, res) {
   };
 
   try {
-    // 1. Pega todos os api_jogo_ids do banco
+    // Pega um jogo do banco
     const jogosRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,api_jogo_id,time1,time2`,
+      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,api_jogo_id,time1,time2&limit=1`,
       { headers: dbH }
     );
     const jogos = await jogosRes.json() || [];
-    if (!jogos.length)
-      return res.status(200).json({ ok: false, msg: 'Nenhum jogo com api_jogo_id no banco' });
+    if (!jogos.length) return res.status(200).json({ ok: false, msg: 'Nenhum jogo no banco' });
 
-    // 2. Busca eventos em lotes de 10 para extrair team IDs únicos
-    // Limita a 10 eventos para não exceder rate limit
-    const sample = jogos.slice(0, 10);
-    const teamIdMap = {}; // teamName -> teamId
+    const firstJogo = jogos[0];
 
-    for (const jogo of sample) {
-      try {
-        const r = await fetch(`${BASE}/lookupevent.php?id=${jogo.api_jogo_id}`);
-        const d = await r.json();
-        const e = d.events?.[0];
-        if (!e) continue;
-        if (e.idHomeTeam && e.strHomeTeam) teamIdMap[e.strHomeTeam] = e.idHomeTeam;
-        if (e.idAwayTeam && e.strAwayTeam) teamIdMap[e.strAwayTeam] = e.idAwayTeam;
-      } catch(e) { continue; }
+    // Debug: o que o lookupevent retorna?
+    const evRes = await fetch(`${BASE}/lookupevent.php?id=${firstJogo.api_jogo_id}`);
+    const evText = await evRes.text();
+    let evData;
+    try { evData = JSON.parse(evText); } catch(e) { return res.status(200).json({ ok: false, msg: 'lookupevent retornou HTML', raw: evText.substring(0, 300) }); }
+
+    const ev = evData.events?.[0];
+    if (!ev) return res.status(200).json({ ok: false, msg: 'Evento vazio', evData });
+
+    // Mostra os campos disponíveis no evento
+    const eventFields = {
+      idEvent: ev.idEvent,
+      strHomeTeam: ev.strHomeTeam,
+      idHomeTeam: ev.idHomeTeam,
+      strAwayTeam: ev.strAwayTeam,
+      idAwayTeam: ev.idAwayTeam,
+      strHomeTeamBadge: ev.strHomeTeamBadge,
+      strAwayTeamBadge: ev.strAwayTeamBadge,
+      strLeague: ev.strLeague,
+    };
+
+    // Se o evento já tem os badges direto!
+    if (ev.strHomeTeamBadge || ev.strAwayTeamBadge) {
+      return res.status(200).json({ ok: true, msg: 'Evento já tem badges!', eventFields });
     }
 
-    if (!Object.keys(teamIdMap).length)
-      return res.status(200).json({ ok: false, msg: 'Não foi possível extrair IDs dos times', sample_jogo: sample[0] });
-
-    // 3. Busca badge de cada time único (máx 20 times)
-    const badgeMap = {}; // teamName -> badgeUrl
-    const uniqueTeams = Object.entries(teamIdMap).slice(0, 20);
-
-    for (const [name, tid] of uniqueTeams) {
-      try {
-        const r = await fetch(`${BASE}/lookupteam.php?id=${tid}`);
-        const d = await r.json();
-        const badge = d.teams?.[0]?.strTeamBadge;
-        if (badge) badgeMap[name] = badge + '/small';
-      } catch(e) { continue; }
-    }
-
-    // 4. Atualiza todos os jogos no banco
-    let updated = 0;
-    const noMatch = new Set();
-
-    for (const jogo of jogos) {
-      const b1 = badgeMap[jogo.time1];
-      const b2 = badgeMap[jogo.time2];
-      if (!b1) noMatch.add(jogo.time1);
-      if (!b2) noMatch.add(jogo.time2);
-      if (!b1 && !b2) continue;
-
-      await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogo.id}`, {
-        method: 'PATCH', headers: dbH,
-        body: JSON.stringify({ ...(b1 && { flag1: b1 }), ...(b2 && { flag2: b2 }) })
+    // Se tem IDs, testa lookupteam
+    if (ev.idHomeTeam) {
+      const teamRes = await fetch(`${BASE}/lookupteam.php?id=${ev.idHomeTeam}`);
+      const teamText = await teamRes.text();
+      let teamData;
+      try { teamData = JSON.parse(teamText); } catch(e) { return res.status(200).json({ ok: false, msg: 'lookupteam retornou HTML', raw: teamText.substring(0,200) }); }
+      const team = teamData.teams?.[0];
+      return res.status(200).json({
+        ok: false,
+        msg: 'Diagnóstico completo',
+        eventFields,
+        team_sample: {
+          strTeam: team?.strTeam,
+          strTeamBadge: team?.strTeamBadge,
+          strTeamBadge_with_size: team?.strTeamBadge ? team.strTeamBadge + '/small' : null
+        }
       });
-      updated++;
     }
 
-    return res.status(200).json({
-      ok: updated > 0,
-      msg: `${updated} jogos atualizados com escudos`,
-      updated,
-      badges_found: Object.keys(badgeMap).length,
-      team_names_api: Object.keys(badgeMap),
-      no_match: [...noMatch].slice(0, 10)
-    });
+    return res.status(200).json({ ok: false, msg: 'idHomeTeam não encontrado no evento', eventFields });
 
   } catch(err) {
     return res.status(500).json({ error: err.message });
