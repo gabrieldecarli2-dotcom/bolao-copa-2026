@@ -1647,7 +1647,7 @@ function renderPalpitesByUser() {
   }
 
   container.innerHTML = users.map((u, idx) => {
-    const userPalpites = allPalpitesAdmin.filter(p => p.usuario_id === u.id);
+    const userPalpites = allPalpitesAdmin.filter(p => String(p.usuario_id) === String(u.id));
     const totalJogos = allJogosAdmin.filter(j => j.status === 'aberto' || j.status === 'ao_vivo' || j.status === 'encerrado').length;
     const palpitados = userPalpites.length;
     const perc = totalJogos > 0 ? Math.round(palpitados / totalJogos * 100) : 0;
