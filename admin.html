@@ -1081,15 +1081,59 @@ async function addJogo() {
 // RANKING
 // ════════════════════════════════════════════
 async function loadRanking() {
-  const { data: users } = await db.from('usuarios').select('*').order('pontos',{ascending:false});
-  const total = (users?.filter(u=>u.pago).length||0) * 20;
-  const prizes = [Math.floor(total*0.6), Math.floor(total*0.25), Math.floor(total*0.15)];
-  const medals = ['🥇','🥈','🥉'];
+  const [{ data: users }, { data: configs }] = await Promise.all([
+    db.from('usuarios').select('*').order('pontos',{ascending:false}),
+    db.from('configuracoes').select('*')
+  ]);
 
-  document.getElementById('prize-info').textContent = `Prêmio total: R$ ${total}`;
-  document.getElementById('rank-table').innerHTML = (users||[]).map((u,i)=>`
-    <tr style="${i<3?'background:rgba(245,200,66,0.04)':''}">
-      <td style="font-family:'Bebas Neue';font-size:22px;color:${i===0?'#FFD700':i===1?'#C0C0C0':i===2?'#CD7F32':'var(--text3)'}">${medals[i]||i+1}</td>
+  const getCfg = k => parseFloat(configs?.find(c=>c.chave===k)?.valor || 0);
+  const taxa = getCfg('taxa_participacao') || 20;
+  const p1 = getCfg('perc_premio_1');
+  const p2 = getCfg('perc_premio_2');
+  const p3 = getCfg('perc_premio_3');
+  const pagos = (users||[]).filter(u=>u.pago).length;
+  const total = pagos * taxa;
+  const prizePool = [
+    p1 ? Math.floor(total * p1 / 100) : 0,
+    p2 ? Math.floor(total * p2 / 100) : 0,
+    p3 ? Math.floor(total * p3 / 100) : 0,
+  ];
+  const medals = ['🥇','🥈','🥉'];
+  const colors = ['#FFD700','#C0C0C0','#CD7F32'];
+
+  document.getElementById('prize-info').textContent = `Prêmio total: R$ ${total.toLocaleString('pt-BR')}`;
+
+  // Calcula posições reais com empate
+  const list = users || [];
+  let posicaoReal = [];
+  let posAtual = 1;
+  for (let i = 0; i < list.length; i++) {
+    if (i > 0 && list[i].pontos === list[i-1].pontos) posicaoReal.push(posicaoReal[i-1]);
+    else posicaoReal.push(posAtual);
+    posAtual++;
+  }
+
+  function getPrize(idx) {
+    const pos = posicaoReal[idx];
+    if (pos > 3) return 0;
+    const countTied = posicaoReal.filter(p => p === pos).length;
+    let t = 0;
+    for (let slot = pos; slot <= Math.min(pos + countTied - 1, 3); slot++) t += prizePool[slot-1] || 0;
+    return Math.floor(t / countTied);
+  }
+
+  document.getElementById('rank-table').innerHTML = list.map((u,i) => {
+    const pos = posicaoReal[i];
+    const medal = medals[pos-1] || pos;
+    const color = colors[pos-1] || 'var(--text3)';
+    const prizeVal = getPrize(i);
+    const countTied = posicaoReal.filter(p => p === pos).length;
+    const prizeLabel = prizeVal > 0
+      ? `<span class="badge badge-gold">R$ ${prizeVal.toLocaleString('pt-BR')}${countTied > 1 ? ` ÷${countTied}` : ''}</span>`
+      : '-';
+    return `
+    <tr style="${pos<=3?'background:rgba(245,200,66,0.04)':''}">
+      <td style="font-family:'Bebas Neue';font-size:22px;color:${color}">${medal}</td>
       <td>
         <div style="display:flex;align-items:center;gap:10px">
           <div class="user-ava">${u.avatar_iniciais||'?'}</div>
@@ -1102,8 +1146,9 @@ async function loadRanking() {
       <td><span style="font-family:'Bebas Neue';font-size:24px;color:var(--gold)">${u.pontos||0}</span></td>
       <td>${u.palpites_exatos||0}</td>
       <td>${u.palpites_certos||0}</td>
-      <td>${prizes[i]?`<span class="badge badge-gold">R$ ${prizes[i]}</span>`:'-'}</td>
-    </tr>`).join('') || '<tr><td colspan="6" class="loading">Nenhum participante</td></tr>';
+      <td>${prizeLabel}</td>
+    </tr>`;
+  }).join('') || '<tr><td colspan="6" class="loading">Nenhum participante</td></tr>';
 }
 
 // ════════════════════════════════════════════
