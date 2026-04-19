@@ -232,6 +232,34 @@
 
   ::-webkit-scrollbar{width:6px} ::-webkit-scrollbar-track{background:var(--dark2)} ::-webkit-scrollbar-thumb{background:rgba(245,200,66,0.25);border-radius:3px}
 
+  /* ── BOTTOM NAV MOBILE ── */
+  .bottom-nav {
+    display: none;
+    position: fixed;
+    bottom: 0; left: 0; right: 0;
+    background: rgba(15,20,15,0.97);
+    border-top: 1px solid rgba(245,200,66,0.15);
+    backdrop-filter: blur(12px);
+    z-index: 200;
+    padding: 8px 0 env(safe-area-inset-bottom, 8px);
+  }
+  .bottom-nav-inner {
+    display: flex;
+    justify-content: space-around;
+    align-items: center;
+  }
+  .bottom-nav-btn {
+    display: flex; flex-direction: column; align-items: center; gap: 3px;
+    background: none; border: none; color: var(--text3);
+    font-family: 'Barlow Condensed'; font-size: 10px; font-weight: 700;
+    letter-spacing: 1px; text-transform: uppercase;
+    padding: 6px 12px; border-radius: 10px; cursor: pointer;
+    transition: all 0.2s; min-width: 56px;
+  }
+  .bottom-nav-btn .bnav-icon { font-size: 20px; line-height: 1; }
+  .bottom-nav-btn.active, .bottom-nav-btn:active { color: var(--gold); }
+  .bottom-nav-btn.active .bnav-icon { transform: scale(1.1); }
+
   @media(max-width:600px){
     .hero{flex-direction:column;gap:20px;padding:24px 20px}
     .hero-stats{gap:16px}
@@ -242,6 +270,10 @@
     .ranking-header>*:nth-child(5),.ranking-row>*:nth-child(5){display:none}
     .auth-box{padding:32px 24px}
     .nav-links{display:none}
+    .logout-btn{display:none}
+    .bottom-nav{display:block}
+    .main-wrapper{padding-bottom:80px}
+    #main-nav .nav-right { gap:6px; }
   }
 </style>
 </head>
@@ -366,6 +398,27 @@
       </div>
 
     </div>
+  </div>
+</div>
+
+<!-- ════ BOTTOM NAV MOBILE ════ -->
+<div class="bottom-nav" id="bottom-nav" style="display:none">
+  <div class="bottom-nav-inner">
+    <button class="bottom-nav-btn active" onclick="goPage('home');setBottomActive(this)" id="bnav-home">
+      <span class="bnav-icon">🏠</span>Início
+    </button>
+    <button class="bottom-nav-btn" onclick="goPage('jogos');setBottomActive(this)" id="bnav-jogos">
+      <span class="bnav-icon">⚽</span>Jogos
+    </button>
+    <button class="bottom-nav-btn" onclick="goPage('ranking');setBottomActive(this)" id="bnav-ranking">
+      <span class="bnav-icon">🏅</span>Ranking
+    </button>
+    <button class="bottom-nav-btn" onclick="goPage('meus-palpites');setBottomActive(this)" id="bnav-palpites">
+      <span class="bnav-icon">📋</span>Palpites
+    </button>
+    <button class="bottom-nav-btn" onclick="goPage('perfil');setBottomActive(this)" id="bnav-perfil">
+      <span class="bnav-icon">👤</span>Perfil
+    </button>
   </div>
 </div>
 
@@ -712,6 +765,7 @@ async function doLogout() {
   await db.auth.signOut();
   currentUser = null; currentProfile = null;
   document.getElementById('main-nav').style.display = 'none';
+  document.getElementById('bottom-nav').style.display = 'none';
   // Reseta todas as páginas
   showPage('page-auth');
 }
@@ -744,6 +798,7 @@ function enterApp() {
   // Esconde todas as páginas de configuração/auth
   document.querySelectorAll('.page').forEach(p => { p.classList.remove('active'); p.style.display = 'none'; });
   document.getElementById('main-nav').style.display = 'flex';
+  document.getElementById('bottom-nav').style.display = 'block';
   document.getElementById('page-config').style.display = 'none';
   document.getElementById('page-auth').style.display = 'none';
   document.getElementById('page-pagamento').style.display = 'none';
@@ -1357,6 +1412,11 @@ function toggleEyePerfil(fieldId, btn) {
   const input = document.getElementById(fieldId);
   input.type = input.type === 'password' ? 'text' : 'password';
   btn.textContent = input.type === 'password' ? '👁️' : '🙈';
+}
+
+function setBottomActive(btn) {
+  document.querySelectorAll('.bottom-nav-btn').forEach(b => b.classList.remove('active'));
+  btn.classList.add('active');
 }
 
 function showToast(msg, isError=false) {
