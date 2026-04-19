@@ -497,6 +497,8 @@
     <div class="section-header" style="margin-bottom:20px"><div class="section-title">⚽ Todos os Jogos</div></div>
     <div class="tabs" id="jogos-tabs">
       <button class="tab active" onclick="filterJogos('todos',this)">Todos</button>
+      <button class="tab" onclick="filterJogos('hoje',this)">📅 Hoje</button>
+      <button class="tab" onclick="filterJogos('amanha',this)">📆 Amanhã</button>
       <button class="tab" onclick="filterJogos('aberto',this)">Abertos</button>
       <button class="tab" onclick="filterJogos('ao_vivo',this)">🔴 Ao Vivo</button>
       <button class="tab" onclick="filterJogos('encerrado',this)">Encerrados</button>
@@ -881,9 +883,22 @@ async function loadHome() {
 }
 
 async function loadHomeGames() {
-  const { data: jogos } = await db.from('jogos').select('*').in('status',['aberto','ao_vivo']).order('data_hora').limit(4);
-  if (!jogos) return;
-  // Atualiza allJogos completamente com dados frescos do banco
+  // Busca jogos de hoje primeiro
+  const hoje = new Date();
+  const inicioDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString();
+  const fimDia = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59).toISOString();
+  const { data: jogosHoje } = await db.from('jogos').select('*')
+    .gte('data_hora', inicioDia).lte('data_hora', fimDia).order('data_hora');
+
+  // Se não tiver hoje, pega os próximos 4
+  let jogos = jogosHoje?.length
+    ? jogosHoje
+    : ((await db.from('jogos').select('*').in('status',['aberto','ao_vivo']).order('data_hora').limit(4)).data || []);
+
+  if (!jogos.length) {
+    document.getElementById('home-games').innerHTML = '<div class="loading">Nenhum jogo em breve</div>';
+    return;
+  }
   jogos.forEach(j => {
     const idx = allJogos.findIndex(aj => aj.id === j.id);
     if (idx >= 0) { allJogos[idx] = {...allJogos[idx], ...j}; }
@@ -891,7 +906,7 @@ async function loadHomeGames() {
   });
   const { data: palpites } = await db.from('palpites').select('*').eq('usuario_id', currentUser.id);
   allPalpites = palpites || [];
-  document.getElementById('home-games').innerHTML = jogos.length ? jogos.map(j=>renderGameCard(j)).join('') : '<div class="loading">Nenhum jogo aberto no momento</div>';
+  document.getElementById('home-games').innerHTML = jogos.map(j=>renderGameCard(j)).join('');
 }
 
 async function loadHomeRanking() {
@@ -925,7 +940,19 @@ async function loadPrizes() {
 // ════════════════════════════════════════════════════
 async function loadJogos(filter='todos') {
   let query = db.from('jogos').select('*').order('data_hora');
-  if(filter!=='todos') query = query.eq('status',filter);
+  if (filter === 'hoje') {
+    const hoje = new Date();
+    const ini = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate()).toISOString();
+    const fim = new Date(hoje.getFullYear(), hoje.getMonth(), hoje.getDate(), 23, 59, 59).toISOString();
+    query = query.gte('data_hora', ini).lte('data_hora', fim);
+  } else if (filter === 'amanha') {
+    const amanha = new Date(); amanha.setDate(amanha.getDate() + 1);
+    const ini = new Date(amanha.getFullYear(), amanha.getMonth(), amanha.getDate()).toISOString();
+    const fim = new Date(amanha.getFullYear(), amanha.getMonth(), amanha.getDate(), 23, 59, 59).toISOString();
+    query = query.gte('data_hora', ini).lte('data_hora', fim);
+  } else if (filter !== 'todos') {
+    query = query.eq('status', filter);
+  }
   const { data: jogos } = await query;
   const { data: palpites } = await db.from('palpites').select('*').eq('usuario_id',currentUser.id);
   allJogos = jogos || []; // dados frescos do banco — sobrescreve cache
@@ -1209,23 +1236,25 @@ async function loadMyBets() {
       : p.pontos_ganhos===1 ? '<span class="mybet-pts win">+1 pt ✅</span>'
       : '<span class="mybet-pts" style="background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.2)">0 pts ❌</span>';
     return `
-    <div class="mybet-row">
-      <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px">
-        <span style="font-size:22px;display:inline-flex;align-items:center">${renderFlag(jogo.flag1,jogo.time1,22)}</span>
-        <span style="font-weight:600">${jogo.time1}</span>
-        <span style="color:var(--text3);font-size:12px;font-weight:700">VS</span>
-        <span style="font-weight:600">${jogo.time2}</span>
-        <span style="font-size:22px;display:inline-flex;align-items:center">${renderFlag(jogo.flag2,jogo.time2,22)}</span>
+    <div class="mybet-row" style="flex-wrap:wrap;gap:10px">
+      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+        <span style="flex-shrink:0">${renderFlag(jogo.flag1,jogo.time1,24)}</span>
+        <span style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${jogo.time1}</span>
+        <span style="color:var(--text3);font-size:11px;font-weight:700;flex-shrink:0">VS</span>
+        <span style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${jogo.time2}</span>
+        <span style="flex-shrink:0">${renderFlag(jogo.flag2,jogo.time2,24)}</span>
       </div>
-      <div>
-        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Resultado</div>
-        <div style="font-family:'Bebas Neue';font-size:20px;letter-spacing:3px">${jogo.status!=='aberto'?`${jogo.gol_time1}:${jogo.gol_time2}`:'Não iniciado'}</div>
+      <div style="display:flex;align-items:center;gap:16px;flex-shrink:0">
+        <div style="text-align:center">
+          <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Result.</div>
+          <div style="font-family:'Bebas Neue';font-size:18px;letter-spacing:2px">${jogo.status!=='aberto'?`${jogo.gol_time1}:${jogo.gol_time2}`:'–'}</div>
+        </div>
+        <div style="text-align:center">
+          <div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Palpite</div>
+          <div style="font-family:'Bebas Neue';font-size:18px;color:var(--gold);letter-spacing:2px">${p.palpite_time1}:${p.palpite_time2}</div>
+        </div>
+        ${badge}
       </div>
-      <div>
-        <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Palpite</div>
-        <div style="font-family:'Bebas Neue';font-size:20px;color:var(--gold);letter-spacing:3px">${p.palpite_time1}:${p.palpite_time2}</div>
-      </div>
-      ${badge}
     </div>`;
   }).join('');
 }
@@ -1239,7 +1268,7 @@ function copyInviteLink() {
 }
 function shareWhatsApp() {
   const link = document.getElementById('invite-link').value;
-  const msg = encodeURIComponent(`🏆 Participe do Bolão Copa 2026! Taxa R$20 · Prêmio R$1.200+\n${link}`);
+  const msg = encodeURIComponent(`🏆 Participe do Bolão Copa 2026!\nVenha dar seus palpites nos jogos!\n${link}`);
   window.open(`https://wa.me/?text=${msg}`, '_blank');
 }
 function shareTelegram() {
