@@ -115,6 +115,10 @@
   .games-grid { display:grid; grid-template-columns:repeat(auto-fill,minmax(320px,1fr)); gap:16px; }
   .game-card { background:var(--card); border:1px solid rgba(255,255,255,0.07); border-radius:16px; padding:20px; transition:all 0.2s; position:relative; overflow:hidden; }
   .game-card:hover { border-color:rgba(245,200,66,0.25); transform:translateY(-2px); box-shadow:0 8px 30px rgba(0,0,0,0.3); }
+  .team-score { font-family:'Bebas Neue'; font-size:32px; color:var(--gold); line-height:1; margin-top:4px; }
+  .live-score-bar { display:flex; align-items:center; justify-content:center; gap:12px; margin:12px 0 4px; padding:10px; background:rgba(245,200,66,0.08); border-radius:10px; border:1px solid rgba(245,200,66,0.15); }
+  .live-score-num { font-family:'Bebas Neue'; font-size:38px; color:var(--gold); line-height:1; }
+  .live-score-sep { font-family:'Bebas Neue'; font-size:22px; color:var(--text3); }
   .game-card.has-palpite { 
     border-color:rgba(56,142,60,0.5); 
     background:linear-gradient(135deg, rgba(56,142,60,0.08) 0%, var(--card) 100%);
@@ -886,9 +890,7 @@ function renderGameCard(jogo) {
     : isFechado ? '<span class="game-status done" style="background:rgba(255,167,38,0.15);color:#FFA726;border:none">⏰ Fechado</span>'
     : '<span class="game-status done">Encerrado</span>';
 
-  const centerContent = (isDone||isLive)
-    ? `<div class="game-score-actual">${jogo.gol_time1??'?'} : ${jogo.gol_time2??'?'}</div>`
-    : `<div class="game-vs">VS</div>`;
+  // Score displayed inline with teams now
 
   let palpiteResult = '';
   if (palpite && isDone) {
@@ -909,10 +911,24 @@ function renderGameCard(jogo) {
       ${statusHtml}
     </div>
     <div class="game-teams">
-      <div class="game-team"><span class="team-flag">${jogo.flag1||'🏳️'}</span><div class="team-name">${jogo.time1}</div></div>
-      ${centerContent}
-      <div class="game-team"><span class="team-flag">${jogo.flag2||'🏳️'}</span><div class="team-name">${jogo.time2}</div></div>
+      <div class="game-team">
+        <span class="team-flag">${jogo.flag1||'🏳️'}</span>
+        <div class="team-name">${jogo.time1}</div>
+        ${(isDone||isLive) ? `<div class="team-score">${jogo.gol_time1??0}</div>` : ''}
+      </div>
+      <div style="font-family:'Bebas Neue';font-size:18px;color:var(--text3);flex-shrink:0">${(isDone||isLive) ? 'VS' : 'VS'}</div>
+      <div class="game-team">
+        <span class="team-flag">${jogo.flag2||'🏳️'}</span>
+        <div class="team-name">${jogo.time2}</div>
+        ${(isDone||isLive) ? `<div class="team-score">${jogo.gol_time2??0}</div>` : ''}
+      </div>
     </div>
+    ${(isDone||isLive) ? `
+    <div class="live-score-bar">
+      <span class="live-score-num">${jogo.gol_time1??0}</span>
+      <span class="live-score-sep">×</span>
+      <span class="live-score-num">${jogo.gol_time2??0}</span>
+    </div>` : ''}
     <div class="palpite-area">
       <div class="palpite-label">🎯 Seu Palpite</div>
       <div class="palpite-inputs">
