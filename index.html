@@ -870,6 +870,14 @@ function getMyPalpite(jogoId) {
   return allPalpites.find(p=>p.jogo_id===jogoId);
 }
 
+function renderFlag(flag, name) {
+  if (!flag) return '🏳️';
+  if (flag.startsWith('http')) {
+    return `<img src="${flag}" alt="${name}" style="width:36px;height:36px;object-fit:contain;border-radius:4px" onerror="this.outerHTML='🏳️'">`;
+  }
+  return flag;
+}
+
 function renderGameCard(jogo) {
   const isLive = jogo.status==='ao_vivo';
   const isDone = jogo.status==='encerrado';
@@ -910,13 +918,13 @@ function renderGameCard(jogo) {
     </div>
     <div class="game-teams">
       <div class="game-team">
-        <span class="team-flag">${jogo.flag1||'🏳️'}</span>
+        <span class="team-flag">${renderFlag(jogo.flag1, jogo.time1)}</span>
         <div class="team-name">${jogo.time1}</div>
         ${(isDone||isLive) ? `<div class="team-score">${jogo.gol_time1??0}</div>` : ''}
       </div>
       <div style="font-family:'Bebas Neue';font-size:18px;color:var(--text3);flex-shrink:0">${(isDone||isLive) ? 'VS' : 'VS'}</div>
       <div class="game-team">
-        <span class="team-flag">${jogo.flag2||'🏳️'}</span>
+        <span class="team-flag">${renderFlag(jogo.flag2, jogo.time2)}</span>
         <div class="team-name">${jogo.time2}</div>
         ${(isDone||isLive) ? `<div class="team-score">${jogo.gol_time2??0}</div>` : ''}
       </div>
