@@ -102,21 +102,35 @@ module.exports = async function handler(req, res) {
       if (!events.length) {
         return res.status(200).json({
           ok: false,
-          msg: 'Nenhum jogo ao vivo encontrado agora',
+          msg: 'Nenhum jogo ao vivo no momento',
           raw_sample: lastRaw,
-          tip: 'Tente quando houver jogos acontecendo ao vivo'
         });
       }
 
+      // Filtra só jogos de futebol da liga correta se lid informado
+      const filteredEvents = lid
+        ? events.filter(e => e.idLeague === lid || e.strLeague?.toLowerCase().includes('brazilian') || e.strLeague?.toLowerCase().includes('brasileir'))
+        : events;
+
       let updated = 0;
+      const notInDB = [];
+
       for (const e of events) {
-        const g1 = parseInt(e.intHomeScore ?? e.strHomeScore ?? -1);
-        const g2 = parseInt(e.intAwayScore ?? e.strAwayScore ?? -1);
+        const g1 = parseInt(e.intHomeScore ?? -1);
+        const g2 = parseInt(e.intAwayScore ?? -1);
         if (g1 < 0 || g2 < 0) continue;
 
-        const check = await fetch(`${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=eq.${e.idEvent}&select=id,status`, { headers: dbH });
+        // Busca no banco pelo api_jogo_id
+        const check = await fetch(
+          `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=eq.${e.idEvent}&select=id,status`,
+          { headers: dbH }
+        );
         const jogo = (await check.json())?.[0];
-        if (!jogo) continue;
+
+        if (!jogo) {
+          notInDB.push(`${e.strHomeTeam} x ${e.strAwayTeam} (${e.strLeague}) id:${e.idEvent}`);
+          continue;
+        }
 
         await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogo.id}`, {
           method: 'PATCH', headers: dbH,
@@ -124,12 +138,17 @@ module.exports = async function handler(req, res) {
         });
         updated++;
       }
+
       return res.status(200).json({
         ok: true,
-        msg: `${updated} jogos ao vivo atualizados de ${events.length} encontrados`,
-        live: events.length,
+        msg: updated > 0
+          ? `🔴 ${updated} jogos ao vivo atualizados!`
+          : `${events.length} jogos ao vivo encontrados mas nenhum está no seu banco. Veja not_in_db.`,
+        live_total: events.length,
         updated,
-        sample: events.slice(0,3).map(e => `${e.strHomeTeam} ${e.intHomeScore} x ${e.intAwayScore} ${e.strAwayTeam}`)
+        leagues: [...new Set(events.map(e => `${e.strLeague} (${e.idLeague})`))],
+        not_in_db: notInDB.slice(0, 5),
+        sample: events.slice(0,3).map(e => `${e.strHomeTeam} ${e.intHomeScore}x${e.intAwayScore} ${e.strAwayTeam} - ${e.strLeague}`)
       });
     }
 
