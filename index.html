@@ -429,6 +429,7 @@
         <div class="regra-card"><div class="regra-icon">✅</div><div><h3><span class="pts-badge">1</span> Resultado Certo</h3><p>Acertou quem venceu ou que seria empate, mas errou o placar exato. Ex: chutou 1×0 e terminou 2×0. <strong style="color:var(--gold)">Vale 1 ponto.</strong></p></div></div>
         <div class="regra-card"><div class="regra-icon">❌</div><div><h3><span class="pts-badge">0</span> Errou</h3><p>Não acertou nem o vencedor. Ex: chutou vitória do Brasil e o jogo terminou em empate ou derrota. <strong style="color:var(--red)">Zero pontos.</strong></p></div></div>
         <div class="regra-card"><div class="regra-icon">⏰</div><div><h3>Prazo do Palpite</h3><p>Os palpites devem ser enviados até <strong style="color:var(--gold)">5 minutos antes</strong> do início do jogo. Após isso, o jogo trava.</p></div></div>
+        <div class="regra-card"><div class="regra-icon">🤝</div><div><h3>Empate no Ranking</h3><p>Se dois ou mais participantes terminarem com a mesma pontuação na mesma posição, o prêmio daquela posição é <strong style="color:var(--gold)">dividido igualmente</strong> entre eles. Ex: 3 empatados em 1º dividem o prêmio do 1º lugar em 3 partes iguais.</p></div></div>
       </div>
     </div>
   </div>
@@ -1024,23 +1025,66 @@ async function renderRankingRows(containerId, users) {
   const p2 = getCfg('perc_premio_2');
   const p3 = getCfg('perc_premio_3');
   const total = (pagos||0) * taxa;
-  const prizeVals = [
+  const prizePool = [
     p1 ? Math.floor(total * p1 / 100) : 0,
     p2 ? Math.floor(total * p2 / 100) : 0,
     p3 ? Math.floor(total * p3 / 100) : 0,
   ];
+
+  // Detecta empates e divide prêmios
+  // Atribui posição real considerando empates
   const posClass = ['gold','silver','bronze'];
+
+  // Calcula posições reais com empate
+  let posicaoReal = [];
+  let posAtual = 1;
+  for (let i = 0; i < users.length; i++) {
+    if (i > 0 && users[i].pontos === users[i-1].pontos) {
+      posicaoReal.push(posicaoReal[i-1]); // mesma posição
+    } else {
+      posicaoReal.push(posAtual);
+    }
+    posAtual++;
+  }
+
+  // Para cada posição premiada (1,2,3), verifica quantos empataram
+  // e divide o prêmio entre eles
+  function getPrizeForUser(idx) {
+    const pos = posicaoReal[idx]; // 1, 2 ou 3
+    if (pos > 3) return 0;
+
+    // Prêmios que esta posição pode absorver
+    // Ex: 3 empatados em 1º absorvem prêmio 1+2+3 dividido por 3
+    let totalPrize = 0;
+    let countTied = posicaoReal.filter(p => p === pos).length;
+
+    // Quais slots de prêmio essa posição ocupa?
+    // pos=1 com 3 empatados → ocupa slots 1,2,3
+    for (let slot = pos; slot < pos + countTied && slot <= 3; slot++) {
+      totalPrize += prizePool[slot - 1] || 0;
+    }
+
+    return Math.floor(totalPrize / countTied);
+  }
+
   container.innerHTML = users.map((u,i)=>{
     const isMe = currentUser && u.id===currentUser.id;
-    const pos = i+1;
+    const pos = posicaoReal[i];
+    const medal = medals[pos-1] || pos;
+    const prizeVal = getPrizeForUser(i);
+    const countTied = posicaoReal.filter(p => p === pos).length;
+    const prizeLabel = prizeVal > 0
+      ? `<span class="prize-tag">R$${prizeVal.toLocaleString('pt-BR')}${countTied > 1 ? ` ÷${countTied}` : ''}</span>`
+      : '';
+
     return `
     <div class="ranking-row" style="${isMe?'background:rgba(245,200,66,0.06);':''}">
-      <div class="rank-pos ${posClass[i]||''}">${medals[i]||pos}</div>
+      <div class="rank-pos ${posClass[pos-1]||''}">${medal}</div>
       <div class="rank-user">
         <div class="rank-avatar" style="${isMe?'background:linear-gradient(135deg,var(--gold),var(--gold2));color:var(--dark)':''}">${u.avatar_iniciais||'?'}</div>
         <div>
           <div class="rank-name">${u.nome}${isMe?' <span style="font-size:11px;color:var(--gold)">(você)</span>':''}</div>
-          <div class="rank-tag">${prizeVals[i]?`<span class="prize-tag">R$${prizeVals[i]}</span>`:''}</div>
+          <div class="rank-tag">${prizeLabel}</div>
         </div>
       </div>
       <div class="rank-pts">${u.pontos||0}</div>
