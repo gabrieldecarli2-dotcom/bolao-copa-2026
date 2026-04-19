@@ -78,18 +78,38 @@ module.exports = async function handler(req, res) {
     // ── LIVESCORES (v2 API com header auth) ──
     if (action === 'live') {
       const BASE_V2 = 'https://www.thesportsdb.com/api/v2/json';
-      const r = await fetch(`${BASE_V2}/livescore.php?l=${lid}`, {
-        headers: { 'X-API-KEY': SPORTS_KEY }
-      });
 
-      const text = await r.text();
-      let data;
-      try { data = JSON.parse(text); }
-      catch(e) { return res.status(500).json({ ok: false, error: 'Resposta inválida: ' + text.substring(0,200) }); }
+      // Tenta diferentes endpoints da v2
+      const endpoints = [
+        `${BASE_V2}/livescore.php?l=${lid}`,
+        `${BASE_V2}/livescore.php?s=Soccer`,
+        `${BASE_V2}/livescore.php`,
+      ];
 
-      const events = data.events || data.livescores || [];
+      let events = [];
+      let lastRaw = '';
+
+      for (const url of endpoints) {
+        const r = await fetch(url, { headers: { 'X-API-KEY': SPORTS_KEY } });
+        const text = await r.text();
+        lastRaw = text.substring(0, 400);
+        try {
+          const data = JSON.parse(text);
+          const evs = data.events || data.livescores || data.results || [];
+          if (evs.length) { events = evs; break; }
+        } catch(e) {}
+      }
+
+      if (!events.length) {
+        return res.status(200).json({
+          ok: false,
+          msg: 'Nenhum jogo ao vivo encontrado agora',
+          raw_sample: lastRaw,
+          tip: 'Tente quando houver jogos acontecendo ao vivo'
+        });
+      }
+
       let updated = 0;
-
       for (const e of events) {
         const g1 = parseInt(e.intHomeScore ?? e.strHomeScore ?? -1);
         const g2 = parseInt(e.intAwayScore ?? e.strAwayScore ?? -1);
@@ -105,7 +125,13 @@ module.exports = async function handler(req, res) {
         });
         updated++;
       }
-      return res.status(200).json({ ok: true, msg: `${updated} jogos ao vivo atualizados de ${events.length} encontrados`, live: events.length, updated });
+      return res.status(200).json({
+        ok: true,
+        msg: `${updated} jogos ao vivo atualizados de ${events.length} encontrados`,
+        live: events.length,
+        updated,
+        sample: events.slice(0,3).map(e => `${e.strHomeTeam} ${e.intHomeScore} x ${e.intAwayScore} ${e.strAwayTeam}`)
+      });
     }
 
     // ── RESULTADOS RECENTES + CALCULAR PONTOS ──
