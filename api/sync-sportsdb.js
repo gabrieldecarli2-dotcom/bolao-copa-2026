@@ -35,7 +35,7 @@ module.exports = async function handler(req, res) {
         const dataHora = new Date(`${e.dateEvent}T${e.strTime||'12:00:00'}Z`).toISOString();
         await fetch(`${SUPABASE_URL}/rest/v1/jogos`, {
           method: 'POST', headers: dbH,
-          body: JSON.stringify({ api_jogo_id: String(e.idEvent), grupo: e.strRound ? `Rodada ${e.intRound}` : e.strLeague, fase: 'grupo', time1: e.strHomeTeam, flag1: teamFlag(e.strHomeTeam), time2: e.strAwayTeam, flag2: teamFlag(e.strAwayTeam), data_hora: dataHora, status: 'aberto' })
+          body: JSON.stringify({ api_jogo_id: String(e.idEvent), grupo: e.strRound ? `Rodada ${e.intRound}` : e.strLeague, fase: 'grupo', time1: e.strHomeTeam, flag1: '🏳️', time2: e.strAwayTeam, flag2: '🏳️', data_hora: dataHora, status: 'aberto' })
         });
         imported++;
       }
@@ -68,7 +68,7 @@ module.exports = async function handler(req, res) {
         const dataHora = new Date(`${e.dateEvent}T${e.strTime||'12:00:00'}Z`).toISOString();
         await fetch(`${SUPABASE_URL}/rest/v1/jogos`, {
           method: 'POST', headers: dbH,
-          body: JSON.stringify({ api_jogo_id: String(e.idEvent), grupo: e.strRound ? `Rodada ${e.intRound}` : e.strLeague, fase: 'grupo', time1: e.strHomeTeam, flag1: teamFlag(e.strHomeTeam), time2: e.strAwayTeam, flag2: teamFlag(e.strAwayTeam), data_hora: dataHora, status: 'aberto' })
+          body: JSON.stringify({ api_jogo_id: String(e.idEvent), grupo: e.strRound ? `Rodada ${e.intRound}` : e.strLeague, fase: 'grupo', time1: e.strHomeTeam, flag1: '🏳️', time2: e.strAwayTeam, flag2: '🏳️', data_hora: dataHora, status: 'aberto' })
         });
         imported++;
       }
@@ -225,30 +225,4 @@ module.exports = async function handler(req, res) {
   } catch(err) {
     return res.status(500).json({ error: err.message });
   }
-}
-
-function teamFlag(name) {
-  if (!name) return '🏳️';
-  const n = name.toLowerCase();
-  const flags = {
-    'flamengo':'🔴','palmeiras':'💚','corinthians':'⚫','sao paulo':'🔴','são paulo':'🔴',
-    'santos':'⚪','gremio':'🔵','grêmio':'🔵','internacional':'🔴','atletico mineiro':'⚫',
-    'atlético mineiro':'⚫','cruzeiro':'🔵','vasco':'⚫','botafogo':'⚫','fluminense':'🟤',
-    'bahia':'🔵','fortaleza':'🔴','ceara':'⚫','sport':'🔴','athletico':'🔴',
-    'bragantino':'🔴','cuiaba':'🟡','america mineiro':'🟢','coritiba':'🟢','goias':'🟢',
-    'arsenal':'🔴','chelsea':'🔵','liverpool':'🔴','manchester city':'🔵',
-    'manchester united':'🔴','tottenham':'⚪','newcastle':'⚫','west ham':'🔵',
-    'aston villa':'🟣','everton':'🔵','leicester':'🔵','wolves':'🟡',
-    'real madrid':'⚪','barcelona':'🔵','atletico madrid':'🔴','sevilla':'🔴',
-    'valencia':'🟡','villarreal':'🟡','sociedad':'🔵','athletic':'🔴',
-    'juventus':'⚫','inter milan':'🔵','ac milan':'🔴','napoli':'🔵','roma':'🟡','lazio':'🔵',
-    'bayern':'🔴','dortmund':'🟡','leipzig':'🔴','leverkusen':'🔴',
-    'psg':'🔵','paris':'🔵','marseille':'🔵','lyon':'🔵','monaco':'🔴',
-    'ajax':'🔴','porto':'🔵','benfica':'🔴','sporting':'🟢',
-    'celtic':'🟢','rangers':'🔵','psv':'🔴','feyenoord':'🔴',
-  };
-  for (const [key, flag] of Object.entries(flags)) {
-    if (n.includes(key)) return flag;
-  }
-  return '🏳️';
 }
