@@ -149,7 +149,8 @@
   .game-status.done { background:rgba(255,255,255,0.08); color:var(--text3); }
   .game-teams { display:flex; align-items:center; justify-content:space-between; gap:10px; }
   .game-team { text-align:center; flex:1; }
-  .team-flag { font-size:36px; display:block; margin-bottom:6px; }
+  .team-flag { font-size:36px; display:block; margin-bottom:6px; min-height:36px; }
+  .team-flag img { width:36px; height:36px; object-fit:contain; display:block; margin:0 auto; }
   .team-name { font-family:'Barlow Condensed'; font-size:15px; font-weight:700; letter-spacing:1px; text-transform:uppercase; }
   .game-vs { font-family:'Bebas Neue'; font-size:22px; color:var(--text3); flex-shrink:0; }
   .game-score-actual { text-align:center; font-family:'Bebas Neue'; font-size:32px; color:var(--text); margin:0 10px; background:rgba(255,255,255,0.06); border-radius:8px; padding:4px 16px; letter-spacing:4px; }
@@ -870,10 +871,10 @@ function getMyPalpite(jogoId) {
   return allPalpites.find(p=>p.jogo_id===jogoId);
 }
 
-function renderFlag(flag, name) {
+function renderFlag(flag, name, size=36) {
   if (!flag) return '🏳️';
   if (flag.startsWith('http')) {
-    return `<img src="${flag}" alt="${name}" style="width:36px;height:36px;object-fit:contain;border-radius:4px" onerror="this.outerHTML='🏳️'">`;
+    return `<img src="${flag}" alt="${name}" style="width:${size}px;height:${size}px;object-fit:contain;display:block;margin:0 auto" onerror="this.style.display='none';this.insertAdjacentHTML('afterend','🏳️')">`;
   }
   return flag;
 }
@@ -1136,11 +1137,11 @@ async function loadMyBets() {
     return `
     <div class="mybet-row">
       <div style="display:flex;align-items:center;gap:10px;flex:1;min-width:200px">
-        <span style="font-size:22px">${jogo.flag1||'🏳️'}</span>
+        <span style="font-size:22px;display:inline-flex;align-items:center">${renderFlag(jogo.flag1,jogo.time1,22)}</span>
         <span style="font-weight:600">${jogo.time1}</span>
         <span style="color:var(--text3);font-size:12px;font-weight:700">VS</span>
         <span style="font-weight:600">${jogo.time2}</span>
-        <span style="font-size:22px">${jogo.flag2||'🏳️'}</span>
+        <span style="font-size:22px;display:inline-flex;align-items:center">${renderFlag(jogo.flag2,jogo.time2,22)}</span>
       </div>
       <div>
         <div style="font-size:11px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Resultado</div>
