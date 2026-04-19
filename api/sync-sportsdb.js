@@ -94,7 +94,7 @@ module.exports = async function handler(req, res) {
         lastRaw = text.substring(0, 400);
         try {
           const data = JSON.parse(text);
-          const evs = data.events || data.livescores || data.results || [];
+          const evs = data.livescore || data.events || data.livescores || data.results || [];
           if (evs.length) { events = evs; break; }
         } catch(e) {}
       }
