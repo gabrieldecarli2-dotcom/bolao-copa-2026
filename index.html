@@ -820,7 +820,7 @@ async function loadHomeGames() {
 
 async function loadHomeRanking() {
   const { data } = await db.from('usuarios').select('id,nome,avatar_iniciais,pontos,palpites_exatos,palpites_certos').order('pontos',{ascending:false}).limit(5);
-  renderRankingRows('home-ranking', data || []);
+  await renderRankingRows('home-ranking', data || []);
 }
 
 async function loadPrizes() {
@@ -1004,17 +1004,31 @@ async function savePalpite(jogoId) {
 // ════════════════════════════════════════════════════
 async function loadRanking() {
   const { data } = await db.from('usuarios').select('id,nome,avatar_iniciais,pontos,palpites_exatos,palpites_certos').order('pontos',{ascending:false});
-  renderRankingRows('full-ranking', data || []);
+  await renderRankingRows('full-ranking', data || []);
 }
 
-function renderRankingRows(containerId, users) {
+async function renderRankingRows(containerId, users) {
   const medals = ['🥇','🥈','🥉'];
-  const prizes = ['R$','R$','R$'];
   const container = document.getElementById(containerId);
   if (!container) return;
   if (!users.length) { container.innerHTML = '<div class="loading">Nenhum participante ainda</div>'; return; }
-  const total = users.length * 20;
-  const prizeVals = [Math.floor(total*0.6),Math.floor(total*0.25),Math.floor(total*0.15)];
+
+  // Busca configurações de prêmio
+  const [{ data: configs }, { count: pagos }] = await Promise.all([
+    db.from('configuracoes').select('*'),
+    db.from('usuarios').select('*',{count:'exact',head:true}).eq('pago',true)
+  ]);
+  const getCfg = k => parseFloat(configs?.find(c=>c.chave===k)?.valor || 0);
+  const taxa = getCfg('taxa_participacao') || 20;
+  const p1 = getCfg('perc_premio_1');
+  const p2 = getCfg('perc_premio_2');
+  const p3 = getCfg('perc_premio_3');
+  const total = (pagos||0) * taxa;
+  const prizeVals = [
+    p1 ? Math.floor(total * p1 / 100) : 0,
+    p2 ? Math.floor(total * p2 / 100) : 0,
+    p3 ? Math.floor(total * p3 / 100) : 0,
+  ];
   const posClass = ['gold','silver','bronze'];
   container.innerHTML = users.map((u,i)=>{
     const isMe = currentUser && u.id===currentUser.id;
