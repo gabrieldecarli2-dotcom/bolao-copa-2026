@@ -245,12 +245,12 @@
       </div>
     </div>
     <nav class="sidebar-nav">
-      <button class="nav-item active" onclick="goSection('dashboard')"><span class="icon">📊</span><span>Dashboard</span></button>
-      <button class="nav-item" onclick="goSection('participantes')"><span class="icon">👥</span><span>Participantes</span></button>
-      <button class="nav-item" onclick="goSection('jogos')"><span class="icon">⚽</span><span>Jogos</span></button>
-      <button class="nav-item" onclick="goSection('ranking')"><span class="icon">🏅</span><span>Ranking</span></button>
-      <button class="nav-item" onclick="goSection('palpites')"><span class="icon">🎯</span><span>Palpites</span></button>
-      <button class="nav-item" onclick="goSection('config')"><span class="icon">⚙️</span><span>Config</span></button>
+      <button class="nav-item active" onclick="goSection('dashboard',this)"><span class="icon">📊</span><span>Dashboard</span></button>
+      <button class="nav-item" onclick="goSection('participantes',this)"><span class="icon">👥</span><span>Participantes</span></button>
+      <button class="nav-item" onclick="goSection('jogos',this)"><span class="icon">⚽</span><span>Jogos</span></button>
+      <button class="nav-item" onclick="goSection('ranking',this)"><span class="icon">🏅</span><span>Ranking</span></button>
+      <button class="nav-item" onclick="goSection('palpites',this)"><span class="icon">🎯</span><span>Palpites</span></button>
+      <button class="nav-item" onclick="goSection('config',this)"><span class="icon">⚙️</span><span>Config</span></button>
     </nav>
     <div class="sidebar-footer">
       <div class="admin-info">
@@ -720,11 +720,11 @@ function showErr(msg) {
 // ════════════════════════════════════════════
 // NAVEGAÇÃO
 // ════════════════════════════════════════════
-function goSection(sec) {
+function goSection(sec, btn) {
   document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
   document.querySelectorAll('.nav-item').forEach(n=>n.classList.remove('active'));
   document.getElementById('sec-'+sec).classList.add('active');
-  event.currentTarget.classList.add('active');
+  if (btn) btn.classList.add('active');
   if (sec==='dashboard') loadDashboard();
   if (sec==='participantes') loadParticipantes();
   if (sec==='jogos') loadJogos();
