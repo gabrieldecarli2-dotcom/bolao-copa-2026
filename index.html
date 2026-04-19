@@ -1047,20 +1047,19 @@ async function renderRankingRows(containerId, users) {
     posAtual++;
   }
 
-  // Para cada posição premiada (1,2,3), verifica quantos empataram
-  // e divide o prêmio entre eles
+  // Para cada posição premiada, verifica quantos empataram
+  // Divide os prêmios afetados igualmente entre os empatados
   function getPrizeForUser(idx) {
-    const pos = posicaoReal[idx]; // 1, 2 ou 3
+    const pos = posicaoReal[idx];
     if (pos > 3) return 0;
 
-    // Prêmios que esta posição pode absorver
-    // Ex: 3 empatados em 1º absorvem prêmio 1+2+3 dividido por 3
-    let totalPrize = 0;
-    let countTied = posicaoReal.filter(p => p === pos).length;
+    const countTied = posicaoReal.filter(p => p === pos).length;
 
-    // Quais slots de prêmio essa posição ocupa?
-    // pos=1 com 3 empatados → ocupa slots 1,2,3
-    for (let slot = pos; slot < pos + countTied && slot <= 3; slot++) {
+    // Soma os slots de prêmio que essa turma de empatados ocupa
+    // Ex: 6 empatados em 1º → ocupa slots 1,2,3 (todos os 3 prêmios)
+    // Ex: 2 empatados em 2º → ocupa slots 2 e 3
+    let totalPrize = 0;
+    for (let slot = pos; slot <= Math.min(pos + countTied - 1, 3); slot++) {
       totalPrize += prizePool[slot - 1] || 0;
     }
 
