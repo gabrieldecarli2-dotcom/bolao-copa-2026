@@ -1045,7 +1045,7 @@ function renderGameCard(jogo) {
         </button>
       </div>
       ${isOpen && palpite ? '<div class="palpite-saved-badge">✅ Palpite salvo — clique em Alterar para mudar</div>' : ''}
-      ${isOpen && !palpite ? '<div class="palpite-pending-badge">⚠️ Palpite pendente</div>' : ''}
+      ${isOpen && !palpite ? '<div class="palpite-pending-badge">⚠️ Palpite pendente — até 5 minutos antes do início</div>' : ''}
       ${isFechado ? `<div style="margin-top:8px;padding:8px 12px;border-radius:8px;background:rgba(255,167,38,0.1);border:1px solid rgba(255,167,38,0.25);font-size:12px;font-weight:600;color:#FFA726">⏰ Palpites encerrados — faltam ${Math.max(0,Math.ceil(minutosRestantes))} min para o jogo</div>` : ''}
       ${palpiteResult}
     </div>
