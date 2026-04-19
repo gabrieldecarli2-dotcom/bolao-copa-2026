@@ -128,7 +128,24 @@ module.exports = async function handler(req, res) {
         const jogo = (await check.json())?.[0];
 
         if (!jogo) {
-          notInDB.push(`${e.strHomeTeam} x ${e.strAwayTeam} (${e.strLeague}) id:${e.idEvent}`);
+          // Tenta casar pelo nome dos times
+          const t1 = encodeURIComponent(e.strHomeTeam);
+          const t2 = encodeURIComponent(e.strAwayTeam);
+          const nameCheck = await fetch(
+            `${SUPABASE_URL}/rest/v1/jogos?time1=ilike.*${e.strHomeTeam}*&time2=ilike.*${e.strAwayTeam}*&select=id,status`,
+            { headers: dbH }
+          );
+          const jogoByName = (await nameCheck.json())?.[0];
+          if (!jogoByName) {
+            notInDB.push(`${e.strHomeTeam} x ${e.strAwayTeam} (${e.strLeague}) id:${e.idEvent}`);
+            continue;
+          }
+          // Atualiza o api_jogo_id e o placar
+          await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogoByName.id}`, {
+            method: 'PATCH', headers: dbH,
+            body: JSON.stringify({ api_jogo_id: String(e.idEvent), gol_time1: g1, gol_time2: g2, status: 'ao_vivo' })
+          });
+          updated++;
           continue;
         }
 
