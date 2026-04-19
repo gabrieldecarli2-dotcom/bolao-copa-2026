@@ -886,13 +886,14 @@ function renderFlag(flag, name, size=48) {
   if (!flag) return '🏳️';
   const f = String(flag).trim();
   if (f.startsWith('http')) {
-    const url = f.replace('/small','').replace('/tiny','').replace('/medium','') + '/small';
+    // Use URL as-is from DB, just ensure no duplicate suffix
+    const url = f.replace('/small/small','').replace('/tiny/tiny','');
     const img = document.createElement('img');
     img.src = url;
     img.alt = name || '';
     img.width = size;
     img.height = size;
-    img.style.cssText = 'object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))';
+    img.style.cssText = 'object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3));border-radius:4px';
     img.onerror = function(){ this.outerHTML = '🏳️'; };
     return img.outerHTML;
   }
