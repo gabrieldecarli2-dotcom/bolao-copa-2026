@@ -884,14 +884,12 @@ function getMyPalpite(jogoId) {
 
 function renderFlag(flag, name, size=48) {
   if (!flag) return '🏳️';
-  if (flag.startsWith('http')) {
-    // Remove any size suffix and use /tiny for performance
-    const url = flag.replace('/small', '').replace('/tiny', '').replace('/medium', '') + '/small';
-    return `<img src="${url}" alt="${name||''}" 
-      style="width:${size}px;height:${size}px;object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))" 
-      onerror="this.outerHTML='🏳️'">`;
+  const f = String(flag).trim();
+  if (f.startsWith('http')) {
+    const url = f.replace('/small','').replace('/tiny','').replace('/medium','') + '/small';
+    return '<img src="' + url + '" alt="' + (name||'') + '" width="' + size + '" height="' + size + '" style="object-fit:contain;display:block;margin:0 auto;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.3))" onerror="this.outerHTML='🏳️'">';
   }
-  return flag;
+  return f;
 }
 
 function renderGameCard(jogo) {
