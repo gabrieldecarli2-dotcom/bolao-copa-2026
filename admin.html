@@ -518,7 +518,8 @@
           </div>
         </div>
         <div style="display:flex;gap:10px;flex-wrap:wrap">
-          <button class="btn btn-primary" onclick="syncSports('import_jogos')">📥 Importar Próximos Jogos</button>
+          <button class="btn btn-primary" onclick="syncSports('season')">📅 Importar Temporada Completa</button>
+          <button class="btn btn-neutral" onclick="syncSports('import_jogos')">📥 Próximos Jogos</button>
           <button class="btn btn-success" onclick="syncSports('sync_resultados')">🔄 Sincronizar Resultados</button>
         </div>
         <div id="sync-sports-result" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:13px"></div>
@@ -1299,7 +1300,7 @@ async function syncSports(action) {
     const r = await fetch('/api/sync-sportsdb', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, league_id: leagueId, action: action === 'import_jogos' ? 'next' : 'results' })
+      body: JSON.stringify({ secret, league_id: leagueId, action: action === 'import_jogos' ? 'next' : action === 'season' ? 'season' : 'results' })
     });
     const data = await r.json();
     if (data.ok) {
@@ -1422,7 +1423,7 @@ async function syncSportsDB(action) {
     const res = await fetch('/api/sync-sportsdb', {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify({ secret, league_id: leagueId, action: action === 'import_jogos' ? 'next' : 'results' })
+      body: JSON.stringify({ secret, league_id: leagueId, action: action === 'import_jogos' ? 'next' : action === 'season' ? 'season' : 'results' })
     });
     const data = await res.json();
 
