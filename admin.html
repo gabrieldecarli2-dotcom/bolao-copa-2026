@@ -505,6 +505,26 @@
       </div>
 
       <div class="config-box" style="margin-top:20px">
+        <h2>⚽ Sincronizar via TheSportsDB</h2>
+        <p>Importa jogos e resultados automaticamente de qualquer liga. Chave gratuita — 30 req/min.</p>
+        <div class="form-row">
+          <label>ID da Liga</label>
+          <div style="display:flex;gap:10px;align-items:center">
+            <input class="form-input" id="sports-league-id" placeholder="Ex: 4351 (Brasileirão)" style="max-width:260px">
+            <a href="https://www.thesportsdb.com/sport/leagues" target="_blank" style="font-size:12px;color:var(--gold);white-space:nowrap">🔍 Buscar ID de liga</a>
+          </div>
+          <div style="font-size:11px;color:var(--text3);margin-top:6px">
+            Brasileirão Série A = 4351 · Premier League = 4328 · La Liga = 4335 · Champions League = 4480
+          </div>
+        </div>
+        <div style="display:flex;gap:10px;flex-wrap:wrap">
+          <button class="btn btn-primary" onclick="syncSports('import_jogos')">📥 Importar Próximos Jogos</button>
+          <button class="btn btn-success" onclick="syncSports('sync_resultados')">🔄 Sincronizar Resultados</button>
+        </div>
+        <div id="sync-sports-result" style="display:none;margin-top:12px;padding:12px;border-radius:8px;font-size:13px"></div>
+      </div>
+
+      <div class="config-box" style="margin-top:20px">
         <h2>🔗 Link do Sistema</h2>
         <p>Compartilhe esse link com os participantes</p>
         <div style="display:flex;gap:10px">
@@ -1266,6 +1286,38 @@ async function previewPremios() {
   }
 }
 
+async function syncSports(action) {
+  const leagueId = document.getElementById('sports-league-id').value.trim() || '4351';
+  const resultEl = document.getElementById('sync-sports-result');
+  const secret = sessionStorage.getItem('admin_secret');
+
+  resultEl.style.display = 'block';
+  resultEl.style.cssText = 'display:block;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;background:rgba(66,165,245,0.1);color:var(--blue);border:1px solid rgba(66,165,245,0.2)';
+  resultEl.textContent = '⏳ Sincronizando...';
+
+  try {
+    const r = await fetch('/api/sync-sports', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, league_id: leagueId, action })
+    });
+    const data = await r.json();
+    if (data.ok) {
+      resultEl.style.cssText = 'display:block;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;background:rgba(56,142,60,0.15);color:#81C784;border:1px solid rgba(56,142,60,0.3)';
+      resultEl.textContent = action === 'import_jogos'
+        ? `✅ ${data.imported} jogos importados!`
+        : `✅ ${data.updated} resultados atualizados e pontos calculados!`;
+      if (action === 'import_jogos') loadJogos();
+    } else {
+      resultEl.style.cssText = 'display:block;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3)';
+      resultEl.textContent = '❌ ' + (data.error || 'Erro ao sincronizar');
+    }
+  } catch(e) {
+    resultEl.style.cssText = 'display:block;margin-top:12px;padding:12px;border-radius:8px;font-size:13px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3)';
+    resultEl.textContent = '❌ Erro: ' + e.message;
+  }
+}
+
 function copySiteLink() {
   navigator.clipboard?.writeText(document.getElementById('site-link').value);
   showToast('🔗 Link copiado!');
@@ -1344,6 +1396,45 @@ async function syncScores() {
 
   btn.disabled = false;
   btn.textContent = '⚽ Sincronizar Placares';
+}
+
+async function syncSportsDB(action) {
+  const btnId = action === 'results' ? 'btn-sync-results' : 'btn-sync-next';
+  const btn = document.getElementById(btnId);
+  const result = document.getElementById('sync-result');
+  if (btn) { btn.disabled = true; btn.textContent = '⏳ Buscando...'; }
+  result.style.display = 'none';
+
+  // Mostra input para league_id
+  const leagueId = prompt(
+    action === 'next'
+      ? 'ID da Liga no TheSportsDB (ex: 4328 = Premier League, 4335 = Brasileirão, 4480 = Champions League):'
+      : 'ID da Liga para buscar resultados recentes:',
+    '4328'
+  );
+  if (!leagueId) {
+    if (btn) { btn.disabled = false; btn.textContent = action === 'results' ? '📥 Atualizar Resultados' : '📅 Importar Próximos Jogos'; }
+    return;
+  }
+
+  try {
+    const secret = sessionStorage.getItem('admin_secret');
+    const res = await fetch('/api/sync-sportsdb', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ secret, league_id: leagueId, action })
+    });
+    const data = await res.json();
+
+    result.style.cssText = `display:block;padding:14px;border-radius:10px;margin-bottom:20px;font-size:14px;font-weight:600;${data.ok ? 'background:rgba(56,142,60,0.15);color:#81C784;border:1px solid rgba(56,142,60,0.3)' : 'background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3)'}`;
+    result.textContent = data.ok ? `✅ ${data.msg}` : `❌ ${data.error}`;
+    if (data.ok) loadDashboard();
+  } catch(e) {
+    result.style.cssText = 'display:block;padding:14px;border-radius:10px;background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.3);margin-bottom:20px;font-size:14px;font-weight:600';
+    result.textContent = '❌ Erro: ' + e.message;
+  }
+
+  if (btn) { btn.disabled = false; btn.textContent = action === 'results' ? '📥 Atualizar Resultados' : '📅 Importar Próximos Jogos'; }
 }
 
 async function syncJogos() {
