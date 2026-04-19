@@ -1,5 +1,4 @@
-// api/cron-live.js — atualiza placares ao vivo + detecta jogos encerrados
-// CORRIGIDO: match inteligente de times (resolve diferença de nomes pt-BR vs inglês)
+// api/cron-live.js — atualiza placares ao vivo + detecta fim de jogo via strStatus
 
 module.exports = async function handler(req, res) {
   const CRON_SECRET = process.env.CRON_SECRET || process.env.ADMIN_SECRET;
@@ -33,7 +32,7 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, msg: 'Nenhum jogo ao vivo agora', ...results });
     }
 
-    // 2. Busca TODOS os jogos abertos/ao_vivo do banco de uma vez
+    // 2. Busca todos os jogos abertos/ao_vivo do banco
     const dbRes = await fetch(
       `${SUPABASE_URL}/rest/v1/jogos?status=in.(aberto,ao_vivo)&select=id,time1,time2,api_jogo_id,status,gol_time1,gol_time2`,
       { headers: dbH }
@@ -44,13 +43,27 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, msg: 'Nenhum jogo aberto/ao_vivo no banco', ...results });
     }
 
-    // 3. Para cada jogo ao vivo na API, tenta dar match com o banco
+    // 3. Processa cada evento ao vivo da API
+    const idsEncerradosAPI = new Set(); // api_jogo_ids que terminaram
+
     for (const e of liveEvents) {
       const g1 = parseInt(e.intHomeScore ?? -1);
       const g2 = parseInt(e.intAwayScore ?? -1);
       if (g1 < 0 || g2 < 0) continue;
 
       const apiId = String(e.idEvent);
+      const statusAPI = (e.strStatus || '').toLowerCase().trim();
+
+      // Detecta se o jogo terminou pelo strStatus
+      const terminou = [
+        'match finished', 'ft', 'aet', 'pen', 'finished',
+        'full time', 'após prorrogação', 'after extra time'
+      ].some(s => statusAPI === s || statusAPI.includes(s));
+
+      if (terminou) {
+        idsEncerradosAPI.add(apiId);
+      }
+
       const jogoBanco = encontrarJogo(jogosBanco, e, apiId);
 
       if (!jogoBanco) {
@@ -62,26 +75,46 @@ module.exports = async function handler(req, res) {
 
       results.matched++;
 
-      // Só faz PATCH se mudou algo
-      if (
-        jogoBanco.gol_time1 === g1 &&
-        jogoBanco.gol_time2 === g2 &&
-        jogoBanco.status === 'ao_vivo' &&
-        jogoBanco.api_jogo_id === apiId
-      ) continue;
+      // Grava api_jogo_id se ainda não tiver (facilita próximas execuções)
+      if (!jogoBanco.api_jogo_id) {
+        await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogoBanco.id}`, {
+          method: 'PATCH', headers: dbH,
+          body: JSON.stringify({ api_jogo_id: apiId })
+        });
+      }
 
-      const patch = { gol_time1: g1, gol_time2: g2, status: 'ao_vivo' };
-      if (!jogoBanco.api_jogo_id) patch.api_jogo_id = apiId;
+      if (terminou) {
+        // Jogo terminou — encerra e calcula pontos
+        const jaEncerrado = jogoBanco.status === 'encerrado';
+        if (jaEncerrado) continue;
 
-      await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogoBanco.id}`, {
-        method: 'PATCH', headers: dbH,
-        body: JSON.stringify(patch)
-      });
-      results.updated++;
+        await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogoBanco.id}`, {
+          method: 'PATCH', headers: dbH,
+          body: JSON.stringify({ gol_time1: g1, gol_time2: g2, status: 'encerrado', api_jogo_id: apiId })
+        });
+        results.finished++;
+        await calcularPontos(jogoBanco.id, g1, g2, SUPABASE_URL, dbH);
+
+      } else {
+        // Jogo em andamento — atualiza placar se mudou
+        const semMudanca =
+          jogoBanco.gol_time1 === g1 &&
+          jogoBanco.gol_time2 === g2 &&
+          jogoBanco.status === 'ao_vivo';
+
+        if (semMudanca) continue;
+
+        await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogoBanco.id}`, {
+          method: 'PATCH', headers: dbH,
+          body: JSON.stringify({ gol_time1: g1, gol_time2: g2, status: 'ao_vivo', api_jogo_id: apiId })
+        });
+        results.updated++;
+      }
     }
 
-    // 4. Detecta jogos ao_vivo que sumiram da API (terminaram)
-    const idsAoVivoAPI = new Set(liveEvents.map(e => String(e.idEvent)));
+    // 4. Fallback: jogos ao_vivo no banco que sumiram completamente da API
+    //    (API às vezes remove sem mandar strStatus = finished)
+    const idsNaAPI = new Set(liveEvents.map(e => String(e.idEvent)));
 
     const aoVivoRes = await fetch(
       `${SUPABASE_URL}/rest/v1/jogos?status=eq.ao_vivo&select=id,api_jogo_id,gol_time1,gol_time2`,
@@ -90,7 +123,8 @@ module.exports = async function handler(req, res) {
     const jogosAoVivo = await aoVivoRes.json() || [];
 
     for (const jogo of jogosAoVivo) {
-      if (jogo.api_jogo_id && !idsAoVivoAPI.has(jogo.api_jogo_id)) {
+      if (jogo.api_jogo_id && !idsNaAPI.has(jogo.api_jogo_id)) {
+        // Sumiu da API sem passar pelo loop acima → encerra
         await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogo.id}`, {
           method: 'PATCH', headers: dbH,
           body: JSON.stringify({ status: 'encerrado' })
@@ -116,7 +150,7 @@ function encontrarJogo(jogosBanco, eventoAPI, apiId) {
   const homeAPI = normalizar(eventoAPI.strHomeTeam);
   const awayAPI = normalizar(eventoAPI.strAwayTeam);
 
-  // 1. api_jogo_id exato (melhor caso — após primeiro match manual)
+  // 1. api_jogo_id exato
   const porId = jogosBanco.find(j => j.api_jogo_id === apiId);
   if (porId) return porId;
 
@@ -126,7 +160,7 @@ function encontrarJogo(jogosBanco, eventoAPI, apiId) {
   );
   if (porNome) return porNome;
 
-  // 3. Match por tokens — resolve "Atletico Mineiro" vs "Atlético-MG"
+  // 3. Match por tokens
   const homeTokens = tokens(homeAPI);
   const awayTokens = tokens(awayAPI);
 
@@ -140,7 +174,7 @@ function encontrarJogo(jogosBanco, eventoAPI, apiId) {
   });
   if (porToken) return porToken;
 
-  // 4. Match reverso (API às vezes inverte home/away)
+  // 4. Match reverso
   const porTokenRev = jogosBanco.find(j => {
     const t1 = tokens(normalizar(j.time1));
     const t2 = tokens(normalizar(j.time2));
@@ -157,15 +191,15 @@ function normalizar(str) {
   return str
     .toLowerCase()
     .normalize('NFD')
-    .replace(/[\u0300-\u036f]/g, '') // tira acentos
-    .replace(/[^a-z0-9 ]/g, ' ')     // tira especiais e hífens
+    .replace(/[\u0300-\u036f]/g, '')
+    .replace(/[^a-z0-9 ]/g, ' ')
     .replace(/\s+/g, ' ')
     .trim();
 }
 
 const STOPWORDS = new Set([
   'the','de','do','da','fc','sc','ac','cf','rc','se','ec','cr','sr',
-  'esporte','clube','sport','club','united','city','real','atletico','atletica'
+  'esporte','clube','sport','club','united','city','real'
 ]);
 
 function tokens(str) {
