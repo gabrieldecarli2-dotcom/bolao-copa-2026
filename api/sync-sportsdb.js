@@ -75,16 +75,24 @@ module.exports = async function handler(req, res) {
       return res.status(200).json({ ok: true, msg: `${imported} jogos futuros importados de ${events.length} totais (${events.length - futuros.length} passados ignorados)`, imported });
     }
 
-    // ── LIVESCORES ──
+    // ── LIVESCORES (v2 API com header auth) ──
     if (action === 'live') {
-      const r = await fetch(`${BASE}/livescore.php?l=${lid}`);
-      const data = await r.json();
-      const events = data.events || [];
+      const BASE_V2 = 'https://www.thesportsdb.com/api/v2/json';
+      const r = await fetch(`${BASE_V2}/livescore.php?l=${lid}`, {
+        headers: { 'X-API-KEY': SPORTS_KEY }
+      });
+
+      const text = await r.text();
+      let data;
+      try { data = JSON.parse(text); }
+      catch(e) { return res.status(500).json({ ok: false, error: 'Resposta inválida: ' + text.substring(0,200) }); }
+
+      const events = data.events || data.livescores || [];
       let updated = 0;
 
       for (const e of events) {
-        const g1 = parseInt(e.intHomeScore ?? -1);
-        const g2 = parseInt(e.intAwayScore ?? -1);
+        const g1 = parseInt(e.intHomeScore ?? e.strHomeScore ?? -1);
+        const g2 = parseInt(e.intAwayScore ?? e.strAwayScore ?? -1);
         if (g1 < 0 || g2 < 0) continue;
 
         const check = await fetch(`${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=eq.${e.idEvent}&select=id,status`, { headers: dbH });
@@ -97,7 +105,7 @@ module.exports = async function handler(req, res) {
         });
         updated++;
       }
-      return res.status(200).json({ ok: true, msg: `${updated} jogos ao vivo atualizados`, live: events.length, updated });
+      return res.status(200).json({ ok: true, msg: `${updated} jogos ao vivo atualizados de ${events.length} encontrados`, live: events.length, updated });
     }
 
     // ── RESULTADOS RECENTES + CALCULAR PONTOS ──
