@@ -1233,6 +1233,7 @@ async function previewPremios() {
   const p1 = parseFloat(document.getElementById('cfg-p1').value) || 0;
   const p2 = parseFloat(document.getElementById('cfg-p2').value) || 0;
   const p3 = parseFloat(document.getElementById('cfg-p3').value) || 0;
+  const adminFee = parseFloat(document.getElementById('cfg-admin-fee')?.value) || 0;
   if (!taxa) return;
 
   const preview = document.getElementById('premio-preview');
@@ -1245,14 +1246,24 @@ async function previewPremios() {
   const el1 = document.getElementById('prev-p1');
   const el2 = document.getElementById('prev-p2');
   const el3 = document.getElementById('prev-p3');
+  const elA = document.getElementById('prev-admin');
   const elT = document.getElementById('prev-total');
   const elW = document.getElementById('perc-warning');
+  const elR = document.getElementById('prev-restante-wrap');
 
   if (el1) el1.textContent = fmt(total * p1 / 100);
   if (el2) el2.textContent = fmt(total * p2 / 100);
   if (el3) el3.textContent = fmt(total * p3 / 100);
+  if (elA) elA.textContent = fmt(total * adminFee / 100);
   if (elT) elT.textContent = fmt(total);
-  if (elW) elW.style.display = (p1+p2+p3+adminFee) > 100.01 ? 'block' : 'none';
+  const soma = p1 + p2 + p3 + adminFee;
+  if (elW) elW.style.display = soma > 100.01 ? 'block' : 'none';
+  const restante = total * (100 - soma) / 100;
+  if (elR) {
+    elR.style.display = soma < 99.99 ? 'inline' : 'none';
+    const elRVal = document.getElementById('prev-restante');
+    if (elRVal) elRVal.textContent = fmt(restante);
+  }
 }
 
 function copySiteLink() {
