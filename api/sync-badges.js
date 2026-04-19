@@ -1,4 +1,6 @@
 // api/sync-badges.js
+// Busca escudos usando os jogos já importados — pega o idHomeTeam/idAwayTeam
+// e busca o badge diretamente pelo ID do time
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -20,74 +22,69 @@ module.exports = async function handler(req, res) {
   };
 
   const lid = league_id || '4351';
-  const leagueNames = {
-    '4351': 'Brazilian Serie A',
-    '4328': 'English Premier League',
-    '4335': 'Spanish La Liga',
-    '4332': 'Serie A',
-    '4331': 'Bundesliga',
-    '4334': 'Ligue 1',
-    '4480': 'UEFA Champions League',
-  };
-  const leagueName = leagueNames[lid] || 'Brazilian Serie A';
-
-  // Normaliza string: remove acentos, lowercase, remove palavras comuns
-  function normalize(str) {
-    return str
-      .toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '') // remove acentos
-      .replace(/\b(fc|sc|ac|cf|club|de|da|do|das|dos|sport|club|esporte)\b/g, '')
-      .replace(/[^a-z0-9 ]/g, '')
-      .replace(/\s+/g, ' ')
-      .trim();
-  }
 
   try {
-    const r = await fetch(`${BASE}/search_all_teams.php?l=${encodeURIComponent(leagueName)}`);
-    const text = await r.text();
-    let data;
-    try { data = JSON.parse(text); }
-    catch(e) { return res.status(500).json({ error: 'Resposta inválida: ' + text.substring(0,200) }); }
-
-    const teams = data.teams || [];
-    if (!teams.length)
-      return res.status(200).json({ ok: false, msg: `Nenhum time encontrado para "${leagueName}"`, raw: text.substring(0,300) });
-
-    // Monta mapa normalizado -> badge URL
-    const badgeMap = {};
-    for (const t of teams) {
-      if (t.strTeamBadge) {
-        const badge = t.strTeamBadge + '/small';
-        badgeMap[normalize(t.strTeam)] = { badge, original: t.strTeam };
-        if (t.strTeamShort) badgeMap[normalize(t.strTeamShort)] = { badge, original: t.strTeam };
-        if (t.strTeamAlternate) badgeMap[normalize(t.strTeamAlternate)] = { badge, original: t.strTeam };
-      }
+    // Pega jogos da temporada para extrair IDs dos times
+    const year = new Date().getFullYear();
+    const seasons = [`${year}`, `${year-1}-${year}`, `${year}-${year+1}`];
+    let events = [];
+    for (const s of seasons) {
+      const r = await fetch(`${BASE}/eventsseason.php?id=${lid}&s=${s}`);
+      const d = await r.json();
+      if (d.events?.length) { events = d.events; break; }
     }
 
-    // Busca jogos do banco
+    if (!events.length)
+      return res.status(200).json({ ok: false, msg: 'Nenhum evento encontrado para extrair times' });
+
+    // Monta mapa de nome do time -> badge
+    // A API retorna strHomeTeam, idHomeTeam, strAwayTeam, idAwayTeam
+    // Busca badge de cada time único pelo ID
+    const teamIds = {};
+    for (const e of events) {
+      if (e.idHomeTeam && e.strHomeTeam) teamIds[e.strHomeTeam] = e.idHomeTeam;
+      if (e.idAwayTeam && e.strAwayTeam) teamIds[e.strAwayTeam] = e.idAwayTeam;
+    }
+
+    // Busca badge para cada time único
+    const badgeByName = {};
+    const teamNames = Object.keys(teamIds);
+
+    // Busca em lotes de 5 para não exceder rate limit
+    for (let i = 0; i < teamNames.length; i += 5) {
+      const batch = teamNames.slice(i, i + 5);
+      await Promise.all(batch.map(async (name) => {
+        const tid = teamIds[name];
+        const r = await fetch(`${BASE}/lookupteam.php?id=${tid}`);
+        const d = await r.json();
+        const team = d.teams?.[0];
+        if (team?.strTeamBadge) {
+          badgeByName[name.toLowerCase()] = team.strTeamBadge + '/small';
+        }
+      }));
+    }
+
+    // Busca jogos no banco
     const jogosRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,time1,time2,flag1,flag2`,
+      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,time1,time2`,
       { headers: dbH }
     );
     const jogos = await jogosRes.json() || [];
 
     let updated = 0;
-    const matches = [], noMatch = [];
+    const noMatch = new Set();
 
     for (const jogo of jogos) {
-      const match1 = findBadge(jogo.time1, badgeMap);
-      const match2 = findBadge(jogo.time2, badgeMap);
+      const badge1 = badgeByName[jogo.time1.toLowerCase()];
+      const badge2 = badgeByName[jogo.time2.toLowerCase()];
 
-      if (match1) matches.push(`${jogo.time1} → ${match1.original}`);
-      else noMatch.push(jogo.time1);
-      if (match2) matches.push(`${jogo.time2} → ${match2.original}`);
-      else noMatch.push(jogo.time2);
-
-      if (!match1 && !match2) continue;
+      if (!badge1) noMatch.add(jogo.time1);
+      if (!badge2) noMatch.add(jogo.time2);
+      if (!badge1 && !badge2) continue;
 
       const update = {};
-      if (match1) update.flag1 = match1.badge;
-      if (match2) update.flag2 = match2.badge;
+      if (badge1) update.flag1 = badge1;
+      if (badge2) update.flag2 = badge2;
 
       await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogo.id}`, {
         method: 'PATCH', headers: dbH,
@@ -96,47 +93,16 @@ module.exports = async function handler(req, res) {
       updated++;
     }
 
-    const uniqueNoMatch = [...new Set(noMatch)].slice(0, 10);
-    const uniqueMatches = [...new Set(matches)].slice(0, 10);
-
     return res.status(200).json({
       ok: true,
-      msg: `${updated} jogos atualizados`,
+      msg: `${updated} jogos atualizados com escudos`,
       updated,
-      teams_found: teams.length,
-      matches: uniqueMatches,
-      no_match: uniqueNoMatch
+      teams_found: Object.keys(badgeByName).length,
+      no_match: [...noMatch].slice(0, 10),
+      sample_badges: Object.entries(badgeByName).slice(0, 5).map(([k,v]) => `${k}: ${v}`)
     });
 
   } catch(err) {
     return res.status(500).json({ error: err.message });
   }
-}
-
-function findBadge(teamName, badgeMap) {
-  if (!teamName) return null;
-
-  function normalize(str) {
-    return str.toLowerCase()
-      .normalize('NFD').replace(/[\u0300-\u036f]/g, '')
-      .replace(/\b(fc|sc|ac|cf|club|de|da|do|das|dos|sport|club|esporte)\b/g, '')
-      .replace(/[^a-z0-9 ]/g, '')
-      .replace(/\s+/g, ' ').trim();
-  }
-
-  const n = normalize(teamName);
-
-  // Busca exata
-  if (badgeMap[n]) return badgeMap[n];
-
-  // Busca parcial — verifica se um contém o outro
-  for (const [key, val] of Object.entries(badgeMap)) {
-    if (n.includes(key) || key.includes(n)) return val;
-    // Verifica palavras em comum
-    const nWords = n.split(' ').filter(w => w.length > 3);
-    const kWords = key.split(' ').filter(w => w.length > 3);
-    if (nWords.some(w => kWords.includes(w))) return val;
-  }
-
-  return null;
 }
