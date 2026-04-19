@@ -1,4 +1,5 @@
 // api/sync-badges.js
+// Os eventos já contêm strHomeTeamBadge e strAwayTeamBadge — usa direto!
 module.exports = async function handler(req, res) {
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
@@ -20,62 +21,52 @@ module.exports = async function handler(req, res) {
   };
 
   try {
-    // Pega um jogo do banco
+    // Busca todos os jogos com api_jogo_id
     const jogosRes = await fetch(
-      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,api_jogo_id,time1,time2&limit=1`,
+      `${SUPABASE_URL}/rest/v1/jogos?api_jogo_id=not.is.null&select=id,api_jogo_id,time1,time2`,
       { headers: dbH }
     );
     const jogos = await jogosRes.json() || [];
-    if (!jogos.length) return res.status(200).json({ ok: false, msg: 'Nenhum jogo no banco' });
+    if (!jogos.length)
+      return res.status(200).json({ ok: false, msg: 'Nenhum jogo com api_jogo_id no banco' });
 
-    const firstJogo = jogos[0];
+    // Busca eventos em lotes de 10 (rate limit 30 req/min)
+    let updated = 0;
+    const batches = [];
+    for (let i = 0; i < jogos.length; i += 10) batches.push(jogos.slice(i, i + 10));
 
-    // Debug: o que o lookupevent retorna?
-    const evRes = await fetch(`${BASE}/lookupevent.php?id=${firstJogo.api_jogo_id}`);
-    const evText = await evRes.text();
-    let evData;
-    try { evData = JSON.parse(evText); } catch(e) { return res.status(200).json({ ok: false, msg: 'lookupevent retornou HTML', raw: evText.substring(0, 300) }); }
+    for (const batch of batches) {
+      await Promise.all(batch.map(async (jogo) => {
+        try {
+          const r = await fetch(`${BASE}/lookupevent.php?id=${jogo.api_jogo_id}`);
+          const d = await r.json();
+          const e = d.events?.[0];
+          if (!e) return;
 
-    const ev = evData.events?.[0];
-    if (!ev) return res.status(200).json({ ok: false, msg: 'Evento vazio', evData });
+          const b1 = e.strHomeTeamBadge ? e.strHomeTeamBadge + '/small' : null;
+          const b2 = e.strAwayTeamBadge ? e.strAwayTeamBadge + '/small' : null;
+          if (!b1 && !b2) return;
 
-    // Mostra os campos disponíveis no evento
-    const eventFields = {
-      idEvent: ev.idEvent,
-      strHomeTeam: ev.strHomeTeam,
-      idHomeTeam: ev.idHomeTeam,
-      strAwayTeam: ev.strAwayTeam,
-      idAwayTeam: ev.idAwayTeam,
-      strHomeTeamBadge: ev.strHomeTeamBadge,
-      strAwayTeamBadge: ev.strAwayTeamBadge,
-      strLeague: ev.strLeague,
-    };
+          await fetch(`${SUPABASE_URL}/rest/v1/jogos?id=eq.${jogo.id}`, {
+            method: 'PATCH', headers: dbH,
+            body: JSON.stringify({ ...(b1 && { flag1: b1 }), ...(b2 && { flag2: b2 }) })
+          });
+          updated++;
+        } catch(e) {}
+      }));
 
-    // Se o evento já tem os badges direto!
-    if (ev.strHomeTeamBadge || ev.strAwayTeamBadge) {
-      return res.status(200).json({ ok: true, msg: 'Evento já tem badges!', eventFields });
+      // Pausa entre lotes para respeitar rate limit
+      if (batches.indexOf(batch) < batches.length - 1) {
+        await new Promise(r => setTimeout(r, 2000));
+      }
     }
 
-    // Se tem IDs, testa lookupteam
-    if (ev.idHomeTeam) {
-      const teamRes = await fetch(`${BASE}/lookupteam.php?id=${ev.idHomeTeam}`);
-      const teamText = await teamRes.text();
-      let teamData;
-      try { teamData = JSON.parse(teamText); } catch(e) { return res.status(200).json({ ok: false, msg: 'lookupteam retornou HTML', raw: teamText.substring(0,200) }); }
-      const team = teamData.teams?.[0];
-      return res.status(200).json({
-        ok: false,
-        msg: 'Diagnóstico completo',
-        eventFields,
-        team_sample: {
-          strTeam: team?.strTeam,
-          strTeamBadge: team?.strTeamBadge,
-          strTeamBadge_with_size: team?.strTeamBadge ? team.strTeamBadge + '/small' : null
-        }
-      });
-    }
-
-    return res.status(200).json({ ok: false, msg: 'idHomeTeam não encontrado no evento', eventFields });
+    return res.status(200).json({
+      ok: true,
+      msg: `${updated} jogos atualizados com escudos`,
+      updated,
+      total: jogos.length
+    });
 
   } catch(err) {
     return res.status(500).json({ error: err.message });
