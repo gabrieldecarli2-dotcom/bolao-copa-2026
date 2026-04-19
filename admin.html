@@ -837,7 +837,7 @@ async function loadDashboard() {
     ? `<table><thead><tr><th>Jogo</th><th>Grupo</th><th>Data</th><th>Status</th><th>Ação</th></tr></thead><tbody>
         ${liveGames.map(j=>`
           <tr>
-            <td><strong>${j.flag1||''} ${j.time1} × ${j.time2} ${j.flag2||''}</strong></td>
+            <td><strong>${renderFlag(j.flag1)} ${j.time1} × ${j.time2} ${renderFlag(j.flag2)}</strong></td>
             <td>${j.grupo}</td>
             <td>${new Date(j.data_hora).toLocaleString('pt-BR',{day:'2-digit',month:'short',hour:'2-digit',minute:'2-digit'})}</td>
             <td>${statusBadge(j.status)}</td>
@@ -952,11 +952,11 @@ function renderJogosList(list) {
       <div class="game-editor">
         <div class="game-editor-header">
           <div class="game-teams-display">
-            <span class="game-flag">${j.flag1||'🏳️'}</span>
+            <span class="game-flag">${renderFlag(j.flag1, 28)}</span>
             <span class="game-team-name">${j.time1}</span>
             <span class="game-vs-text">VS</span>
             <span class="game-team-name">${j.time2}</span>
-            <span class="game-flag">${j.flag2||'🏳️'}</span>
+            <span class="game-flag">${renderFlag(j.flag2, 28)}</span>
             ${j.gol_time1!==null && j.gol_time2!==null
               ? `<span style="font-family:'Bebas Neue';font-size:22px;color:var(--gold);margin-left:8px">${j.gol_time1}:${j.gol_time2}</span>` : ''}
           </div>
@@ -1017,8 +1017,8 @@ async function openEditJogo(id) {
   }
   document.getElementById('modal-jogo-id').value = id;
   document.getElementById('modal-jogo-title').textContent = `✏️ ${j.time1} × ${j.time2}`;
-  document.getElementById('mj-flag1').textContent = j.flag1||'🏳️';
-  document.getElementById('mj-flag2').textContent = j.flag2||'🏳️';
+  const f1el = document.getElementById('mj-flag1'); f1el.innerHTML = renderFlag(j.flag1||'🏳️', 28);
+  const f2el = document.getElementById('mj-flag2'); f2el.innerHTML = renderFlag(j.flag2||'🏳️', 28);
   document.getElementById('mj-time1-input').value = j.time1||'';
   document.getElementById('mj-time2-input').value = j.time2||'';
   document.getElementById('mj-flag1-input').value = j.flag1||'🏳️';
@@ -1695,7 +1695,7 @@ function renderPalpitesByUser() {
                   else if (p.pontos_ganhos === 1) ptsBadge = '<span class="badge badge-green" style="font-size:11px">✅ +1</span>';
                   else ptsBadge = '<span class="badge badge-red" style="font-size:11px">❌ 0</span>';
                   return `<tr style="border-top:1px solid rgba(255,255,255,0.04)">
-                    <td style="padding:11px 20px;font-weight:600;font-size:14px">${jogo.flag1||''} ${jogo.time1} × ${jogo.time2} ${jogo.flag2||''}</td>
+                    <td style="padding:11px 20px;font-weight:600;font-size:14px">${renderFlag(jogo.flag1)} ${jogo.time1} × ${jogo.time2} ${renderFlag(jogo.flag2)}</td>
                     <td style="padding:11px 16px;color:var(--text3);font-size:13px">${jogo.grupo}</td>
                     <td style="padding:11px 16px;text-align:center;font-family:'Bebas Neue';font-size:18px;letter-spacing:2px">${resultado}</td>
                     <td style="padding:11px 16px;text-align:center;font-family:'Bebas Neue';font-size:18px;color:var(--gold);letter-spacing:2px">${p.palpite_time1}:${p.palpite_time2}</td>
