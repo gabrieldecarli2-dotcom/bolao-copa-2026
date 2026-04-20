@@ -785,13 +785,13 @@ function renderGameCard(jogo){
       </div>
     </div>
     <div class="palpite-area">
-      <div class="palpite-label">🎯 Seu Palpite</div>
+      <div class="palpite-label">Seu Palpite</div>
       <div class="palpite-inputs">
         <input class="palpite-input" type="number" min="0" max="20" id="p-${jogo.id}-1" value="${palpite?palpite.palpite_time1:''}" placeholder="–" ${!isOpen?'disabled':''}>
         <span class="palpite-x">×</span>
         <input class="palpite-input" type="number" min="0" max="20" id="p-${jogo.id}-2" value="${palpite?palpite.palpite_time2:''}" placeholder="–" ${!isOpen?'disabled':''}>
         <button class="btn-palpite ${palpite&&isOpen?'alterar':''}" onclick="savePalpite(${jogo.id})" ${!isOpen?'disabled':''}>
-          ${palpite&&isOpen?'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" /><path d="M16 5l3 3" /></svg> Alterar':palpite?'✅ Salvo':'💾 Salvar'}
+          ${palpite&&isOpen?'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-edit"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M7 7h-1a2 2 0 0 0 -2 2v9a2 2 0 0 0 2 2h9a2 2 0 0 0 2 -2v-1" /><path d="M20.385 6.585a2.1 2.1 0 0 0 -2.97 -2.97l-8.415 8.385v3h3l8.385 -8.415" /><path d="M16 5l3 3" /></svg> Alterar':palpite?'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-check"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M5 12l5 5l10 -10" /></svg> Salvo':'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-device-floppy"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6 4h10l4 4v10a2 2 0 0 1 -2 2h-12a2 2 0 0 1 -2 -2v-12a2 2 0 0 1 2 -2" /><path d="M10 14a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M14 4l0 4l-6 0l0 -4" /></svg> Salvar'}
         </button>
       </div>
       ${isOpen&&palpite?'<div class="palpite-saved-badge">✅ Palpite salvo — clique em Alterar para mudar</div>':''}
