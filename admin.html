@@ -635,7 +635,7 @@ function renderParticipantes(list) {
       <td style="color:var(--text3);font-size:13px">${u.email}</td>
       <td><span style="font-family:'Bebas Neue';font-size:20px;color:var(--gold)">${u.pontos||0}</span></td>
       <td style="color:var(--text3)">${u.palpites_exatos||0} exatos · ${u.palpites_certos||0} acertos</td>
-      <td>${u.pago?'<span class="badge badge-green">✅ Pago</span>':`<button class="btn btn-sm btn-success" onclick="confirmarPagamento('${u.id}','${u.nome}')">Confirmar</button>`}</td>
+      <td>${u.pago?'<span class="badge badge-green">✅ Pago</span>':`<button class="badge badge-gold" onclick="confirmarPagamento('${u.id}','${u.nome}')">Confirmar</button>`}</td>
       <td><button class="btn btn-sm btn-danger" onclick="removerParticipante('${u.id}','${u.nome}')">Remover</button></td>
     </tr>`).join('')||'<tr><td colspan="6" class="loading">Nenhum participante</td></tr>';
 }
