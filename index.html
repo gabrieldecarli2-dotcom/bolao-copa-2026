@@ -177,6 +177,26 @@
     .main-wrapper{padding-bottom:80px}
     #main-nav .nav-right{gap:6px}
   }
+
+  /* Ícones PNG nos menus — remove fundo preto */
+.nav-icon {
+  width: 22px;
+  height: 22px;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  vertical-align: middle;
+  margin-right: 4px;
+}
+
+.bnav-img {
+  width: 28px;
+  height: 28px;
+  object-fit: contain;
+  mix-blend-mode: screen;
+  display: block;
+  margin: 0 auto 2px;
+}
+  
 </style>
 </head>
 <body>
@@ -185,11 +205,19 @@
 <nav id="main-nav" style="display:none">
   <div class="nav-logo">🏆 BOLÃO <span>COPA 2026</span></div>
   <div class="nav-links">
-    <button class="nav-btn active" onclick="goPage('home')">🏠 Início</button>
-    <button class="nav-btn" onclick="goPage('jogos')">⚽ Jogos</button>
-    <button class="nav-btn" onclick="goPage('ranking')">🏅 Ranking</button>
-    <button class="nav-btn" onclick="goPage('meus-palpites')">📋 Meus Palpites</button>
-  </div>
+  <button class="nav-btn active" onclick="goPage('home')">
+    <img src="/icons/home.png" class="nav-icon"> Início
+  </button>
+  <button class="nav-btn" onclick="goPage('jogos')">
+    <img src="/icons/jogos.png" class="nav-icon"> Jogos
+  </button>
+  <button class="nav-btn" onclick="goPage('ranking')">
+    <img src="/icons/ranking.png" class="nav-icon"> Ranking
+  </button>
+  <button class="nav-btn" onclick="goPage('meus-palpites')">
+    <img src="/icons/palpites.png" class="nav-icon"> Meus Palpites
+  </button>
+</div>
   <div class="nav-right">
     <div class="user-avatar" id="nav-avatar" onclick="goPage('perfil')" title="Meu Perfil">?</div>
     <button class="logout-btn" onclick="doLogout()">Sair</button>
@@ -262,12 +290,22 @@
 <!-- BOTTOM NAV MOBILE — sem Convidar, 5 botões equilibrados -->
 <div class="bottom-nav" id="bottom-nav" style="display:none">
   <div class="bottom-nav-inner">
-    <button class="bottom-nav-btn active" onclick="goPage('home');setBottomActive(this)" id="bnav-home"><span class="bnav-icon">🏠</span>Início</button>
-    <button class="bottom-nav-btn" onclick="goPage('jogos');setBottomActive(this)" id="bnav-jogos"><span class="bnav-icon">⚽</span>Jogos</button>
-    <button class="bottom-nav-btn" onclick="goPage('ranking');setBottomActive(this)" id="bnav-ranking"><span class="bnav-icon">🏅</span>Ranking</button>
-    <button class="bottom-nav-btn" onclick="goPage('meus-palpites');setBottomActive(this)" id="bnav-palpites"><span class="bnav-icon">📋</span>Palpites</button>
-    <button class="bottom-nav-btn" onclick="goPage('perfil');setBottomActive(this)" id="bnav-perfil"><span class="bnav-icon">👤</span>Perfil</button>
-  </div>
+  <button class="bottom-nav-btn active" onclick="goPage('home');setBottomActive(this)" id="bnav-home">
+    <img src="/icons/home.png" class="bnav-img"> Início
+  </button>
+  <button class="bottom-nav-btn" onclick="goPage('jogos');setBottomActive(this)" id="bnav-jogos">
+    <img src="/icons/jogos.png" class="bnav-img"> Jogos
+  </button>
+  <button class="bottom-nav-btn" onclick="goPage('ranking');setBottomActive(this)" id="bnav-ranking">
+    <img src="/icons/ranking.png" class="bnav-img"> Ranking
+  </button>
+  <button class="bottom-nav-btn" onclick="goPage('meus-palpites');setBottomActive(this)" id="bnav-palpites">
+    <img src="/icons/palpites.png" class="bnav-img"> Palpites
+  </button>
+  <button class="bottom-nav-btn" onclick="goPage('perfil');setBottomActive(this)" id="bnav-perfil">
+    <img src="/icons/perfil.png" class="bnav-img"> Perfil
+  </button>
+</div>
 </div>
 
 <!-- HOME -->
