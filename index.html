@@ -75,7 +75,7 @@
   .rank-pts{font-family:'Bebas Neue';font-size:24px;color:var(--gold);text-align:center;}
   .rank-exact{text-align:center;font-size:14px;font-weight:600;color:var(--text2);}
   .rank-win{text-align:center;font-size:14px;color:var(--text3);}
-  .prize-tag{display:inline-block;font-size:10px;font-family:'Barlow Condensed';font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:rgba(245,200,66,0.15);color:var(--text2);border:1px solid rgba(245,200,66,0.25);margin-right:4px;}
+  .prize-tag{display:inline-block;font-size:12px;font-family:'Barlow Condensed';font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:rgba(245,200,66,0.15);color:var(--text2);border:1px solid rgba(245,200,66,0.25);margin-right:4px;margin-top: 2px;}
   .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
   .game-card{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;transition:all 0.2s;position:relative;overflow:hidden;}
   .game-card:hover{border-color:rgba(245,200,66,0.25);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.3);}
@@ -109,8 +109,8 @@
   .btn-palpite:hover{opacity:0.85;}
   .btn-palpite:disabled{opacity:0.4;cursor:not-allowed;}
   .palpite-result{margin-top:10px;padding:8px 12px;border-radius:8px;font-size:12px;font-weight:600;display:flex;text-align:center;align-items:center;justify-content:center;gap:5px}
-  .palpite-result.exact{background:rgba(245,200,66,0.15);color:var(--gold);display:block;}
-  .palpite-result.win{background:rgba(56,142,60,0.15);color:var(--text3);display:block;}
+  .palpite-result.exact{background:rgba(245,200,66,0.15);color:var(--gold);display:flex;}
+  .palpite-result.win{background:rgba(56,142,60,0.15);color:var(--text3);display:flex;}
   .palpite-result.miss{background:rgba(239,83,80,0.1);color:var(--red);display:flex;}
   .premio-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:16px;}
   .premio-card{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px 20px;text-align:center;}
@@ -351,7 +351,7 @@
           <div style="font-size:13px;color:var(--text2)">Para participar do bolão e dar palpites, conclua o pagamento da taxa de participação.</div>
         </div>
       </div>
-      <button onclick="showPage('page-pagamento');gerarPix()" style="padding:12px 24px;background:linear-gradient(135deg,#e82045,#b71c1c);border:none;border-radius:10px;color:white;font-family:'Barlow Condensed';font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0">💳 Pagar Agora</button>
+      <button onclick="showPage('page-pagamento');gerarPix()" style="padding:12px 24px;background:linear-gradient(135deg,#e82045,#b71c1c);border:none;border-radius:10px;color:white;font-family:'Barlow Condensed';font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0">Pagar Agora</button>
     </div>
 
     <!-- Próximos Jogos -->
@@ -485,8 +485,8 @@
     </div>
     <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;margin-bottom:16px">
       <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">🔒 Alterar Senha</h3>
-      <div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Nova senha</label><div style="position:relative"><input type="password" id="perfil-senha-input" style="width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Mínimo 6 caracteres"><button type="button" onclick="toggleEyePerfil('perfil-senha-input',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">👁️</button></div></div>
-      <div style="margin-bottom:16px"><label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Confirmar nova senha</label><div style="position:relative"><input type="password" id="perfil-senha-confirm" style="width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Repita a senha"><button type="button" onclick="toggleEyePerfil('perfil-senha-confirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer">👁️</button></div></div>
+      <div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Nova senha</label><div style="position:relative"><input type="password" id="perfil-senha-input" style="width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Mínimo 6 caracteres"><button type="button" onclick="toggleEyePerfil('perfil-senha-input',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></button></div></div>
+      <div style="margin-bottom:16px"><label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Confirmar nova senha</label><div style="position:relative"><input type="password" id="perfil-senha-confirm" style="width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Repita a senha"><button type="button" onclick="toggleEyePerfil('perfil-senha-confirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></button></div></div>
       <button onclick="alterarSenha()" style="padding:12px 24px;background:rgba(239,83,80,0.15);border:1px solid rgba(239,83,80,0.3);border-radius:10px;color:var(--red);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">🔒 Alterar Senha</button>
     </div>
   </div>
@@ -906,7 +906,7 @@ async function renderRankingRows(containerId,users){
 async function loadMyBets(){
   const{data:palpites}=await db.from('palpites').select('*,jogo:jogos(*)').eq('usuario_id',currentUser.id).order('created_at',{ascending:false});
   const container=document.getElementById('mybets-list');
-  if(!palpites?.length){container.innerHTML='<div class="loading">Nenhum palpite ainda. Vá para Jogos! ⚽</div>';return;}
+  if(!palpites?.length){container.innerHTML='<div class="loading">Nenhum palpite ainda. Vá para Jogos e comece a palpitar!</div>';return;}
   container.innerHTML=palpites.map(p=>{
     const jogo=p.jogo,isPending=jogo.status==='aberto';
     let badge=isPending?'<span class="mybet-pts pending">Aguardando<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hourglass-high"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.5 7h11" /><path d="M6 20v-2a6 6 0 1 1 12 0v2a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1" /><path d="M6 4v2a6 6 0 1 0 12 0v-2a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1" /></svg></span>'
@@ -987,7 +987,7 @@ async function alterarSenha(){
 function toggleEyePerfil(fieldId,btn){
   const input=document.getElementById(fieldId);
   input.type=input.type==='password'?'text':'password';
-  btn.textContent=input.type==='password'?'👁️':'🙈';
+  btn.textContent=input.type==='password'?'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg>':'<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye-off"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10.585 10.587a2 2 0 0 0 2.829 2.828" /><path d="M16.681 16.673a8.717 8.717 0 0 1 -4.681 1.327c-3.6 0 -6.6 -2 -9 -6c1.272 -2.12 2.712 -3.678 4.32 -4.674m2.86 -1.146a9.055 9.055 0 0 1 1.82 -.18c3.6 0 6.6 2 9 6c-.666 1.11 -1.379 2.067 -2.138 2.87" /><path d="M3 3l18 18" /></svg>';
 }
 
 function setBottomActive(btn){document.querySelectorAll('.bottom-nav-btn').forEach(b=>b.classList.remove('active'));btn.classList.add('active');}
