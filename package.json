@@ -1,7 +1,16 @@
 {
   "name": "bolao-copa-2026",
   "version": "1.0.0",
+  "scripts": {
+    "local": "vercel dev --listen 3000"
+  },
+  "dependencies": {
+    "@supabase/supabase-js": "^2.39.0"
+  },
+  "devDependencies": {
+    "vercel": "^48.6.0"
+  },
   "engines": {
-    "node": "24.x"
+    "node": "20.x"
   }
 }

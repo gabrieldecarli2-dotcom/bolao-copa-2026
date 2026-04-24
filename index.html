@@ -30,8 +30,17 @@
   .logout-btn:hover{background:rgba(239,83,80,0.25);}
   .page{display:none;position:relative;z-index:1;}
   .page.active{display:block;}
-  #page-auth{min-height:100vh;display:flex;align-items:center;justify-content:center;padding:40px 20px;}
+  #page-auth{min-height:100vh;align-items:center;justify-content:center;padding:40px 20px;}
+  .input-eye-wrap{position:relative;}
+  .input-eye-wrap input{padding-right:44px;}
+  .eye-toggle{position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer;padding:0;}
+  .auth-help{margin-top:-16px;margin-bottom:14px;text-align:right;}
+  .auth-help button{background:none;border:none;color:var(--gold);font-size:12px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;font-family:'Barlow Condensed';}
   .auth-box{width:100%;max-width:460px;background:rgba(23,32,23,0.95);border:1px solid rgba(245,200,66,0.2);border-radius:20px;padding:48px 40px;box-shadow:0 24px 80px rgba(0,0,0,0.5);animation:fadeUp 0.6s ease;}
+  .loading-box{background:var(--card);border:1px solid rgba(245,200,66,0.2);border-radius:20px;padding:40px 32px;width:100%;max-width:360px;text-align:center;}
+  .loading-box img{width:72px;height:72px;object-fit:contain;display:block;margin:0 auto 14px;filter:drop-shadow(0 2px 4px rgba(0,0,0,0.5));}
+  .loading-box h1{font-family:'Bebas Neue';font-size:34px;letter-spacing:3px;color:var(--gold);margin-bottom:6px;}
+  .loading-box p{font-size:13px;color:var(--text3);letter-spacing:1px;}
   .auth-logo{text-align:center;margin-bottom:32px;}
   .auth-logo h1{font-family:'Bebas Neue';font-size:48px;letter-spacing:5px;color:var(--gold);line-height:1;}
   .auth-logo p{color:var(--text2);font-size:13px;letter-spacing:2px;margin-top:6px;}
@@ -75,7 +84,7 @@
   .rank-pts{font-family:'Bebas Neue';font-size:24px;color:var(--gold);text-align:center;}
   .rank-exact{text-align:center;font-size:14px;font-weight:600;color:var(--text2);}
   .rank-win{text-align:center;font-size:14px;color:var(--text3);}
-  .prize-tag{display:inline-block;font-size:12px;font-family:'Barlow Condensed';font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:rgba(245,200,66,0.15);color:var(--text2);border:1px solid rgba(245,200,66,0.25);margin-right:4px;margin-top: 2px;}
+  .prize-tag{display:inline-block;font-size:12px;font-family:'Barlow Condensed';font-weight:700;letter-spacing:1px;text-transform:uppercase;padding:2px 8px;border-radius:20px;background:rgba(245,200,66,0.15);color:var(--gold);border:1px solid rgba(245,200,66,0.25);margin-right:4px;margin-top: 2px;}
   .games-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(320px,1fr));gap:16px;}
   .game-card{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:20px;transition:all 0.2s;position:relative;overflow:hidden;}
   .game-card:hover{border-color:rgba(245,200,66,0.25);transform:translateY(-2px);box-shadow:0 8px 30px rgba(0,0,0,0.3);}
@@ -116,10 +125,14 @@
   .premio-card{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px 20px;text-align:center;}
   .premio-card.primeiro{border-color:rgba(255,215,0,0.35);background:linear-gradient(135deg,var(--card),rgba(255,215,0,0.07));}
   .premio-icon{font-size:44px;display:block;margin-bottom:12px;}
+  .premio-icon2 svg{width:50px;height:50px;margin-bottom:12px;}
   .premio-pos{font-family:'Bebas Neue';font-size:16px;letter-spacing:2px;color:var(--text3);margin-bottom:8px;}
   .premio-val{font-family:'Bebas Neue';font-size:38px;line-height:1;}
+  .premio-card.primeiro .premio-icon2{color:#FFD700;}
   .premio-card.primeiro .premio-val{color:#FFD700;}
+  .premio-card.segundo .premio-icon2{color:#C0C0C0;}
   .premio-card.segundo .premio-val{color:#C0C0C0;}
+  .premio-card.terceiro .premio-icon2{color:#CD7F32;}
   .premio-card.terceiro .premio-val{color:#CD7F32;}
   .invite-box{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:28px;}
   .invite-link-row{display:flex;gap:10px;margin-bottom:20px;}
@@ -132,10 +145,12 @@
   .share-telegram{background:rgba(0,136,204,0.15);color:#0088cc;border:1px solid rgba(0,136,204,0.3);}
   .share-email-btn{background:rgba(255,255,255,0.07);color:var(--text2);border:1px solid rgba(255,255,255,0.12);}
   .tabs{display:flex;gap:4px;background:rgba(255,255,255,0.04);border-radius:10px;padding:4px;margin-bottom:20px;}
-  .tab{padding:9px 18px;border-radius:8px;background:none;border:none;font-family:'Barlow Condensed';font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;transition:all 0.2s;}
+  .tab{padding:9px 12px;border-radius:8px;background:none;border:none;font-family:'Barlow Condensed';font-size:14px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:var(--text3);cursor:pointer;transition:all 0.2s;}
   .tab.active{background:var(--card2);color:var(--text);}
   .mybets-list{display:flex;flex-direction:column;gap:14px;}
   .mybet-row{background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:14px;padding:16px 20px;display:flex;align-items:center;gap:16px;flex-wrap:wrap;}
+  .mybet-matchline{display:flex;align-items:center;gap:8px;flex:1;min-width:0;}
+  .mybet-infoline{display:flex;align-items:center;gap:16px;flex-shrink:0;}
   .mybet-pts{padding:4px 14px;border-radius:20px;font-family:'Bebas Neue';font-size:16px;display:flex;align-items:center;gap:3px;}
   .mybet-pts.exact{background:rgba(245,200,66,0.15);color:var(--gold);border:1px solid rgba(245,200,66,0.3);}
   .mybet-pts.win{background:rgba(56,142,60,0.15);color:var(--text3);border:1px solid rgba(56,142,60,0.2);}
@@ -178,6 +193,10 @@
     .bottom-nav{display:block}
     .main-wrapper{padding-bottom:80px}
     #main-nav .nav-right{gap:6px}
+    .mybet-row{padding:14px 16px;gap:12px}
+    .mybet-matchline{width:100%;justify-content:flex-start}
+    .mybet-infoline{width:100%;justify-content:space-between;gap:10px;flex-wrap:nowrap}
+    .mybet-pts{font-size:14px;padding:4px 10px;white-space:nowrap}
   }
 
   /* Ícones PNG nos menus — remove fundo preto */
@@ -251,11 +270,11 @@
 <!-- LOADING -->
 <div id="page-config" class="page active">
   <div style="min-height:100vh;display:flex;align-items:center;justify-content:center;flex-direction:column;gap:16px">
-    <div style="font-size:52px">⚽</div>
-    <div style="font-family:'Bebas Neue';font-size:32px;letter-spacing:4px;color:var(--gold)">BOLÃO COPA 2026</div>
-    <div style="display:flex;align-items:center;gap:12px;color:var(--text3);font-size:14px">
-      <div style="width:24px;height:24px;border:3px solid rgba(245,200,66,0.2);border-top-color:var(--gold);border-radius:50%;animation:spin 0.8s linear infinite"></div>
-      Carregando...
+    <div class="loading-box">
+      <img src="https://github.com/gabrieldecarli2-dotcom/bolao-copa-2026/raw/refs/heads/main/icons/logotopo" alt="Bolão Copa 2026">
+      <div class="spinner"></div>
+      <h1>BOLÃO</h1>
+      <p>Carregando...</p>
     </div>
     <div id="load-error" style="display:none;margin-top:12px;padding:16px 24px;background:rgba(239,83,80,0.1);border:1px solid rgba(239,83,80,0.3);border-radius:12px;color:var(--red);font-size:14px;text-align:center;max-width:400px"></div>
   </div>
@@ -275,7 +294,8 @@
     </div>
     <div id="tab-login">
       <div class="form-group"><label>E-mail</label><input type="email" id="login-email" placeholder="seu@email.com"></div>
-      <div class="form-group"><label>Senha</label><input type="password" id="login-pass" placeholder="••••••••"></div>
+      <div class="form-group"><label>Senha</label><div class="input-eye-wrap"><input type="password" id="login-pass" placeholder="••••••••"><button type="button" class="eye-toggle" onclick="toggleEyePerfil('login-pass',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></button></div></div>
+      <div class="auth-help"><button type="button" onclick="forgotPasswordUser()">Esqueci minha senha</button></div>
       <div id="login-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:10px;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
       <button class="btn-primary" id="btn-login" onclick="doLogin()">Entrar</button>
     </div>
@@ -285,6 +305,17 @@
       <div class="form-group"><label>Senha</label><input type="password" id="reg-pass" placeholder="Mínimo 6 caracteres"></div>
       <div id="reg-error" style="display:none;color:var(--red);font-size:13px;margin:10px 0;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
       <button class="btn-primary" id="btn-register" onclick="doRegister()" style="margin-top:8px">Criar Conta</button>
+    </div>
+    <div id="tab-reset" style="display:none">
+      <div style="text-align:center;margin-bottom:20px">
+        <div style="font-family:'Bebas Neue';font-size:30px;letter-spacing:2px;color:var(--gold)">NOVA SENHA</div>
+        <p style="color:var(--text2);font-size:13px;margin-top:6px">Defina uma nova senha para acessar sua conta.</p>
+      </div>
+      <div class="form-group"><label>Nova senha</label><div class="input-eye-wrap"><input type="password" id="reset-pass" placeholder="Mínimo 6 caracteres"><button type="button" class="eye-toggle" onclick="toggleEyePerfil('reset-pass',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></button></div></div>
+      <div class="form-group"><label>Confirmar nova senha</label><div class="input-eye-wrap"><input type="password" id="reset-pass-confirm" placeholder="Repita a nova senha"><button type="button" class="eye-toggle" onclick="toggleEyePerfil('reset-pass-confirm',this)"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></button></div></div>
+      <div id="reset-error" style="display:none;color:var(--red);font-size:13px;margin-bottom:10px;padding:10px;background:rgba(239,83,80,0.1);border-radius:8px"></div>
+      <button class="btn-primary" id="btn-reset-password" onclick="submitPasswordReset()">Salvar nova senha</button>
+      <div class="auth-help" style="text-align:center;margin-top:16px"><button type="button" onclick="backToLoginFromReset()">Voltar para login</button></div>
     </div>
   </div>
 </div>
@@ -298,6 +329,7 @@
         <div style="text-align:center;margin-bottom:24px"><div style="font-size:36px;margin-bottom:8px">⚽</div><h2 style="font-family:'Bebas Neue';font-size:28px;letter-spacing:2px;color:var(--gold)">PAGAR TAXA</h2><p style="color:var(--text2);font-size:13px;margin-top:4px">Bolão Copa 2026 — Participação</p></div>
         <div style="background:rgba(255,255,255,0.04);border:1px solid rgba(255,255,255,0.1);border-radius:14px;padding:20px;text-align:center;margin-bottom:20px"><p style="font-size:12px;color:var(--text3);margin-bottom:12px;letter-spacing:1px;text-transform:uppercase">Valor a pagar</p><div style="font-family:'Bebas Neue';font-size:48px;color:var(--gold);line-height:1" id="pay-valor">R$ 20</div></div>
         <div style="text-align:center;margin-bottom:16px"><img id="pix-qr-img" src="" alt="QR Code PIX" style="width:180px;height:180px;border-radius:12px;border:3px solid white;display:none"><div id="pix-qr-placeholder" style="width:180px;height:180px;background:white;border-radius:12px;margin:0 auto;display:flex;align-items:center;justify-content:center;font-size:64px">📲</div></div>
+        <div id="pix-validade-box" style="display:none;background:rgba(255,167,38,0.12);border:1px solid rgba(255,167,38,0.28);border-radius:10px;padding:12px;text-align:center;font-size:13px;color:#FFB74D;margin-bottom:12px"></div>
         <p style="font-size:12px;color:var(--text2);text-align:center;margin-bottom:12px">Ou copie o código PIX abaixo:</p>
         <div id="pix-code-display" style="background:rgba(255,255,255,0.06);border:1px solid rgba(255,255,255,0.1);border-radius:8px;padding:12px 14px;font-size:11px;font-family:monospace;color:var(--text2);word-break:break-all;margin-bottom:12px;max-height:80px;overflow:auto"></div>
         <button onclick="copiarPix()" style="width:100%;padding:13px;background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.3);border-radius:10px;color:var(--gold);font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1px;text-transform:uppercase;cursor:pointer;margin-bottom:10px">📋 Copiar Código PIX</button>
@@ -305,7 +337,7 @@
         <button onclick="verificarPagamento()" id="btn-verificar" style="width:100%;padding:13px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;color:var(--dark);font-family:'Barlow Condensed';font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">✅ Já Paguei — Verificar</button>
         <button onclick="doLogout()" style="width:100%;padding:11px;background:none;border:none;color:var(--text3);font-size:13px;cursor:pointer;margin-top:8px">Sair e pagar depois</button>
       </div>
-      <div id="pay-success" style="display:none;text-align:center;padding:20px"><div style="font-size:64px;margin-bottom:16px">🎉</div><h2 style="font-family:'Bebas Neue';font-size:32px;color:var(--gold);letter-spacing:2px">PAGAMENTO CONFIRMADO!</h2><p style="color:var(--text2);margin:12px 0">Bem-vindo ao Bolão Copa 2026!</p><button onclick="enterApp()" style="margin-top:16px;padding:14px 32px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:var(--dark);font-family:'Barlow Condensed';font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer">⚽ Entrar no Bolão</button></div>
+      <div id="pay-success" style="display:none;text-align:center;padding:20px"><div style="font-size:64px;margin-bottom:16px">🎉</div><h2 style="font-family:'Bebas Neue';font-size:32px;color:var(--gold);letter-spacing:2px">PAGAMENTO CONFIRMADO!</h2><p style="color:var(--text2);margin:12px 0">Bem-vindo ao Bolão Copa 2026!</p><button onclick="enterApp()" style="margin-top:16px;padding:14px 32px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:12px;color:var(--dark);font-family:'Barlow Condensed';font-size:16px;font-weight:900;letter-spacing:2px;text-transform:uppercase;cursor:pointer">Entrar no Bolão</button></div>
       <div id="pay-error" style="display:none;text-align:center;padding:20px"><div style="font-size:48px;margin-bottom:12px">⚠️</div><p style="color:var(--red);font-size:14px" id="pay-error-msg">Erro ao gerar PIX</p><button onclick="gerarPix()" style="margin-top:16px;padding:12px 24px;background:rgba(245,200,66,0.15);border:1px solid rgba(245,200,66,0.3);border-radius:10px;color:var(--gold);font-family:'Barlow Condensed';font-size:14px;font-weight:700;cursor:pointer">🔄 Tentar novamente</button></div>
     </div>
   </div>
@@ -338,7 +370,7 @@
     <div class="hero">
       <div class="hero-left">
         <h1>BEM-VINDO,<br><span id="hero-name">–</span></h1>
-        <p>Bolão - Copa do Mundo 2026 - Alterado</p>
+        <p>Bolão - Copa do Mundo 2026</p>
       </div>
       <div class="hero-stats">
         <div class="hero-stat"><div class="val" id="stat-pts">–</div><div class="lbl">Meus Pontos</div></div>
@@ -351,19 +383,22 @@
     <!-- Banner pagamento -->
     <div id="banner-pagamento" style="display:none;background:linear-gradient(135deg,rgba(232,32,69,0.12),rgba(232,32,69,0.06));border:1px solid rgba(232,32,69,0.35);border-radius:16px;padding:20px 24px;margin-bottom:24px;display:flex;align-items:center;justify-content:space-between;gap:16px;flex-wrap:wrap">
       <div style="display:flex;align-items:center;gap:14px">
-        <div style="font-size:32px"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-clock-dollar"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20.866 10.45a9 9 0 1 0 -7.815 10.488" /><path d="M12 7v5l1.5 1.5" /><path d="M21 15h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" /><path d="M19 21v1m0 -8v1" /></svg></div>
+        <div style="font-size:32px"><div class="regra-icon2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-clock-dollar"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M20.866 10.45a9 9 0 1 0 -7.815 10.488" /><path d="M12 7v5l1.5 1.5" /><path d="M21 15h-2.5a1.5 1.5 0 0 0 0 3h1a1.5 1.5 0 0 1 0 3h-2.5" /><path d="M19 21v1m0 -8v1" /></svg></div></div>
         <div>
           <div style="font-family:'Barlow Condensed';font-size:16px;font-weight:700;letter-spacing:1px;text-transform:uppercase;color:#e82045;margin-bottom:4px">Pagamento Pendente</div>
-          <div style="font-size:13px;color:var(--text2)">Para participar do bolão e dar palpites, conclua o pagamento da taxa de participação.</div>
+          <div style="font-size:13px;color:var(--text)">Para participar do bolão e dar palpites, conclua o pagamento da taxa de participação.</div>
         </div>
       </div>
-      <button onclick="showPage('page-pagamento');gerarPix()" style="padding:12px 24px;background:linear-gradient(135deg,#e82045,#b71c1c);border:none;border-radius:10px;color:white;font-family:'Barlow Condensed';font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0">Pagar Agora</button>
+      <div style="display:flex;gap:10px;flex-wrap:wrap">
+        <button onclick="abrirTelaPagamento()" style="padding:12px 24px;background:linear-gradient(135deg,#e82045,#b71c1c);border:none;border-radius:10px;color:white;font-family:'Barlow Condensed';font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0">Pagar Agora</button>
+        <button id="btn-ver-qrcode" onclick="abrirTelaPagamento()" style="display:none;padding:12px 24px;background:rgba(255,255,255,0.08);border:1px solid rgba(255,255,255,0.14);border-radius:10px;color:var(--text);font-family:'Barlow Condensed';font-size:15px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer;white-space:nowrap;flex-shrink:0">Ver QRCode</button>
+      </div>
     </div>
 
     <!-- Próximos Jogos -->
     <div class="section">
       <div class="section-header">
-        <div class="section-title">⚽ Próximos Jogos</div>
+        <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-ball-football"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 7l4.76 3.45l-1.76 5.55h-6l-1.76 -5.55l4.76 -3.45" /><path d="M12 7v-4m3 13l2.5 3m-.74 -8.55l3.74 -1.45m-11.44 7.05l-2.56 2.95m.74 -8.55l-3.74 -1.45" /></svg> Próximos Jogos</div>
         <span class="section-link" onclick="goPage('jogos')">Ver todos →</span>
       </div>
       <div class="games-grid" id="home-games"><div class="loading"><div class="spinner"></div><br>Carregando jogos...</div></div>
@@ -372,7 +407,7 @@
     <!-- Ranking -->
     <div class="section">
       <div class="section-header">
-        <div class="section-title">🏅 Ranking</div>
+        <div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trophy"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 21l8 0" /><path d="M12 17l0 4" /><path d="M7 4l10 0" /><path d="M17 4v8a5 5 0 0 1 -10 0v-8" /><path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /></svg> Ranking</div>
         <span class="section-link" onclick="goPage('ranking')">Ver completo →</span>
       </div>
       <div class="ranking-table">
@@ -383,11 +418,11 @@
 
     <!-- Premiação -->
     <div class="section">
-      <div class="section-header"><div class="section-title">🏆 Premiação</div></div>
+      <div class="section-header"><div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-premium-rights"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M13.867 9.75c-.246 -.48 -.708 -.769 -1.2 -.75h-1.334c-.736 0 -1.333 .67 -1.333 1.5c0 .827 .597 1.499 1.333 1.499h1.334c.736 0 1.333 .671 1.333 1.5c0 .828 -.597 1.499 -1.333 1.499h-1.334c-.492 .019 -.954 -.27 -1.2 -.75" /><path d="M12 7v2" /><path d="M12 15v2" /></svg> Premiação</div></div>
       <div class="premio-grid">
-        <div class="premio-card primeiro"><span class="premio-icon">🥇</span><div class="premio-pos">1º Lugar</div><div class="premio-val" id="prize1">R$ –</div></div>
-        <div class="premio-card segundo"><span class="premio-icon">🥈</span><div class="premio-pos">2º Lugar</div><div class="premio-val" id="prize2">R$ –</div></div>
-        <div class="premio-card terceiro"><span class="premio-icon">🥉</span><div class="premio-pos">3º Lugar</div><div class="premio-val" id="prize3">R$ –</div></div>
+        <div class="premio-card primeiro"><span class="premio-icon2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-laurel-wreath-1"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.436 8a8.6 8.6 0 0 0 -.436 2.727c0 4.017 2.686 7.273 6 7.273s6 -3.256 6 -7.273a8.6 8.6 0 0 0 -.436 -2.727" /><path d="M14.5 21s-.682 -3 -2.5 -3s-2.5 3 -2.5 3" /><path d="M18.52 5.23c.292 1.666 -1.02 2.77 -1.02 2.77s-1.603 -.563 -1.895 -2.23c-.292 -1.666 1.02 -2.77 1.02 -2.77s1.603 .563 1.895 2.23" /><path d="M21.094 12.14c-1.281 1.266 -3.016 .76 -3.016 .76s-.454 -1.772 .828 -3.04c1.28 -1.266 3.016 -.76 3.016 -.76s.454 1.772 -.828 3.04" /><path d="M17.734 18.826c-1.5 -.575 -1.734 -2.19 -1.734 -2.19s1.267 -1.038 2.767 -.462c1.5 .575 1.733 2.19 1.733 2.19s-1.267 1.038 -2.767 .462" /><path d="M6.267 18.826c1.5 -.575 1.733 -2.19 1.733 -2.19s-1.267 -1.038 -2.767 -.462c-1.5 .575 -1.733 2.19 -1.733 2.19s1.267 1.038 2.767 .462" /><path d="M2.906 12.14c1.281 1.266 3.016 .76 3.016 .76s.454 -1.772 -.828 -3.04c-1.281 -1.265 -3.016 -.76 -3.016 -.76s-.454 1.772 .828 3.04" /><path d="M5.48 5.23c-.292 1.666 1.02 2.77 1.02 2.77s1.603 -.563 1.895 -2.23c.292 -1.666 -1.02 -2.77 -1.02 -2.77s-1.603 .563 -1.895 2.23" /><path d="M11 9l1 -1v6" /></svg></span><div class="premio-pos">1º Lugar</div><div class="premio-val" id="prize1">R$ –</div></div>
+        <div class="premio-card segundo"><span class="premio-icon2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-laurel-wreath-2"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.436 8a8.6 8.6 0 0 0 -.436 2.727c0 4.017 2.686 7.273 6 7.273s6 -3.256 6 -7.273a8.6 8.6 0 0 0 -.436 -2.727" /><path d="M14.5 21s-.682 -3 -2.5 -3s-2.5 3 -2.5 3" /><path d="M18.52 5.23c.292 1.666 -1.02 2.77 -1.02 2.77s-1.603 -.563 -1.895 -2.23c-.292 -1.666 1.02 -2.77 1.02 -2.77s1.603 .563 1.895 2.23" /><path d="M21.094 12.14c-1.281 1.266 -3.016 .76 -3.016 .76s-.454 -1.772 .828 -3.04c1.28 -1.266 3.016 -.76 3.016 -.76s.454 1.772 -.828 3.04" /><path d="M17.734 18.826c-1.5 -.575 -1.734 -2.19 -1.734 -2.19s1.267 -1.038 2.767 -.462c1.5 .575 1.733 2.19 1.733 2.19s-1.267 1.038 -2.767 .462" /><path d="M6.267 18.826c1.5 -.575 1.733 -2.19 1.733 -2.19s-1.267 -1.038 -2.767 -.462c-1.5 .575 -1.733 2.19 -1.733 2.19s1.267 1.038 2.767 .462" /><path d="M2.906 12.14c1.281 1.266 3.016 .76 3.016 .76s.454 -1.772 -.828 -3.04c-1.281 -1.265 -3.016 -.76 -3.016 -.76s-.454 1.772 .828 3.04" /><path d="M5.48 5.23c-.292 1.666 1.02 2.77 1.02 2.77s1.603 -.563 1.895 -2.23c.292 -1.666 -1.02 -2.77 -1.02 -2.77s-1.603 .563 -1.895 2.23" /><path d="M10.6 8h2a1 1 0 0 1 1 1v1a1 1 0 0 1 -1 1h-1a1 1 0 0 0 -1 1v1a1 1 0 0 0 1 1h2" /></svg></span><div class="premio-pos">2º Lugar</div><div class="premio-val" id="prize2">R$ –</div></div>
+        <div class="premio-card terceiro"><span class="premio-icon2"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-laurel-wreath-3"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.436 8a8.6 8.6 0 0 0 -.436 2.727c0 4.017 2.686 7.273 6 7.273s6 -3.256 6 -7.273a8.6 8.6 0 0 0 -.436 -2.727" /><path d="M14.5 21s-.682 -3 -2.5 -3s-2.5 3 -2.5 3" /><path d="M18.52 5.23c.292 1.666 -1.02 2.77 -1.02 2.77s-1.603 -.563 -1.895 -2.23c-.292 -1.666 1.02 -2.77 1.02 -2.77s1.603 .563 1.895 2.23" /><path d="M21.094 12.14c-1.281 1.266 -3.016 .76 -3.016 .76s-.454 -1.772 .828 -3.04c1.28 -1.266 3.016 -.76 3.016 -.76s.454 1.772 -.828 3.04" /><path d="M17.734 18.826c-1.5 -.575 -1.734 -2.19 -1.734 -2.19s1.267 -1.038 2.767 -.462c1.5 .575 1.733 2.19 1.733 2.19s-1.267 1.038 -2.767 .462" /><path d="M6.267 18.826c1.5 -.575 1.733 -2.19 1.733 -2.19s-1.267 -1.038 -2.767 -.462c-1.5 .575 -1.733 2.19 -1.733 2.19s1.267 1.038 2.767 .462" /><path d="M2.906 12.14c1.281 1.266 3.016 .76 3.016 .76s.454 -1.772 -.828 -3.04c-1.281 -1.265 -3.016 -.76 -3.016 -.76s-.454 1.772 .828 3.04" /><path d="M5.48 5.23c-.292 1.666 1.02 2.77 1.02 2.77s1.603 -.563 1.895 -2.23c.292 -1.666 -1.02 -2.77 -1.02 -2.77s-1.603 .563 -1.895 2.23" /><path d="M10.5 8h1.5a1.5 1.5 0 0 1 0 3h-1h1a1.5 1.5 0 0 1 0 3h-1.5" /></svg></span><div class="premio-pos">3º Lugar</div><div class="premio-val" id="prize3">R$ –</div></div>
       </div>
     </div>
 
@@ -433,7 +468,7 @@
 <!-- JOGOS -->
 <div id="page-jogos" class="page">
   <div class="main-wrapper">
-    <div class="section-header" style="margin-bottom:20px"><div class="section-title">⚽ Todos os Jogos</div></div>
+    <div class="section-header" style="margin-bottom:20px"><div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-ball-football"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M3 12a9 9 0 1 0 18 0a9 9 0 1 0 -18 0" /><path d="M12 7l4.76 3.45l-1.76 5.55h-6l-1.76 -5.55l4.76 -3.45" /><path d="M12 7v-4m3 13l2.5 3m-.74 -8.55l3.74 -1.45m-11.44 7.05l-2.56 2.95m.74 -8.55l-3.74 -1.45" /></svg> Todos os Jogos</div></div>
     <div class="tabs" id="jogos-tabs">
       <button class="tab active" onclick="filterJogos('aberto',this)">Abertos</button>
       <button class="tab" onclick="filterJogos('hoje',this)">Hoje</button>
@@ -448,7 +483,7 @@
 <!-- RANKING -->
 <div id="page-ranking" class="page">
   <div class="main-wrapper">
-    <div class="section-header" style="margin-bottom:20px"><div class="section-title">🏅 Ranking Geral</div></div>
+    <div class="section-header" style="margin-bottom:20px"><div class="section-title"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-trophy"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M8 21l8 0" /><path d="M12 17l0 4" /><path d="M7 4l10 0" /><path d="M17 4v8a5 5 0 0 1 -10 0v-8" /><path d="M3 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /><path d="M17 9a2 2 0 1 0 4 0a2 2 0 1 0 -4 0" /></svg> Ranking Geral</div></div>
     <div class="ranking-table">
       <div class="ranking-header"><div>#</div><div>Jogador</div><div style="text-align:center">Pts</div><div style="text-align:center">Exatos</div><div style="text-align:center">Acertos</div></div>
       <div id="full-ranking"><div class="loading"><div class="spinner"></div></div></div>
@@ -479,21 +514,26 @@
       </div>
     </div>
     <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;margin-bottom:16px">
-      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">✏️ Editar Nome</h3>
+      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">Editar Nome</h3>
       <div class="form-group"><label>Nome completo</label><input type="text" id="perfil-nome-input" style="width:100%;padding:13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Seu nome"></div>
-      <button onclick="salvarNome()" style="padding:12px 24px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;color:var(--dark);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">💾 Salvar Nome</button>
+      <button onclick="salvarNome()" style="padding:12px 24px;background:linear-gradient(135deg,var(--gold),var(--gold2));border:none;border-radius:10px;color:var(--dark);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Salvar Nome</button>
     </div>
     <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;margin-bottom:16px">
-      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">📧 Alterar E-mail</h3>
+      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">Alterar E-mail</h3>
       <div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Novo e-mail</label><input type="email" id="perfil-email-input" style="width:100%;padding:13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="novo@email.com"></div>
-      <div id="email-msg" style="display:none;font-size:12px;color:var(--blue);margin-bottom:10px;padding:8px 12px;background:rgba(66,165,245,0.1);border-radius:8px">📧 Um link de confirmação será enviado para o novo e-mail.</div>
-      <button onclick="alterarEmail()" style="padding:12px 24px;background:rgba(66,165,245,0.15);border:1px solid rgba(66,165,245,0.3);border-radius:10px;color:var(--blue);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">📧 Alterar E-mail</button>
+      <div id="email-msg" style="display:none;font-size:12px;color:var(--blue);margin-bottom:10px;padding:8px 12px;background:rgba(66,165,245,0.1);border-radius:8px">Um link de confirmação será enviado para o novo e-mail.</div>
+      <button onclick="alterarEmail()" style="padding:12px 24px;background:rgba(66,165,245,0.15);border:1px solid rgba(66,165,245,0.3);border-radius:10px;color:var(--blue);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Alterar E-mail</button>
     </div>
     <div style="background:var(--card);border:1px solid rgba(255,255,255,0.07);border-radius:16px;padding:24px;margin-bottom:16px">
-      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">🔒 Alterar Senha</h3>
+      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:16px">Alterar Senha</h3>
       <div style="margin-bottom:12px"><label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Nova senha</label><div style="position:relative"><input type="password" id="perfil-senha-input" style="width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Mínimo 6 caracteres"><button class="eye-toggle" onclick="toggleEyePerfil('perfil-senha-input',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></button></div></div>
       <div style="margin-bottom:16px"><label style="display:block;font-size:12px;font-weight:600;letter-spacing:1.5px;text-transform:uppercase;color:var(--text3);margin-bottom:7px">Confirmar nova senha</label><div style="position:relative"><input type="password" id="perfil-senha-confirm" style="width:100%;padding:13px 44px 13px 16px;background:rgba(255,255,255,0.05);border:1px solid rgba(255,255,255,0.1);border-radius:10px;color:var(--text);font-family:'Barlow';font-size:15px;outline:none" placeholder="Repita a senha"><button class="eye-toggle" onclick="toggleEyePerfil('perfil-senha-confirm',this)" style="position:absolute;right:12px;top:50%;transform:translateY(-50%);background:none;border:none;color:var(--text3);font-size:18px;cursor:pointer"><svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-eye"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M10 12a2 2 0 1 0 4 0a2 2 0 0 0 -4 0" /><path d="M21 12c-2.4 4 -5.4 6 -9 6c-3.6 0 -6.6 -2 -9 -6c2.4 -4 5.4 -6 9 -6c3.6 0 6.6 2 9 6" /></svg></button></div></div>
-      <button onclick="alterarSenha()" style="padding:12px 24px;background:rgba(239,83,80,0.15);border:1px solid rgba(239,83,80,0.3);border-radius:10px;color:var(--red);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">🔒 Alterar Senha</button>
+      <button onclick="alterarSenha()" style="padding:12px 24px;background:rgba(239,83,80,0.15);border:1px solid rgba(239,83,80,0.3);border-radius:10px;color:var(--red);font-family:'Barlow Condensed';font-size:14px;font-weight:900;letter-spacing:1px;text-transform:uppercase;cursor:pointer">Alterar Senha</button>
+    </div>
+    <div style="background:var(--card);border:1px solid rgba(239,83,80,0.2);border-radius:16px;padding:24px">
+      <h3 style="font-family:'Barlow Condensed';font-size:15px;font-weight:700;letter-spacing:1.5px;text-transform:uppercase;color:var(--red);margin-bottom:10px">Sessão</h3>
+      <p style="font-size:14px;color:var(--text2);line-height:1.5;margin-bottom:16px">Se quiser sair da sua conta neste dispositivo, use o botão abaixo.</p>
+      <button class="logout-btn" onclick="doLogout()" style="display:inline-flex;align-items:center;justify-content:center;width:100%;padding:12px 24px;font-size:14px;font-weight:900;letter-spacing:1.2px">Sair da conta</button>
     </div>
   </div>
 </div>
@@ -502,6 +542,26 @@
 
 <script>
 let db=null,currentUser=null,currentProfile=null,allJogos=[],allPalpites=[];
+const AUTH_BASE_URL=(location.hostname==='localhost'||location.hostname==='127.0.0.1')?'https://copa-bolao.vercel.app':location.origin;
+const USER_RESET_REDIRECT_URL=`${AUTH_BASE_URL}/`;
+let isPasswordRecoveryFlow=false;
+
+function hasRecoveryParams(){
+  const hash=new URLSearchParams((window.location.hash||'').replace(/^#/,''));
+  const search=new URLSearchParams(window.location.search||'');
+  return hash.get('type')==='recovery'
+    || search.get('type')==='recovery'
+    || hash.has('access_token')
+    || hash.has('refresh_token')
+    || search.has('access_token')
+    || search.has('refresh_token');
+}
+
+function clearRecoveryUrl(){
+  if(window.location.hash||window.location.search.includes('type=')){
+    window.history.replaceState({},document.title,window.location.pathname);
+  }
+}
 
 function initDB(url,key){
   try{
@@ -509,7 +569,15 @@ function initDB(url,key){
     if(window.supabase&&typeof window.supabase.createClient==='function') fn=window.supabase.createClient;
     else if(typeof window.createClient==='function') fn=window.createClient;
     else{showToast('Biblioteca Supabase não encontrada.',true);return;}
-    db=fn(url,key);showAuthPage();
+    db=fn(url,key);
+    db.auth.onAuthStateChange((event)=>{
+      if(event==='PASSWORD_RECOVERY'){
+        isPasswordRecoveryFlow=true;
+        showPage('page-auth');
+        showResetPasswordScreen();
+      }
+    });
+    showAuthPage();
   }catch(e){showToast('Erro ao conectar: '+e.message,true);}
 }
 
@@ -529,14 +597,38 @@ function showLoadError(msg){const el=document.getElementById('load-error');if(el
 
 async function showAuthPage(){
   const{data:{session}}=await db.auth.getSession();
-  if(session){currentUser=session.user;await loadProfile();enterApp();}
-  else{showPage('page-auth');}
+  if(hasRecoveryParams()||isPasswordRecoveryFlow){
+    isPasswordRecoveryFlow=true;
+    showPage('page-auth');
+    showResetPasswordScreen();
+  }
+  else if(session){currentUser=session.user;await loadProfile();enterApp();}
+  else{
+    showPage('page-auth');
+    switchAuthTab('login');
+  }
 }
 
 function switchAuthTab(tab){
   document.getElementById('tab-login').style.display=tab==='login'?'block':'none';
   document.getElementById('tab-register').style.display=tab==='register'?'block':'none';
+  document.getElementById('tab-reset').style.display=tab==='reset'?'block':'none';
   document.querySelectorAll('.auth-tab').forEach((t,i)=>t.classList.toggle('active',(i===0&&tab==='login')||(i===1&&tab==='register')));
+  const tabs=document.querySelector('.auth-tabs');
+  if(tabs) tabs.style.display=tab==='reset'?'none':'flex';
+}
+
+function showResetPasswordScreen(){
+  switchAuthTab('reset');
+  showError('reset-error','');
+  const el=document.getElementById('reset-error');
+  if(el) el.style.display='none';
+}
+
+function backToLoginFromReset(){
+  isPasswordRecoveryFlow=false;
+  clearRecoveryUrl();
+  switchAuthTab('login');
 }
 
 async function doLogin(){
@@ -546,7 +638,7 @@ async function doLogin(){
   const btn=document.getElementById('btn-login');
   btn.disabled=true;btn.textContent='Entrando...';
   const{data,error}=await db.auth.signInWithPassword({email,password:pass});
-  btn.disabled=false;btn.textContent='⚽ Entrar no Bolão';
+  btn.disabled=false;btn.textContent='Entrar no Bolão';
   if(error){showError('login-error','E-mail ou senha incorretos');return;}
   currentUser=data.user;await loadProfile();enterApp();
 }
@@ -571,36 +663,243 @@ async function doRegister(){
   setTimeout(()=>switchAuthTab('login'),1500);
 }
 
+async function forgotPasswordUser(){
+  const email=document.getElementById('login-email').value.trim();
+  if(!email||!email.includes('@')){showError('login-error','Digite seu e-mail para recuperar a senha');return;}
+  const { error } = await db.auth.resetPasswordForEmail(email,{redirectTo:USER_RESET_REDIRECT_URL});
+  if(error){showError('login-error','Não foi possível enviar o e-mail de recuperação');return;}
+  showToast('Enviamos um e-mail para redefinir sua senha 📧');
+}
+
+async function submitPasswordReset(){
+  const senha=document.getElementById('reset-pass').value;
+  const confirma=document.getElementById('reset-pass-confirm').value;
+  if(!senha||senha.length<6){showError('reset-error','A senha deve ter pelo menos 6 caracteres');return;}
+  if(senha!==confirma){showError('reset-error','As senhas não coincidem');return;}
+  const btn=document.getElementById('btn-reset-password');
+  btn.disabled=true;btn.textContent='Salvando...';
+  const { error } = await db.auth.updateUser({password:senha});
+  btn.disabled=false;btn.textContent='Salvar nova senha';
+  if(error){showError('reset-error','Não foi possível redefinir sua senha');return;}
+  document.getElementById('reset-pass').value='';
+  document.getElementById('reset-pass-confirm').value='';
+  isPasswordRecoveryFlow=false;
+  clearRecoveryUrl();
+  showToast('Senha redefinida com sucesso! Faça login com a nova senha 🔒');
+  switchAuthTab('login');
+}
+
 async function doLogout(){
   await db.auth.signOut();
   currentUser=null;currentProfile=null;
+  limparPixAtual();
+  atualizarBotaoVerQr();
   document.getElementById('main-nav').style.display='none';
   document.getElementById('bottom-nav').style.display='none';
   showPage('page-auth');
 }
 
-let pixCodigoAtual='',verificarInterval=null;
+let pixCodigoAtual='',pixQrBase64Atual='',pixValorAtual='',pixExpiraEmAtual='',verificarInterval=null,pixTimerInterval=null;
+
+function getPixStorageKey(){
+  return currentUser?`bolao_pix_${currentUser.id}`:'';
+}
+
+function salvarPixLocal(){
+  const key=getPixStorageKey();
+  if(!key) return;
+  const payload={
+    pixCodigoAtual,
+    pixQrBase64Atual,
+    pixValorAtual,
+    pixExpiraEmAtual,
+    savedAt:new Date().toISOString()
+  };
+  localStorage.setItem(key,JSON.stringify(payload));
+}
+
+function removerPixLocal(){
+  const key=getPixStorageKey();
+  if(!key) return;
+  localStorage.removeItem(key);
+}
+
+function restaurarPixLocal(){
+  const key=getPixStorageKey();
+  if(!key) return false;
+  try{
+    const raw=localStorage.getItem(key);
+    if(!raw) return false;
+    const data=JSON.parse(raw);
+    if(!data?.pixExpiraEmAtual) return false;
+    const expiraMs=new Date(data.pixExpiraEmAtual).getTime();
+    if(!Number.isFinite(expiraMs)||expiraMs<=Date.now()){
+      localStorage.removeItem(key);
+      return false;
+    }
+    pixCodigoAtual=data.pixCodigoAtual||'';
+    pixQrBase64Atual=data.pixQrBase64Atual||'';
+    pixValorAtual=data.pixValorAtual||'20';
+    pixExpiraEmAtual=data.pixExpiraEmAtual||'';
+    atualizarBotaoVerQr();
+    return !!(pixCodigoAtual||pixQrBase64Atual);
+  }catch(e){
+    localStorage.removeItem(key);
+    return false;
+  }
+}
+
+function limparPixAtual(){
+  pixCodigoAtual='';
+  pixQrBase64Atual='';
+  pixValorAtual='';
+  pixExpiraEmAtual='';
+  clearInterval(pixTimerInterval);
+  clearInterval(verificarInterval);
+  removerPixLocal();
+  const box=document.getElementById('pix-validade-box');
+  if(box){box.style.display='none';box.textContent='';}
+  const code=document.getElementById('pix-code-display');
+  if(code) code.textContent='';
+  const img=document.getElementById('pix-qr-img');
+  if(img){img.src='';img.style.display='none';}
+  const placeholder=document.getElementById('pix-qr-placeholder');
+  if(placeholder) placeholder.style.display='flex';
+}
+
+function atualizarBotaoVerQr(){
+  const btn=document.getElementById('btn-ver-qrcode');
+  if(btn) btn.style.display=(pixCodigoAtual||pixQrBase64Atual)?'inline-flex':'none';
+}
+
+function formatarDuracao(segundos){
+  const mins=Math.floor(segundos/60);
+  const secs=segundos%60;
+  return `${String(mins).padStart(2,'0')}:${String(secs).padStart(2,'0')}`;
+}
+
+function atualizarAvisoValidade(){
+  const box=document.getElementById('pix-validade-box');
+  if(!box) return;
+  if(!pixExpiraEmAtual){
+    box.style.display='none';
+    box.textContent='';
+    return;
+  }
+  const segundos=Math.max(0,Math.floor((new Date(pixExpiraEmAtual).getTime()-Date.now())/1000));
+  if(segundos<=0){
+    box.style.display='block';
+    box.textContent='Este QR Code expirou. Gere um novo para continuar.';
+    limparPixAtual();
+    atualizarBotaoVerQr();
+    document.getElementById('pay-content').style.display='none';
+    document.getElementById('pay-error').style.display='block';
+    document.getElementById('pay-error-msg').textContent='QR Code expirado. Gere um novo PIX para continuar.';
+    return;
+  }
+  box.style.display='block';
+  box.textContent=`Este QR Code vence em ${formatarDuracao(segundos)}. Após esse prazo, ele será invalidado automaticamente.`;
+}
+
+function iniciarTimerPix(){
+  clearInterval(pixTimerInterval);
+  atualizarAvisoValidade();
+  if(!pixExpiraEmAtual) return;
+  pixTimerInterval=setInterval(atualizarAvisoValidade,1000);
+}
+
+function aplicarPixData(data){
+  pixCodigoAtual=data.pix_copia_cola||'';
+  pixQrBase64Atual=data.pix_qr_base64||'';
+  pixValorAtual=data.valor||'20';
+  pixExpiraEmAtual=data.date_of_expiration||'';
+  salvarPixLocal();
+  atualizarBotaoVerQr();
+  renderPixExistente();
+}
+
+function renderPixExistente(){
+  document.getElementById('pay-loading').style.display='none';
+  document.getElementById('pay-error').style.display='none';
+  document.getElementById('pay-success').style.display='none';
+  document.getElementById('pay-content').style.display='block';
+  document.getElementById('pix-code-display').textContent=pixCodigoAtual||'';
+  document.getElementById('pay-valor').textContent=pixValorAtual?`R$ ${pixValorAtual}`:'R$ 20';
+  const img=document.getElementById('pix-qr-img');
+  const placeholder=document.getElementById('pix-qr-placeholder');
+  if(pixQrBase64Atual){
+    img.src=`data:image/png;base64,${pixQrBase64Atual}`;
+    img.style.display='block';
+    placeholder.style.display='none';
+  }else{
+    img.style.display='none';
+    placeholder.style.display='flex';
+  }
+  iniciarTimerPix();
+}
+
+async function abrirTelaPagamento(opts={}){
+  showPage('page-pagamento');
+  if(opts.forcarNovo){
+    gerarPix();
+    return;
+  }
+  if(!pixCodigoAtual&&!pixQrBase64Atual){
+    await sincronizarPixPendente();
+  }
+  if(!pixCodigoAtual&&!pixQrBase64Atual){
+    gerarPix();
+    return;
+  }
+  renderPixExistente();
+}
+
+async function sincronizarPixPendente(){
+  if(!currentUser||currentProfile?.pago) return;
+  if(restaurarPixLocal()) return;
+  try{
+    const res=await fetch('/api/criar-pix',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario_id:currentUser.id,email:currentUser.email,nome:currentProfile?.nome||'',somente_existente:true})});
+    const data=await res.json();
+    if(data.pago){
+      currentProfile.pago=true;
+      limparPixAtual();
+      atualizarBotaoVerQr();
+      const banner=document.getElementById('banner-pagamento');
+      if(banner) banner.style.display='none';
+      return;
+    }
+    if(data.tem_pix_pendente||data.reused){
+      aplicarPixData(data);
+      return;
+    }
+    limparPixAtual();
+    atualizarBotaoVerQr();
+  }catch(e){
+    restaurarPixLocal();
+    atualizarBotaoVerQr();
+  }
+}
 
 async function gerarPix(){
   document.getElementById('pay-loading').style.display='block';
   document.getElementById('pay-content').style.display='none';
   document.getElementById('pay-error').style.display='none';
+  document.getElementById('pay-success').style.display='none';
   try{
     const res=await fetch('/api/criar-pix',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario_id:currentUser.id,email:currentUser.email,nome:currentProfile?.nome||''})});
     const data=await res.json();
     if(!data.ok) throw new Error(data.error||'Erro ao gerar PIX');
-    pixCodigoAtual=data.pix_copia_cola||'';
-    document.getElementById('pix-code-display').textContent=pixCodigoAtual;
-    document.getElementById('pay-valor').textContent=`R$ ${data.valor}`;
-    if(data.pix_qr_base64){
-      const img=document.getElementById('pix-qr-img');
-      img.src=`data:image/png;base64,${data.pix_qr_base64}`;
-      img.style.display='block';
-      document.getElementById('pix-qr-placeholder').style.display='none';
+    if(data.pago){
+      currentProfile.pago=true;
+      limparPixAtual();
+      atualizarBotaoVerQr();
+      document.getElementById('pay-loading').style.display='none';
+      document.getElementById('pay-success').style.display='block';
+      return;
     }
-    document.getElementById('pay-loading').style.display='none';
-    document.getElementById('pay-content').style.display='block';
-    verificarInterval=setInterval(verificarPagamento,10000);
+    aplicarPixData(data);
+    clearInterval(verificarInterval);
+    verificarInterval=setInterval(()=>verificarPagamento({automatico:true}),10000);
   }catch(e){
     document.getElementById('pay-loading').style.display='none';
     document.getElementById('pay-error').style.display='block';
@@ -608,25 +907,40 @@ async function gerarPix(){
   }
 }
 
-async function verificarPagamento(){
+async function verificarPagamento(opts={}){
+  const automatico=!!opts.automatico;
   const btn=document.getElementById('btn-verificar');
-  if(btn){btn.disabled=true;btn.textContent='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-hourglass-high"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M6.5 7h11" /><path d="M6 20v-2a6 6 0 1 1 12 0v2a1 1 0 0 1 -1 1h-10a1 1 0 0 1 -1 -1" /><path d="M6 4v2a6 6 0 1 0 12 0v-2a1 1 0 0 0 -1 -1h-10a1 1 0 0 0 -1 1" /></svg> Verificando...';}
+  if(btn&&!automatico){btn.disabled=true;btn.textContent='Verificando...';}
   try{
     const res=await fetch('/api/verificar-pagamento',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify({usuario_id:currentUser.id})});
     const data=await res.json();
     if(data.pago){
       clearInterval(verificarInterval);
       currentProfile.pago=true;
+      limparPixAtual();
+      atualizarBotaoVerQr();
       document.getElementById('pay-content').style.display='none';
       document.getElementById('pay-loading').style.display='none';
       document.getElementById('pay-success').style.display='block';
+    }else if(data.tem_pix_pendente){
+      aplicarPixData(data);
+      if(btn&&!automatico){btn.disabled=false;btn.textContent='Já Paguei — Verificar';}
+      if(!automatico) showToast('Pagamento ainda está pendente. Use o mesmo QR Code antes do vencimento.',true);
+    }else if(data.pix_expirado){
+      limparPixAtual();
+      atualizarBotaoVerQr();
+      document.getElementById('pay-content').style.display='none';
+      document.getElementById('pay-loading').style.display='none';
+      document.getElementById('pay-error').style.display='block';
+      document.getElementById('pay-error-msg').textContent='O QR Code expirou. Gere um novo PIX para continuar.';
+      if(btn&&!automatico){btn.disabled=false;btn.textContent='Já Paguei — Verificar';}
     }else{
-      if(btn){btn.disabled=false;btn.textContent='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-credit-card-pay"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 19h-6a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v4.5" /><path d="M3 10h18" /><path d="M16 19h6" /><path d="M19 16l3 3l-3 3" /><path d="M7.005 15h.005" /><path d="M11 15h2" /></svg> Já Paguei — Verificar';}
-      showToast('Pagamento ainda não confirmado. Aguarde alguns instantes.',true);
+      if(btn&&!automatico){btn.disabled=false;btn.textContent='Já Paguei — Verificar';}
+      if(!automatico) showToast('Pagamento ainda não confirmado. Aguarde alguns instantes.',true);
     }
   }catch(e){
-    if(btn){btn.disabled=false;btn.textContent='<svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-credit-card-pay"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 19h-6a3 3 0 0 1 -3 -3v-8a3 3 0 0 1 3 -3h12a3 3 0 0 1 3 3v4.5" /><path d="M3 10h18" /><path d="M16 19h6" /><path d="M19 16l3 3l-3 3" /><path d="M7.005 15h.005" /><path d="M11 15h2" /></svg> Já Paguei — Verificar';}
-    showToast('Erro ao verificar. Tente novamente.',true);
+    if(btn&&!automatico){btn.disabled=false;btn.textContent='Já Paguei — Verificar';}
+    if(!automatico) showToast('Erro ao verificar. Tente novamente.',true);
   }
 }
 
@@ -648,6 +962,7 @@ function enterApp(){
   document.getElementById('nav-avatar').textContent=currentProfile.avatar_iniciais||'?';
   document.getElementById('hero-name').textContent=currentProfile.nome.split(' ')[0].toUpperCase()+'!';
   document.getElementById('invite-link').value=`${location.origin}${location.pathname}?convite=${currentProfile.id}`;
+  sincronizarPixPendente();
   goPage('home');
 }
 
@@ -826,7 +1141,7 @@ function renderGameCard(jogo){
 }
 
 async function savePalpite(jogoId){
-  if(!currentProfile?.pago){showToast('Complete o pagamento para dar palpites ⚠️',true);setTimeout(()=>{showPage('page-pagamento');gerarPix();},1500);return;}
+  if(!currentProfile?.pago){showToast('Complete o pagamento para dar palpites ⚠️',true);setTimeout(()=>abrirTelaPagamento(),1500);return;}
   const v1=parseInt(document.getElementById(`p-${jogoId}-1`)?.value);
   const v2=parseInt(document.getElementById(`p-${jogoId}-2`)?.value);
   if(isNaN(v1)||isNaN(v2)){showToast('Preencha os dois placares ⚠️',true);return;}
@@ -921,14 +1236,14 @@ async function loadMyBets(){
       :'<span class="mybet-pts" style="background:rgba(239,83,80,0.1);color:var(--red);border:1px solid rgba(239,83,80,0.2)">0 pts <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" class="icon icon-tabler icons-tabler-outline icon-tabler-xbox-x"><path stroke="none" d="M0 0h24v24H0z" fill="none" /><path d="M12 21a9 9 0 0 0 9 -9a9 9 0 0 0 -9 -9a9 9 0 0 0 -9 9a9 9 0 0 0 9 9" /><path d="M9 8l6 8" /><path d="M15 8l-6 8" /></svg></span>';
     return `
     <div class="mybet-row" style="flex-wrap:wrap;gap:10px">
-      <div style="display:flex;align-items:center;gap:8px;flex:1;min-width:0">
+      <div class="mybet-matchline">
         <span style="flex-shrink:0">${renderFlag(jogo.flag1,jogo.time1,24)}</span>
         <span style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${jogo.time1}</span>
         <span style="color:var(--text3);font-size:11px;font-weight:700;flex-shrink:0">VS</span>
         <span style="font-weight:600;font-size:13px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${jogo.time2}</span>
         <span style="flex-shrink:0">${renderFlag(jogo.flag2,jogo.time2,24)}</span>
       </div>
-      <div style="display:flex;align-items:center;gap:16px;flex-shrink:0">
+      <div class="mybet-infoline">
         <div style="text-align:center"><div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Result.</div><div style="font-family:'Bebas Neue';font-size:18px;letter-spacing:2px">${jogo.status!=='aberto'?`${jogo.gol_time1}:${jogo.gol_time2}`:'–'}</div></div>
         <div style="text-align:center"><div style="font-size:10px;color:var(--text3);font-weight:700;letter-spacing:1px;text-transform:uppercase">Palpite</div><div style="font-family:'Bebas Neue';font-size:18px;color:var(--gold);letter-spacing:2px">${p.palpite_time1}:${p.palpite_time2}</div></div>
         ${badge}
